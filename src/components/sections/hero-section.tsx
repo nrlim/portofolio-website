@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, MessageCircle } from "lucide-react";
-import { hero, personalInfo } from "@/data/portfolio";
+import { personalInfo } from "@/data/portfolio";
 
 export function HeroSection() {
   return (
@@ -105,7 +105,7 @@ export function HeroSection() {
                 >
                   <Link href={personalInfo.whatsapp} target="_blank">
                     <MessageCircle className="mr-2 h-5 w-5" />
-                    Let's Talk
+                    Let&apos;s Talk
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </Button>

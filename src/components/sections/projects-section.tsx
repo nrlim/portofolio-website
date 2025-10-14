@@ -15,7 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { projects, projectCategories } from "@/data/portfolio";
-import { ExternalLink, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 
 const containerVariants = {
   hidden: { opacity: 0 },

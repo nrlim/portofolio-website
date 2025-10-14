@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { personalInfo } from "@/data/portfolio";
-import { Github, Linkedin, Instagram, Heart } from "lucide-react";
+import { Github, Linkedin, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const socialLinks = [

@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { skills } from "@/data/portfolio";
-import { Code2, Database, Cloud, Layout, Boxes, Wrench } from "lucide-react";
+import { Code2, Database, Cloud, Layout, Boxes } from "lucide-react";
 
 const skillCategories = [
   {
@@ -85,7 +85,7 @@ export function SkillsSection() {
 
           {/* Skills Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {skillCategories.map((category, index) => {
+            {skillCategories.map((category) => {
               const Icon = category.icon;
               return (
                 <motion.div key={category.title} variants={itemVariants}>
