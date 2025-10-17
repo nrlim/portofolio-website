@@ -73,7 +73,7 @@ export function HeroSection() {
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                     <span className="text-sm font-semibold text-muted-foreground">
-                      6+ Years Experience
+                      7+ Years Experience
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -218,7 +218,7 @@ export function HeroSection() {
                         </div>
                         <div className="flex items-center justify-center gap-2 pt-2">
                           <Badge variant="secondary" className="text-xs px-3 py-1">
-                            6+ Years
+                            7+ Years
                           </Badge>
                           <Badge variant="secondary" className="text-xs px-3 py-1">
                             Engineering

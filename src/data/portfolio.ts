@@ -5,15 +5,15 @@ export const personalInfo = {
   phone: "+62 811 144 1696",
   whatsapp: "https://wa.me/628111441696?text=Halo%20Nuralim,%20saya%20ingin%20diskusikan%20proyek%20software.",
   address: "Segara City Cluster Baltic, SC 2.9 No.8",
-  
+
   // CARA MENGGUNAKAN FOTO:
   // 1. Dari LinkedIn: Klik kanan foto profile LinkedIn Anda → Copy Image Address → Paste URL di bawah
   //    Contoh: "https://media.licdn.com/dms/image/..."
   // 2. Dari Local: Taruh foto di public/profile-photo.jpg → Isi: "/profile-photo.jpg"
   // 3. Kosongkan untuk menggunakan initial "N" dengan gradient (default)
-  
+
   photo: "https://media.licdn.com/dms/image/v2/D5603AQGosK48viiJsg/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1667830699770?e=1763596800&v=beta&t=UM_4_ilPNBpMgvlL7c0U7ZCQiB4rPGDVWINZv22iYAw", // Kosong = Initial gradient, URL = LinkedIn photo, Path = Local photo
-  
+
   social: {
     linkedin: "https://linkedin.com/in/nuralim",
     github: "https://github.com/nrlim",
@@ -23,15 +23,15 @@ export const personalInfo = {
 
 export const hero = {
   headline: "Membangun software yang adaptif dan tim yang berdaya.",
-  subheadline: "Product & Technology Development Manager dengan 6+ tahun pengalaman membangun solusi software end-to-end di berbagai domain industri. Berfokus pada arsitektur yang scalable, tim yang produktif, dan budaya engineering excellence.",
+  subheadline: "Product & Technology Development Manager dengan 7+ tahun pengalaman membangun solusi software end-to-end di berbagai domain industri. Berfokus pada arsitektur yang scalable, tim yang produktif, dan budaya engineering excellence.",
   techBadges: ["C#/.NET", "NHibernate", "RabbitMQ", "Camunda BPM", "Docker", "Elasticsearch"]
 };
 
 export const about = {
-  description: "Saya adalah seorang Product & Technology Development Manager dengan pengalaman lebih dari 6 tahun dalam membangun solusi software yang scalable dan memberdayakan tim engineering. Keahlian saya mencakup pengembangan backend, mobile, hingga kepemimpinan teknis dan produk. Saya memiliki track record yang solid dalam menangani proyek-proyek kompleks di berbagai industri seperti asuransi, manufaktur, perbankan, dan sektor pemerintahan. Dengan pendekatan yang adaptif dan kolaboratif, saya berkomitmen untuk menghasilkan solusi berkualitas tinggi yang memberikan nilai bisnis nyata.",
+  description: "Saya adalah seorang Product & Technology Development Manager dengan pengalaman lebih dari 7 tahun dalam membangun solusi software yang scalable dan memberdayakan tim engineering. Keahlian saya mencakup pengembangan backend, mobile, hingga kepemimpinan teknis dan produk. Saya memiliki track record yang solid dalam menangani proyek-proyek kompleks di berbagai industri seperti asuransi, manufaktur, perbankan, dan sektor pemerintahan. Dengan pendekatan yang adaptif dan kolaboratif, saya berkomitmen untuk menghasilkan solusi berkualitas tinggi yang memberikan nilai bisnis nyata.",
   metrics: [
     {
-      value: "6+",
+      value: "7+",
       label: "Tahun Pengalaman Profesional"
     },
     {
@@ -140,6 +140,32 @@ export const projects = [
     }
   },
   {
+    id: "impulse",
+    title: "Impulse - Political Party Platform",
+    category: "Government",
+    description: "Web & mobile platform untuk manajemen data keanggotaan dan kampanye partai politik",
+    tech: [".NET 6", "Masstransit", "FluentValidation", "ORM", "Automapper", "MongoDB", "Quartz", "Log4net", "FCM", "Email Gateway", "Swagger", "JWT Authentication", "API Versioning", "API Rate Limit"],
+    image: "/projects/impulse.png",
+    caseStudy: {
+      problem: "Partai politik kesulitan mengelola jutaan data anggota dan volunteers yang tersebar di seluruh Indonesia, serta tracking aktivitas kampanye.",
+      solution: "Membangun scalable platform dengan MongoDB untuk flexible schema dan geo-spatial queries. Implementasi API rate limiting untuk menangani traffic spike saat event besar.",
+      result: "Mampu mengelola 1M+ member data dengan response time <200ms. Mobile app digunakan oleh 50K+ volunteers untuk real-time reporting."
+    }
+  },
+  {
+    id: "ematerai",
+    title: "E-Materai",
+    category: "Government",
+    description: "Platform digital untuk penerbitan dan verifikasi materai elektronik sesuai regulasi Peraturan Pemerintah No. 86 Tahun 2021",
+    tech: [".NET 6", "Masstransit", "ORM", "JWT Authentication", "Log4net", "FluentValidation", "Automapper", "Quartz", "Email Gateway", "Swagger", "Peruri Middleware", "Payment Gateway", "API Versioning", "API Rate Limit"],
+    image: "/projects/ematerai.png",
+    caseStudy: {
+      problem: "Implementasi regulasi e-Materai membutuhkan sistem yang dapat menangani penerbitan materai elektronik secara massal, memastikan keamanan dan autentikasi dokumen, serta integrasi dengan berbagai platform dokumen elektronik. Tantangan utama adalah mencegah pemalsuan, memastikan validitas materai, dan menyediakan mekanisme verifikasi yang mudah bagi publik.",
+      solution: "Membangun secure e-Materai issuance platform dengan digital signature implementation untuk autentikasi dokumen. Implementasi QR code generation untuk setiap materai dengan unique identifier dan blockchain-inspired verification chain. REST API untuk integrasi dengan document management systems dan e-signature platforms. Real-time validation service untuk public verification. Batch processing dengan Quartz untuk handle bulk issuance requests. RabbitMQ untuk reliable message delivery dan audit trail. JWT authentication untuk secure API access.",
+      result: "Platform berhasil menerbitkan 500K+ e-Materai per bulan dengan zero forgery incidents. Verification response time <500ms untuk real-time validation. API uptime 99.95% dengan seamless integration ke 20+ partner platforms. Compliance 100% dengan regulasi Ditjen Pajak. Public verification portal diakses 100K+ times monthly. Mengurangi biaya operasional materai fisik hingga 70% untuk enterprise clients. User satisfaction score 4.6/5 dari survei partner integration."
+    }
+  },
+  {
     id: "mitsubishi",
     title: "Mitsubishi Krama Yudha Motors & Manufacturing",
     category: "Manufacturing",
@@ -164,44 +190,44 @@ export const projects = [
       solution: "Digitalisasi end-to-end workflow dengan approval chain automation. Integrasi API dengan sistem kementerian terkait untuk verifikasi data real-time.",
       result: "Waktu processing berkurang dari 3-4 bulan menjadi 2-3 minggu. Transparansi meningkat dengan tracking system real-time untuk applicant."
     }
-  },  
+  },
   {
-    id: "ematerai",
-    title: "E-Materai",
-    category: "Government",
-    description: "Platform digital untuk penerbitan dan verifikasi materai elektronik sesuai regulasi Peraturan Pemerintah No. 86 Tahun 2021",
-    tech: [".NET 6", "Masstransit", "ORM", "JWT Authentication", "Log4net", "FluentValidation", "Automapper", "Quartz", "Email Gateway", "Swagger", "Peruri Middleware", "Payment Gateway", "API Versioning", "API Rate Limit"],
-    image: "/projects/ematerai.png",
+    id: "kansai",
+    title: "Kansai Prakarsa Coating",
+    category: "Manufacturing",
+    description: "Implementasi Cirrust platform dengan custom services dan pages untuk customer profiling di industri coating",
+    tech: [".NET 6", "Cirrust Platform", "Masstransit", "ORM", "JWT Authentication", "Log4net", "FluentValidation", "Automapper", "Quartz", "Email Gateway", "Swagger", "Telerik Reporting", "API Versioning", "Custom Services", "Custom Pages"],
+    image: "/projects/kansai.png",
     caseStudy: {
-      problem: "Implementasi regulasi e-Materai membutuhkan sistem yang dapat menangani penerbitan materai elektronik secara massal, memastikan keamanan dan autentikasi dokumen, serta integrasi dengan berbagai platform dokumen elektronik. Tantangan utama adalah mencegah pemalsuan, memastikan validitas materai, dan menyediakan mekanisme verifikasi yang mudah bagi publik.",
-      solution: "Membangun secure e-Materai issuance platform dengan digital signature implementation untuk autentikasi dokumen. Implementasi QR code generation untuk setiap materai dengan unique identifier dan blockchain-inspired verification chain. REST API untuk integrasi dengan document management systems dan e-signature platforms. Real-time validation service untuk public verification. Batch processing dengan Quartz untuk handle bulk issuance requests. RabbitMQ untuk reliable message delivery dan audit trail. JWT authentication untuk secure API access.",
-      result: "Platform berhasil menerbitkan 500K+ e-Materai per bulan dengan zero forgery incidents. Verification response time <500ms untuk real-time validation. API uptime 99.95% dengan seamless integration ke 20+ partner platforms. Compliance 100% dengan regulasi Ditjen Pajak. Public verification portal diakses 100K+ times monthly. Mengurangi biaya operasional materai fisik hingga 70% untuk enterprise clients. User satisfaction score 4.6/5 dari survei partner integration."
+      problem: "Kansai Prakarsa Coating menghadapi tantangan dalam mengelola customer relationship dan profiling di industri coating yang kompleks. Sales team kesulitan tracking customer history, preferences, dan buying patterns. Proses manual dalam dokumentasi customer requirements, quotation history, dan project specifications menyebabkan inefficiency dan kehilangan peluang sales. Tidak ada centralized system untuk customer data, sehingga setiap sales person memiliki versi data yang berbeda dan tidak tersinkronisasi.",
+      solution: "Implementasi Cirrust platform sebagai core document management system dengan extensive customization untuk customer profiling use case. Develop custom services untuk customer relationship management yang terintegrasi dengan sales pipeline dan order management. Build custom pages untuk customer profiling yang mencakup company information, contact persons, industry segments, coating preferences, dan purchase history. Create custom forms untuk capturing customer requirements, technical specifications, dan color formulation requests. Develop custom API services untuk integration dengan sales CRM dan quotation system. Build custom workflow untuk approval chain dari customer inquiry hingga quotation dan order confirmation. Create custom reporting pages dengan Telerik untuk customer analytics: segmentation analysis, buying behavior, revenue contribution, dan customer lifetime value.",
+      result: "Customer profiling accuracy meningkat 100% dengan centralized database dan custom forms. Sales conversion rate naik 35% karena better understanding of customer needs dan preferences. Follow-up time berkurang 50% dengan automated reminder system. Customer documentation sepenuhnya paperless dengan semua quotations, technical specs, dan purchase orders tersimpan di Cirrust. Sales team productivity meningkat 40% karena quick access to customer history dan buying patterns. Customer retention meningkat 25% dengan systematic follow-up dan personalized service. Management mendapat real-time visibility terhadap customer portfolio dengan custom analytics dashboard. Cross-selling opportunities meningkat dengan customer segmentation analysis. ROI tercapai dalam 8 bulan dengan increased sales dan improved customer satisfaction score 4.5/5."
     }
   },
   {
-    id: "impulse",
-    title: "Impulse - Political Party Platform",
-    category: "Government",
-    description: "Web & mobile platform untuk manajemen data keanggotaan dan kampanye partai politik",
-    tech: [".NET 6", "Masstransit", "FluentValidation", "ORM", "Automapper", "MongoDB", "Quartz", "Log4net", "FCM", "Email Gateway", "Swagger", "JWT Authentication", "API Versioning", "API Rate Limit"],
-    image: "/projects/impulse.png",
+    id: "mtm",
+    title: "Media Telekomunikasi Mandiri",
+    category: "Others",
+    description: "Implementasi Cirrust Document Management System untuk digitalisasi dokumen perusahaan.",
+    tech: [".NET 6", "Cirrust Platform", "JWT Authentication", "Log4net", "Automapper", "Quartz", "Swagger", "API Versioning", "DocuViewer"],
+    image: "/projects/mtm.png",
     caseStudy: {
-      problem: "Partai politik kesulitan mengelola jutaan data anggota dan volunteers yang tersebar di seluruh Indonesia, serta tracking aktivitas kampanye.",
-      solution: "Membangun scalable platform dengan MongoDB untuk flexible schema dan geo-spatial queries. Implementasi API rate limiting untuk menangani traffic spike saat event besar.",
-      result: "Mampu mengelola 1M+ member data dengan response time <200ms. Mobile app digunakan oleh 50K+ volunteers untuk real-time reporting."
+      problem: "Media Telekomunikasi Mandiri menghadapi tantangan dalam mengelola dokumen perusahaan yang terus bertambah secara eksponensial. Proses filing manual menyebabkan kesulitan dalam pencarian dokumen, kehilangan file penting, dan tidak adanya version control. Koordinasi antar departemen terhambat karena dokumen fisik harus berpindah tangan, menyebabkan bottleneck dalam approval process. Compliance dan audit trail sulit dilacak karena tidak ada sistem tracking yang terstruktur.",
+      solution: "Implementasi Cirrust Document Management System sebagai solusi paperless untuk centralized document repository. Setup folder structure yang sesuai dengan organizational hierarchy dan document taxonomy perusahaan. Konfigurasi user roles dan permissions untuk secure document access control. Implementasi document workflow untuk approval chain yang otomatis. Setup version control untuk tracking document revisions. Enable full-text search capability untuk quick document retrieval. Konfigurasi retention policy untuk document lifecycle management. Setup automated backup dan disaster recovery mechanism.",
+      result: "Dokumen perusahaan 95% sudah terdigitalisasi dengan centralized repository. Document retrieval time berkurang dari 30 menit menjadi <1 menit dengan powerful search feature. Approval process accelerated 60% dengan automated workflow. Storage cost berkurang 40% dengan eliminasi physical filing cabinets. Compliance dan audit trail 100% traceable dengan complete activity logs. Document version control mencegah konflik dan kehilangan data. Cross-departmental collaboration meningkat dengan secure document sharing. User adoption rate 90% dalam 3 bulan pertama. ROI tercapai dalam 12 bulan dengan operational efficiency dan cost savings."
     }
   },
   {
     id: "bni-life",
     title: "BNI Life Insurance",
     category: "Insurance",
-    description: "Implementasi Cirrust platform dan integrasi dengan sistem third-party untuk digital insurance",
-    tech: [".NET 6", "Masstransit", "ORM", "Telerik Reporting", "Quartz", "Log4net", "Automapper", "JWT Authentication", "Swagger", "API Versioning"],
+    description: "Implementasi Cirrust platform untuk auto underwriting & approval system dan policy management unit dashboard",
+    tech: [".NET 6", "Cirrust Platform", "Masstransit", "ORM", "Telerik Reporting", "Quartz", "Log4net", "Automapper", "JWT Authentication", "Swagger", "API Versioning", "Custom Services", "Dashboard"],
     image: "/projects/bni.png",
     caseStudy: {
-      problem: "BNI Life membutuhkan solusi document management yang terintegrasi dengan core insurance system dan memenuhi regulasi OJK.",
-      solution: "Customize dan implement Cirrust platform dengan workflow automation. Integrasi dengan e-signature provider dan payment gateway. Generate dynamic reports dengan Telerik.",
-      result: "Paperless process 95%, compliance dengan audit trail lengkap, policy issuance time berkurang 70%."
+      problem: "BNI Life menghadapi bottleneck dalam proses underwriting dan approval polis yang masih manual, memakan waktu 5-7 hari per aplikasi. Underwriter kesulitan mengakses dokumen lengkap dan medical records yang tersebar. Tim management tidak memiliki visibility real-time terhadap performa Policy Management Unit—tidak ada dashboard untuk tracking policy status, approval pipeline, dan productivity metrics. Koordinasi antar tim (sales, underwriting, medical, approval) terhambat karena tidak ada centralized system, menyebabkan missed SLA dan customer complaints.",
+      solution: "Implementasi Cirrust platform untuk dua use case kritis. Project 1 - Auto Underwriting & Approval: Build custom services untuk automated underwriting rules engine yang terintegrasi dengan medical database dan risk assessment system. Develop custom workflow untuk multi-stage approval chain (underwriter → medical reviewer → manager → final approval) dengan conditional routing based on sum assured dan risk level. Create custom forms untuk capturing application data dengan real-time validation. Implement document checklist automation untuk memastikan kelengkapan dokumen sebelum underwriting. Setup automated email notifications untuk setiap stage approval. Project 2 - Policy Management Unit Dashboard: Build custom dashboard pages untuk real-time monitoring policy pipeline, approval status, dan team productivity. Create custom reporting dengan Telerik untuk analytics: conversion funnel, processing time per stage, underwriter workload distribution, dan SLA compliance. Develop custom API services untuk integration dengan core insurance system untuk auto-sync policy data. Setup scheduled jobs (Quartz) untuk daily reports dan alert notifications.",
+      result: "Auto underwriting & approval system mengurangi processing time dari 5-7 hari menjadi 2-3 hari (60% faster). Automated rules engine handle 40% of standard cases tanpa manual review. Document completeness check meningkatkan first-time-right submission dari 60% menjadi 85%. Approval workflow visibility mengeliminasi bottleneck dan missed handoffs. Policy Management Unit Dashboard memberikan real-time visibility: management dapat monitor 200+ active applications, track individual underwriter productivity, dan identify process bottlenecks instantly. SLA compliance meningkat dari 70% menjadi 92%. Underwriter productivity naik 35% dengan streamlined workflow dan quick access to documents. Customer satisfaction score meningkat ke 4.3/5 dengan faster turnaround time. Paperless process 95% dengan complete audit trail untuk compliance OJK. ROI tercapai dalam 9 bulan dengan operational efficiency dan reduced manual work."
     }
   },
   {
@@ -272,7 +298,7 @@ export const projects = [
   {
     id: "framework",
     title: "Internal Framework Improvement",
-    category: "Framework",
+    category: "Others",
     description: "Framework internal untuk accelerate project development dan standardisasi",
     tech: ["Authentication (JWT/AD/OAuth)", "Notification (SMS/Email/Push)", "Persistence & ORM", "Common Libraries", "Security Libraries", "Project Generator"],
     image: "/projects/quadrant.png",
@@ -310,4 +336,4 @@ export const interests = [
   "Team Building"
 ];
 
-export const projectCategories = ["All", "Insurance", "Government", "Manufacturing", "Product", "Framework"];
+export const projectCategories = ["All", "Insurance", "Government", "Manufacturing", "Product", "Others"];
