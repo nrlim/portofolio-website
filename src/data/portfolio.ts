@@ -47,11 +47,11 @@ export const about = {
 
 export const skills = {
   languages: ["C#", "JavaScript", "TypeScript"],
-  backend: ["NHibernate", "RabbitMQ", "JWT", "OAuth", "Active Directory", "Log4net", "Camunda BPM", "Telerik Report", "FluentValidation", "Automapper", "Quartz", "EF"],
-  databases: ["SQL Server", "PostgreSQL", "SQLite", "RavenDB", "CouchDB", "WatermelonDB", "MongoDB", "Redis"],
-  devops: ["Docker", "Git", "Nexus", "Jenkins", "SonarQube", "Azure DevOps"],
+  backend: ["NHibernate", "Masstransit", "Authentication (Oauth/AD/JWT)", "Log4net", "Hangfire", "Camunda BPM", "Telerik Report", "FluentValidation", "Automapper", "Quartz", "EF", "Xunit"],
+  databases: ["SQL Server", "PostgreSQL", "SQLite", "RavenDB", "CouchDB", "WatermelonDB", "MongoDB"],
+  devops: ["Docker", "Git", "Nexus", "Jenkins", "SonarQube", "Azure DevOps", "Redmine"],
   architecture: ["OOP", "Microservices", "Design Patterns", "Clean Code", "Clean Architecture", "SOLID", "DRY"],
-  tools: ["Elasticsearch", "Firebase Cloud Messaging", "OAuth", "Active Directory"]
+  tools: []
 };
 
 export const experience = [
@@ -131,7 +131,7 @@ export const projects = [
     title: "Liriq - RFID Asset Tracking System",
     category: "Product",
     description: "Real-time asset monitoring and management system menggunakan teknologi RFID untuk tracking inventory dan aset perusahaan",
-    tech: [".NET 6", "RabbitMQ", "NHibernate", "Memory cache", "RFID Middleware", "JWT", "Log4net"],
+    tech: [".NET 6", "Masstransit", "ORM", "MemoryCache", "RFID Middleware", "JWT Authentication", "Log4net", "FluentValidation", "Automapper", "Quartz", "Email Gateway", "Swagger", "API Versioning"],
     image: "/projects/liriq.png",
     caseStudy: {
       problem: "Perusahaan mengalami kesulitan dalam tracking dan monitoring aset secara real-time, sering terjadi kehilangan aset, inefficient inventory management, dan manual stock taking yang memakan waktu dan rawan error. Visibilitas lokasi aset yang rendah menyebabkan produktivitas menurun dan asset utilization tidak optimal.",
@@ -144,7 +144,7 @@ export const projects = [
     title: "Mitsubishi Krama Yudha Motors & Manufacturing",
     category: "Manufacturing",
     description: "Web application dan integrasi API untuk sistem manufaktur otomotif dengan real-time data processing",
-    tech: [".NET 6", "RabbitMQ", "NHibernate", "Automapper", "Quartz", "Log4net"],
+    tech: [".NET 6", "Masstransit", "ORM", "JWT Authentication", "Log4net", "FluentValidation", "Automapper", "Quartz", "Email Gateway", "Swagger", "Chilkat", "API Versioning"],
     image: "/projects/mkm.png",
     caseStudy: {
       problem: "Client membutuhkan sistem terintegrasi untuk mengelola supply chain dan production planning dengan berbagai sistem legacy yang berbeda platform.",
@@ -157,12 +157,25 @@ export const projects = [
     title: "Badan Pertanahan Nasional",
     category: "Government",
     description: "Platform digital untuk layanan pertanahan dengan integrasi ke berbagai sistem pemerintah",
-    tech: [".NET 6", "RabbitMQ", "NHibernate", "Automapper", "Quartz", "Log4net"],
+    tech: [".NET 6", "Masstransit", "ORM", "JWT Authentication", "Log4net", "FluentValidation", "Automapper", "Quartz", "Email Gateway", "Swagger", "Dynamic Forms", "API Versioning"],
     image: "/projects/bpn.png",
     caseStudy: {
       problem: "Proses pengurusan sertifikat tanah memakan waktu berbulan-bulan karena manual processing dan koordinasi antar instansi yang kompleks.",
       solution: "Digitalisasi end-to-end workflow dengan approval chain automation. Integrasi API dengan sistem kementerian terkait untuk verifikasi data real-time.",
       result: "Waktu processing berkurang dari 3-4 bulan menjadi 2-3 minggu. Transparansi meningkat dengan tracking system real-time untuk applicant."
+    }
+  },  
+  {
+    id: "ematerai",
+    title: "E-Materai",
+    category: "Government",
+    description: "Platform digital untuk penerbitan dan verifikasi materai elektronik sesuai regulasi Peraturan Pemerintah No. 86 Tahun 2021",
+    tech: [".NET 6", "Masstransit", "ORM", "JWT Authentication", "Log4net", "FluentValidation", "Automapper", "Quartz", "Email Gateway", "Swagger", "Peruri Middleware", "Payment Gateway", "API Versioning", "API Rate Limit"],
+    image: "/projects/ematerai.png",
+    caseStudy: {
+      problem: "Implementasi regulasi e-Materai membutuhkan sistem yang dapat menangani penerbitan materai elektronik secara massal, memastikan keamanan dan autentikasi dokumen, serta integrasi dengan berbagai platform dokumen elektronik. Tantangan utama adalah mencegah pemalsuan, memastikan validitas materai, dan menyediakan mekanisme verifikasi yang mudah bagi publik.",
+      solution: "Membangun secure e-Materai issuance platform dengan digital signature implementation untuk autentikasi dokumen. Implementasi QR code generation untuk setiap materai dengan unique identifier dan blockchain-inspired verification chain. REST API untuk integrasi dengan document management systems dan e-signature platforms. Real-time validation service untuk public verification. Batch processing dengan Quartz untuk handle bulk issuance requests. RabbitMQ untuk reliable message delivery dan audit trail. JWT authentication untuk secure API access.",
+      result: "Platform berhasil menerbitkan 500K+ e-Materai per bulan dengan zero forgery incidents. Verification response time <500ms untuk real-time validation. API uptime 99.95% dengan seamless integration ke 20+ partner platforms. Compliance 100% dengan regulasi Ditjen Pajak. Public verification portal diakses 100K+ times monthly. Mengurangi biaya operasional materai fisik hingga 70% untuk enterprise clients. User satisfaction score 4.6/5 dari survei partner integration."
     }
   },
   {
@@ -170,7 +183,7 @@ export const projects = [
     title: "Impulse - Political Party Platform",
     category: "Government",
     description: "Web & mobile platform untuk manajemen data keanggotaan dan kampanye partai politik",
-    tech: [".NET 6", "RabbitMQ", "FluentValidation", "NHibernate", "Automapper", "MongoDB", "Quartz", "Log4net"],
+    tech: [".NET 6", "Masstransit", "FluentValidation", "ORM", "Automapper", "MongoDB", "Quartz", "Log4net", "FCM", "Email Gateway", "Swagger", "JWT Authentication", "API Versioning", "API Rate Limit"],
     image: "/projects/impulse.png",
     caseStudy: {
       problem: "Partai politik kesulitan mengelola jutaan data anggota dan volunteers yang tersebar di seluruh Indonesia, serta tracking aktivitas kampanye.",
@@ -183,7 +196,7 @@ export const projects = [
     title: "BNI Life Insurance",
     category: "Insurance",
     description: "Implementasi Cirrust platform dan integrasi dengan sistem third-party untuk digital insurance",
-    tech: [".NET 6", "RabbitMQ", "FluentValidation", "NHibernate", "Telerik Reporting", "Quartz", "Log4net", "Automapper"],
+    tech: [".NET 6", "Masstransit", "ORM", "Telerik Reporting", "Quartz", "Log4net", "Automapper", "JWT Authentication", "Swagger", "API Versioning"],
     image: "/projects/bni.png",
     caseStudy: {
       problem: "BNI Life membutuhkan solusi document management yang terintegrasi dengan core insurance system dan memenuhi regulasi OJK.",
@@ -196,7 +209,7 @@ export const projects = [
     title: "Cirrust - Document Management System",
     category: "Product",
     description: "Enterprise document management system dengan version control dan collaboration features",
-    tech: [".NET 6", "RabbitMQ", "FluentValidation", "NHibernate", "Redis", "Quartz", "JWT", "Log4net", "Automapper"],
+    tech: [".NET 6", "Redis", "Hangfire", "JWT", "Automapper", "Swagger", "API Versioning", "DocuViewer"],
     image: "/projects/cirrust.png",
     caseStudy: {
       problem: "Banyak enterprise client membutuhkan secure document management dengan fine-grained access control dan audit trail lengkap.",
@@ -209,7 +222,7 @@ export const projects = [
     title: "Cirrust Workflow - Workflow Engine",
     category: "Product",
     description: "Business process automation engine dengan visual workflow designer",
-    tech: [".NET 6", "RabbitMQ", "FluentValidation", "NHibernate", "Camunda", "Quartz", "Elasticsearch", "Log4net", "Automapper"],
+    tech: [".NET 6", "Masstransit", "FluentValidation", "ORM", "Camunda", "Quartz", "Log4net", "Automapper", "JWT Authentication", "Swagger", "API Versioning", "Telerik Report"],
     image: "/projects/cirrust-wf.png",
     caseStudy: {
       problem: "Client membutuhkan flexible workflow engine yang bisa handle complex approval chains dan conditional routing tanpa coding.",
@@ -222,7 +235,7 @@ export const projects = [
     title: "Manulife Insurance - Agent AID Implementation",
     category: "Insurance",
     description: "Platform digital untuk agen asuransi dengan mobile app dan backend system",
-    tech: [".NET Core 3.1", "RabbitMQ", "FluentValidation", "NHibernate", "Quartz", "JWT", "Log4net", "Automapper"],
+    tech: [".NetCore 3.1", "Masstransit", "FluentValidation", "ORM", "Quartz", "JWT Authentication", "Log4net", "Automapper", "Swagger", "API Versioning"],
     image: "/projects/manulife.png",
     caseStudy: {
       problem: "Agen Manulife kesulitan melakukan prospecting dan policy management secara mobile. Butuh akses real-time ke customer data.",
@@ -235,7 +248,7 @@ export const projects = [
     title: "Zurich Insurance - Agent AID Implementation",
     category: "Insurance",
     description: "Implementasi dan customization Agent AID untuk Zurich Insurance Indonesia",
-    tech: [".NET 6", "RabbitMQ", "NHibernate", "Quartz", "JWT", "Log4net", "Automapper"],
+    tech: [".NET 8", "Masstransit", "ORM", "FluentValidation", "Quartz", "Oauth", "Log4net", "Automapper", "Swagger", "API Versioning", "Email Gateway", "FCM", "Dynamic Forms", "Json Evaluate"],
     image: "/projects/zurich.png",
     caseStudy: {
       problem: "Zurich ingin adopt Agent AID platform dengan custom requirements untuk compliance dan integration dengan existing systems.",
@@ -248,7 +261,7 @@ export const projects = [
     title: "Agent AID - Core Product",
     category: "Product",
     description: "SaaS platform lengkap untuk digital enablement agen asuransi",
-    tech: [".NET Core 3.1", "RabbitMQ", "FluentValidation", "NHibernate", "Quartz", "Saga", "EF", "JWT", "Log4net", "Automapper"],
+    tech: [".NET Core 3.1", "Masstransit", "FluentValidation", "ORM", "Quartz", "Saga", "EF", "JWT Authentication", "Log4net", "Automapper", "API Versioning", "Swagger"],
     image: "/projects/aid.png",
     caseStudy: {
       problem: "Industri asuransi membutuhkan platform yang bisa accelerate digital transformation untuk field agents dengan onboarding cepat.",
@@ -261,7 +274,7 @@ export const projects = [
     title: "Internal Framework Improvement",
     category: "Framework",
     description: "Framework internal untuk accelerate project development dan standardisasi",
-    tech: ["Authentication (JWT/AD/OAuth)", "Notification (SMS/Email/Push)", "Persistence & ORM", "Common Libraries", "MassTransit", "Project Generator"],
+    tech: ["Authentication (JWT/AD/OAuth)", "Notification (SMS/Email/Push)", "Persistence & ORM", "Common Libraries", "Security Libraries", "Project Generator"],
     image: "/projects/quadrant.png",
     caseStudy: {
       problem: "Setiap project baru memulai dari scratch, banyak duplicated code, dan inconsistent implementation across teams.",

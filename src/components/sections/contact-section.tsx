@@ -34,6 +34,10 @@ const itemVariants = {
 
 export function ContactSection() {
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [submitStatus, setSubmitStatus] = React.useState<{
+    type: 'success' | 'error' | null;
+    message: string;
+  }>({ type: null, message: '' });
   const [formData, setFormData] = React.useState({
     name: "",
     email: "",
@@ -44,25 +48,69 @@ export function ContactSection() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitStatus({ type: null, message: '' });
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
 
-    // Here you would typically send to an API
-    console.log("Form submitted:", formData);
+      const data = await response.json();
 
-    // Show success message
-    alert("Terima kasih! Pesan Anda telah terkirim. Saya akan segera menghubungi Anda.");
+      // Handle rate limit (429 status)
+      if (response.status === 429) {
+        setSubmitStatus({
+          type: 'error',
+          message: data.error || 'Terlalu banyak percobaan. Silakan coba lagi nanti atau hubungi via WhatsApp.',
+        });
+        setIsSubmitting(false);
+        return;
+      }
 
-    // Reset form
-    setFormData({
-      name: "",
-      email: "",
-      company: "",
-      message: "",
-    });
+      if (data.success) {
+        setSubmitStatus({
+          type: 'success',
+          message: data.message || 'Terima kasih! Pesan Anda telah terkirim. Saya akan segera menghubungi Anda.',
+        });
 
-    setIsSubmitting(false);
+        // Reset form
+        setFormData({
+          name: "",
+          email: "",
+          company: "",
+          message: "",
+        });
+
+        // Auto-hide success message after 5 seconds
+        setTimeout(() => {
+          setSubmitStatus({ type: null, message: '' });
+        }, 5000);
+      } else if (data.fallback && data.mailtoLink) {
+        // Fallback: Open mailto link
+        window.location.href = data.mailtoLink;
+        setSubmitStatus({
+          type: 'error',
+          message: data.message || 'Membuka aplikasi email Anda...',
+        });
+      } else {
+        setSubmitStatus({
+          type: 'error',
+          message: data.error || 'Gagal mengirim pesan. Silakan coba lagi.',
+        });
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      setSubmitStatus({
+        type: 'error',
+        message: 'Terjadi kesalahan. Silakan coba lagi atau hubungi via WhatsApp.',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (
@@ -195,6 +243,19 @@ export function ContactSection() {
                       tabIndex={-1}
                       autoComplete="off"
                     />
+
+                    {/* Success/Error Message */}
+                    {submitStatus.type && (
+                      <div
+                        className={`p-4 rounded-lg ${
+                          submitStatus.type === 'success'
+                            ? 'bg-accent/10 border border-accent text-accent'
+                            : 'bg-destructive/10 border border-destructive text-destructive'
+                        }`}
+                      >
+                        <p className="text-sm font-medium">{submitStatus.message}</p>
+                      </div>
+                    )}
 
                     <div className="space-y-2">
                       <Label htmlFor="name">
