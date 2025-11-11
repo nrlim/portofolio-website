@@ -26,7 +26,7 @@ export default function Home() {
     url: "https://nuralim.dev",
     sameAs: [
       personalInfo.social.linkedin,
-      personalInfo.social.github,
+      personalInfo.social.tiktok,
       personalInfo.social.instagram,
     ],
     alumniOf: [

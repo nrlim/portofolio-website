@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Award, Download, Lock } from 'lucide-react';
+import { Award, Lock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -311,7 +311,7 @@ export function CertificationsSection() {
           <DialogHeader>
             <DialogTitle>Verify API Key</DialogTitle>
             <DialogDescription>
-              Enter your API key to download this certificate. If you don't have one, please contact me.
+              Enter your API key to download this certificate. If you don&apos;t have one, please contact me.
             </DialogDescription>
           </DialogHeader>
 
