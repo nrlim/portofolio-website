@@ -16,8 +16,8 @@ export const personalInfo = {
 
   social: {
     linkedin: "https://linkedin.com/in/nuralim",
-    github: "https://github.com/nrlim",
-    instagram: "https://instagram.com/nrlim_"
+    tiktok: "https://tiktok.com/@nuralim.dev",
+    instagram: "https://instagram.com/nuralim.dev"
   }
 };
 
@@ -350,6 +350,206 @@ export const education = [
     description: "Fokus pada Application Development dan Database Management"
   }
 ];
+
+export const certifications: Array<{
+  id: string;
+  title: string;
+  issuer: string;
+  certificateImage: string;
+  certificatePDF?: string;
+  skills: string[];
+}> = [
+    //AWS
+    {
+      "id": "aws-cloud-practitioner-essentials",
+      "title": "AWS Cloud Practitioner Essentials",
+      "issuer": "AWS",
+      "certificateImage": "/certifications/aws-cloud-practitioner-essentials.jpg",
+      "skills": ["AWS Cloud", "Cloud Computing", "AWS Services"]
+    },
+    // Programmer Zaman Now
+    {
+      "id": "belajar-basis-data",
+      "title": "Belajar Basis Data",
+      "issuer": "Programmer Zaman Now",
+      "certificateImage": "/certifications/belajar-basis-data.jpg",
+      "skills": ["Database", "SQL", "Data Management"]
+    },
+    {
+      "id": "docker",
+      "title": "Docker untuk Pemula sampai Mahir",
+      "issuer": "Programmer Zaman Now",
+      "certificateImage": "/certifications/Docker.jpg",
+      "skills": ["DevOps", "Docker", "Containerization", "docker-compose", "Dockerfile"]
+    },
+    {
+      "id": "http-basic",
+      "title": "HTTP Basic",
+      "issuer": "Programmer Zaman Now",
+      "certificateImage": "/certifications/Http-basic.jpg",
+      "skills": ["HTTP", "Web Service", "API"]
+    },
+    {
+      "id": "http-tunnel-ngrok",
+      "title": "HTTP Tunnel Ngrok",
+      "issuer": "Programmer Zaman Now",
+      "certificateImage": "/certifications/Http-Tunnel-Ngrok.jpg",
+      "skills": ["HTTP", "Networking", "Development Tools"]
+    },
+    {
+      "id": "open-api",
+      "title": "Open API",
+      "issuer": "Programmer Zaman Now",
+      "certificateImage": "/certifications/Open-API.jpg",
+      "skills": ["API", "REST", "Web Service"]
+    },
+    {
+      "id": "restapi-basic",
+      "title": "REST API Basic",
+      "issuer": "Programmer Zaman Now",
+      "certificateImage": "/certifications/RestAPI-Basic.jpg",
+      "skills": ["REST API", "Web Service", "HTTP"]
+    },
+    {
+      "id": "spring-boot-kotlin",
+      "title": "Spring Boot Kotlin",
+      "issuer": "Programmer Zaman Now",
+      "certificateImage": "/certifications/Spring-boot-kotlin.jpg",
+      "skills": ["Spring Boot", "Kotlin", "Backend"]
+    },
+    // Udemy
+    {
+      "id": "cryptocurrency-mastery",
+      "title": "Cryptocurrency Mastery",
+      "issuer": "Udemy",
+      "certificateImage": "/certifications/Cryptocurrency-Mastery.jpg",
+      "skills": ["Blockchain", "Cryptocurrency", "Web3"]
+    },
+    {
+      "id": "data-integration-fundamental",
+      "title": "Data Integration Fundamental",
+      "issuer": "Udemy",
+      "certificateImage": "/certifications/Data-Integration-Fundamental.jpg",
+      "skills": ["Data Integration", "ETL", "Database"]
+    },
+    {
+      "id": "data-integration-guide",
+      "title": "Data Integration Guide",
+      "issuer": "Udemy",
+      "certificateImage": "/certifications/Data-Integration-Guide.jpg",
+      "skills": ["Data Integration", "ETL", "Database"]
+    },
+    {
+      "id": "data-management-masterclass",
+      "title": "Data Management Masterclass",
+      "issuer": "Udemy",
+      "certificateImage": "/certifications/Data-Management-Masterclass.jpg",
+      "skills": ["Data Management", "Database", "SQL"]
+    },
+    // Build With Angga
+    {
+      "id": "android-developer",
+      "title": "Android Developer",
+      "issuer": "Build With Angga",
+      "certificateImage": "/certifications/android-developer.jpg",
+      "skills": ["Android", "Java", "Mobile Development"]
+    },
+    {
+      "id": "devops-cicd",
+      "title": "DevOps CI/CD Development",
+      "issuer": "Build With Angga",
+      "certificateImage": "/certifications/DevOps-CICD.jpg",
+      "skills": ["DevOps", "CI/CD", "Automation"]
+    },
+    {
+      "id": "master-coding-interview",
+      "title": "Master Coding Interview",
+      "issuer": "Build With Angga",
+      "certificateImage": "/certifications/Master-Coding-Interview.jpg",
+      "skills": ["Problem Solving", "Algorithms", "Interview Preparation"]
+    },
+    {
+      "id": "mastering-flutter-dart",
+      "title": "Mastering Flutter Dart",
+      "issuer": "Build With Angga",
+      "certificateImage": "/certifications/Mastering-flutter-dart.jpg",
+      "skills": ["Flutter", "Dart", "Mobile Development"]
+    },
+    {
+      "id": "mastering-provider",
+      "title": "Mastering Provider",
+      "issuer": "Build With Angga",
+      "certificateImage": "/certifications/Mastering-provider.jpg",
+      "skills": ["Flutter", "State Management", "Provider"]
+    },
+    // Entrust
+    {
+      "id": "ncse-entrust",
+      "title": "NCSE Entrust",
+      "issuer": "Entrust",
+      "certificateImage": "/certifications/NCSE-Entrust.png",
+      "skills": ["Security", "Certification", "Professional Development"]
+    },
+    // Lembaga Sertifikasi Profesi
+    {
+      "id": "sql-server-web-design",
+      "title": "SQL Server Web Design",
+      "issuer": "Lembaga Sertifikasi Profesi",
+      "certificateImage": "/certifications/SQL-Server-Web-Design.jpg",
+      "skills": ["SQL Server", "Database", "Web Development"]
+    },
+    // LP3I Course Center
+    {
+      "id": "android-application",
+      "title": "Android Application",
+      "issuer": "LP3I Course Center",
+      "certificateImage": "/certifications/Android-Application.jpg",
+      "skills": ["Android", "Mobile Development", "Java"]
+    },
+    {
+      "id": "ethical-hacking",
+      "title": "Ethical Hacking",
+      "issuer": "LP3I Course Center",
+      "certificateImage": "/certifications/Ethical-Hacking.jpg",
+      "skills": ["Security", "Ethical Hacking", "Penetration Testing"]
+    },
+    {
+      "id": "fun-with-android",
+      "title": "Fun With Android",
+      "issuer": "LP3I Course Center",
+      "certificateImage": "/certifications/Fun-With-Android.jpg",
+      "skills": ["Android", "Mobile Development", "Kotlin"]
+    },
+    // Seminar by UI
+    {
+      "id": "collaboration-technology",
+      "title": "Collaboration Technology",
+      "issuer": "Seminar by UI",
+      "certificateImage": "/certifications/Collaboration-Technology.jpg",
+      "skills": ["Collaboration", "Technology", "Teamwork"]
+    },
+    {
+      "id": "google-design-sprint",
+      "title": "Google Design Sprint",
+      "issuer": "Seminar by UI",
+      "certificateImage": "/certifications/Google-Design-Sprint.jpg",
+      "skills": ["Design Thinking", "UX/UI", "Sprint Methodology"]
+    },
+    {
+      "id": "machine-translation",
+      "title": "Machine Translation",
+      "issuer": "Seminar by UI",
+      "certificateImage": "/certifications/Machine-Translation.jpg",
+      "skills": ["Machine Learning", "NLP", "AI"]
+    },
+    {
+      "id": "natural-language-understanding",
+      "title": "Natural Language Understanding",
+      "issuer": "Seminar by UI",
+      "certificateImage": "/certifications/Natural-Language-Understanding.jpg",
+      "skills": ["NLP", "Machine Learning", "AI"]
+    }
+  ];
 
 export const interests = [
   "Insurance Technology",

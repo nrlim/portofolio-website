@@ -6,6 +6,7 @@ import { SkillsSection } from "@/components/sections/skills-section";
 import { ExperienceSection } from "@/components/sections/experience-section";
 import { ProjectsSection } from "@/components/sections/projects-section";
 import { EducationSection } from "@/components/sections/education-section";
+import { CertificationsSection } from "@/components/sections/certifications-section";
 import { ContactSection } from "@/components/sections/contact-section";
 import { personalInfo } from "@/data/portfolio";
 
@@ -63,6 +64,7 @@ export default function Home() {
           <ExperienceSection />
           <ProjectsSection />
           <EducationSection />
+          <CertificationsSection />
           <ContactSection />
         </main>
         <Footer />

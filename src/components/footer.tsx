@@ -3,7 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import { personalInfo } from "@/data/portfolio";
-import { Github, Linkedin, Instagram } from "lucide-react";
+import { Linkedin, Instagram } from "lucide-react";
+import { TikTokIcon } from "@/components/icons/tiktok-icon";
 import { Button } from "@/components/ui/button";
 
 const socialLinks = [
@@ -13,9 +14,9 @@ const socialLinks = [
     icon: Linkedin,
   },
   {
-    name: "GitHub",
-    href: personalInfo.social.github,
-    icon: Github,
+    name: "TikTok",
+    href: personalInfo.social.tiktok,
+    icon: TikTokIcon,
   },
   {
     name: "Instagram",
@@ -25,10 +26,14 @@ const socialLinks = [
 ];
 
 export function Footer() {
-  const currentYear = new Date().getFullYear();
+  const [currentYear, setCurrentYear] = React.useState(new Date().getFullYear());
+
+  React.useEffect(() => {
+    setCurrentYear(new Date().getFullYear());
+  }, []);
 
   return (
-    <footer className="border-t bg-background">
+    <footer className="border-t bg-background" suppressHydrationWarning>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* Brand */}
