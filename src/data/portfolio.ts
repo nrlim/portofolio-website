@@ -361,6 +361,13 @@ export const certifications: Array<{
 }> = [
     //AWS
     {
+      "id": "aws-technical-essentials",
+      "title": "AWS Technical Essentials",
+      "issuer": "AWS",
+      "certificateImage": "/certifications/aws-technical-essentials.jpg",
+      "skills": ["AWS Cloud", "Cloud Computing", "AWS Services", "Load Balancing", "Auto Scaling", "VPC", "Networking"]
+    },
+    {
       "id": "aws-cloud-practitioner-essentials",
       "title": "AWS Cloud Practitioner Essentials",
       "issuer": "AWS",
