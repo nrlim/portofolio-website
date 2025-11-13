@@ -205,6 +205,19 @@ export const projects = [
     }
   },
   {
+    id: "ccbi",
+    title: "China Construction Bank Indonesia",
+    category: "Banking",
+    description: "Implementasi Cirrust platform dengan custom services dan pages untuk generating pdf request VPN & Network Access di lingkungan perbankan",
+    tech: [".NET 6", "Cirrust Platform", "Masstransit", "ORM", "JWT Authentication", "Log4net", "FluentValidation", "Automapper", "Quartz", "Swagger", "Telerik Reporting", "API Versioning", "Custom Services", "Custom Pages"],
+    image: "/projects/ccbi.png",
+    caseStudy: {
+      problem: "China Construction Bank Indonesia menghadapi tantangan dalam mengelola permintaan akses jaringan dan VPN yang kompleks. Proses manual dalam pengajuan dan persetujuan permintaan menyebabkan keterlambatan dan ketidakakuratan. Tidak ada sistem terpusat untuk melacak status permintaan, sehingga tim IT kesulitan dalam memberikan layanan yang cepat dan efisien.",
+      solution: "Implementasi Cirrust platform sebagai solusi untuk mengelola permintaan akses jaringan dan VPN. Kembangkan custom services untuk otomatisasi proses pengajuan dan persetujuan. Buat custom pages untuk memudahkan pengguna dalam mengajukan permintaan dan melacak statusnya. Integrasikan dengan sistem manajemen identitas untuk verifikasi pengguna. Buat laporan analitik untuk memantau penggunaan dan kinerja jaringan.",
+      result: "Waktu pemrosesan permintaan berkurang 60% dengan otomatisasi proses. Akurasi data permintaan meningkat 100% dengan sistem terpusat. Kepuasan pengguna meningkat dengan layanan yang lebih cepat dan transparan."
+    }
+  },
+  {
     id: "mtm",
     title: "Media Telekomunikasi Mandiri",
     category: "Others",
@@ -361,6 +374,13 @@ export const certifications: Array<{
 }> = [
     //AWS
     {
+      "id": "aws-network-essentials",
+      "title": "Networking Essentials for Cloud Applications on AWS",
+      "issuer": "AWS",
+      "certificateImage": "/certifications/aws-network-essentials.jpg",
+      "skills": ["AWS Cloud", "VPC", "Subnets", "Route Tables", "Egress", "ELB"]
+    },
+    {
       "id": "aws-technical-essentials",
       "title": "AWS Technical Essentials",
       "issuer": "AWS",
@@ -371,7 +391,7 @@ export const certifications: Array<{
       "id": "aws-cloud-practitioner-essentials",
       "title": "AWS Cloud Practitioner Essentials",
       "issuer": "AWS",
-      "certificateImage": "/certifications/aws-cloud-practitioner-essentials.jpg",
+      "certificateImage": "/certifications/aws-practitioner-essentials.jpg",
       "skills": ["AWS Cloud", "Cloud Computing", "AWS Services"]
     },
     // Programmer Zaman Now
