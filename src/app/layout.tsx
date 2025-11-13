@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ChatWidgetModern } from "@/components/chat-widget";
 import { personalInfo } from "@/data/portfolio";
 
 const inter = Inter({
@@ -78,6 +79,7 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <ChatWidgetModern />
         </ThemeProvider>
       </body>
     </html>
