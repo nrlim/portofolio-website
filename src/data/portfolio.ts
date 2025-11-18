@@ -374,6 +374,20 @@ export const certifications: Array<{
 }> = [
     //AWS
     {
+      "id": "aws-agentic-ai",
+      "title": "Agentic AI Foundations",
+      "issuer": "AWS",
+      "certificateImage": "/certifications/aws-agentic-ai.jpg",
+      "skills": ["AWS Cloud", "Agentic AI", "Autonomous Agents", "AI Orchestration"]
+    },
+    {
+      "id": "aws-generative-ai",
+      "title": "Generative AI Essentials on AWS",
+      "issuer": "AWS",
+      "certificateImage": "/certifications/aws-generative-ai.jpg",
+      "skills": ["AWS Cloud", "Generative AI", "Prompt Engineering", "Guardrails"]
+    },
+    {
       "id": "aws-network-essentials",
       "title": "Networking Essentials for Cloud Applications on AWS",
       "issuer": "AWS",
