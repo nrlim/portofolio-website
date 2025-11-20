@@ -1,6 +1,5 @@
 'use client';
 
-import { Metadata } from "next";
 import Link from "next/link";
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
@@ -54,44 +53,6 @@ export default function CRMServicePage() {
       title: "Data Integration",
       description: "Seamlessly connect with your existing tools and systems. Import/export data with ease."
     }
-  ];
-
-  const benefits = [
-    {
-      icon: Zap,
-      title: "Increased Productivity",
-      stat: "40%",
-      description: "Automation reduces manual tasks"
-    },
-    {
-      icon: TrendingUp,
-      title: "Higher Conversion",
-      stat: "30%",
-      description: "Better lead nurturing and follow-up"
-    },
-    {
-      icon: Users,
-      title: "Customer Retention",
-      stat: "25%",
-      description: "Improved customer satisfaction"
-    },
-    {
-      icon: Shield,
-      title: "Data Security",
-      stat: "100%",
-      description: "Enterprise-grade security standards"
-    }
-  ];
-
-  const techStack = [
-    ".NET Core",
-    "React",
-    "TypeScript",
-    "SQL Server",
-    "Azure",
-    "RESTful API",
-    "Redis Cache",
-    "SignalR"
   ];
 
   const implementations = [
@@ -308,7 +269,7 @@ export default function CRMServicePage() {
             Ready to Transform Your Customer Management?
           </h2>
           <p className="text-xl mb-8 text-blue-50">
-            Let's discuss how a custom CRM solution can help your business grow.
+            {`Let's discuss how a custom CRM solution can help your business grow.`}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" asChild className="bg-white text-blue-600 hover:bg-blue-50">

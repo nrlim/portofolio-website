@@ -13,7 +13,6 @@ type Message = {
 };
 
 const STORAGE_KEY = 'nuralim_chat_state_v2';
-const STORAGE_VERSION = '2';
 
 export function ChatWidgetModern() {
   const pathname = usePathname();
@@ -53,7 +52,7 @@ export function ChatWidgetModern() {
       try {
         localStorage.removeItem(STORAGE_KEY);
         localStorage.removeItem('nuralim_chat_state');
-      } catch (e) {
+      } catch {
         // Ignore error
       }
     }
@@ -338,7 +337,7 @@ export function ChatWidgetModern() {
               </div>
               <h4 className="text-slate-200 font-semibold mb-2 text-lg">Halo! 👋</h4>
               <p className="text-slate-400 text-sm leading-relaxed">
-                Saya adalah AI assistant Nuralim - LimAI. Tanya saya tentang background, keahlian, atau pengalaman profesionalnya!
+                {`Saya adalah AI assistant Nuralim - LimAI. Tanya saya tentang background, keahlian, atau pengalaman profesionalnya!`}
               </p>
               <div className="mt-4 flex flex-wrap gap-2 justify-center">
                 <button
