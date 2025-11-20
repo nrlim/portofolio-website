@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
@@ -15,14 +16,21 @@ const STORAGE_KEY = 'nuralim_chat_state_v2';
 const STORAGE_VERSION = '2';
 
 export function ChatWidgetModern() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [isServicePage, setIsServicePage] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  // Check if we're on a service page
+  useEffect(() => {
+    setIsServicePage(pathname?.startsWith('/services') ?? false);
+  }, [pathname]);
 
   // Initialize from localStorage on mount
   useEffect(() => {
@@ -219,6 +227,11 @@ export function ChatWidgetModern() {
 
   // Don't render until hydrated to prevent hydration mismatch
   if (!isHydrated) {
+    return null;
+  }
+
+  // Hide chat widget on service pages
+  if (isServicePage) {
     return null;
   }
 
