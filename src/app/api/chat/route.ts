@@ -96,7 +96,13 @@ export async function POST(request: Request) {
       temperature: 0.7,
     });
 
-    return result.toTextStreamResponse();
+    // Return a simple text stream that's easier to parse on the client
+    return new Response(result.textStream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Transfer-Encoding': 'chunked',
+      },
+    });
   } catch (error) {
     console.error('Chat API error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error';

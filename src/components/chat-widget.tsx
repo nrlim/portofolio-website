@@ -115,79 +115,52 @@ export function ChatWidgetModern() {
         throw new Error(`API error: ${response.status} - ${errorText}`);
       }
 
+      // Stream the response text directly
       const reader = response.body?.getReader();
       if (!reader) throw new Error('No response body');
 
       const decoder = new TextDecoder();
       let assistantMessage = '';
-      let buffer = '';
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-        const chunk = decoder.decode(value, { stream: true });
-        buffer += chunk;
+          const chunk = decoder.decode(value);
+          assistantMessage += chunk;
 
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          const trimmedLine = line.trim();
-          if (!trimmedLine) continue;
-
-          if (trimmedLine.startsWith('0:"')) {
-            const match = trimmedLine.match(/0:"(.*)"$/);
-            if (match) {
-              const text = match[1].replace(/\\"/g, '"').replace(/\\\//g, '/');
-              assistantMessage += text;
-            }
-          } else if (trimmedLine.startsWith('d:')) {
-            try {
-              const jsonStr = trimmedLine.substring(2);
-              const parsed = JSON.parse(jsonStr);
-              if (parsed.type === 'text' && parsed.value) {
-                assistantMessage += parsed.value;
+          // Update UI as we receive text
+          if (assistantMessage.trim()) {
+            setMessages(prev => {
+              const lastMsg = prev[prev.length - 1];
+              if (lastMsg?.role === 'assistant') {
+                return [...prev.slice(0, -1), { role: 'assistant', content: assistantMessage.trim() }];
               }
-            } catch {
-              assistantMessage += trimmedLine;
-            }
-          } else {
-            assistantMessage += trimmedLine + '\n';
+              return [...prev, { role: 'assistant', content: assistantMessage.trim() }];
+            });
           }
         }
-
-        if (assistantMessage.trim()) {
-          setMessages(prev => {
-            const lastMsg = prev[prev.length - 1];
-            if (lastMsg?.role === 'assistant') {
-              return [...prev.slice(0, -1), { role: 'assistant', content: assistantMessage.trim() }];
-            }
-            return [...prev, { role: 'assistant', content: assistantMessage.trim() }];
-          });
+      } finally {
+        // Final decode flush
+        const finalChunk = decoder.decode();
+        if (finalChunk) {
+          assistantMessage += finalChunk;
         }
       }
 
-      if (buffer.trim()) {
-        if (buffer.startsWith('0:"')) {
-          const match = buffer.match(/0:"(.*)"$/);
-          if (match) {
-            const text = match[1].replace(/\\"/g, '"');
-            assistantMessage += text;
-          }
-        } else {
-          assistantMessage += buffer;
-        }
-      }
-
+      // Ensure message is displayed with final content
       const finalMessage = assistantMessage.trim();
       if (finalMessage) {
         setMessages(prev => {
           const lastMsg = prev[prev.length - 1];
-          if (lastMsg?.role === 'assistant') {
+          if (lastMsg?.role === 'assistant' && lastMsg.content !== finalMessage) {
             return [...prev.slice(0, -1), { role: 'assistant', content: finalMessage }];
           }
-          return [...prev, { role: 'assistant', content: finalMessage }];
+          if (lastMsg?.role !== 'assistant') {
+            return [...prev, { role: 'assistant', content: finalMessage }];
+          }
+          return prev;
         });
       } else {
         setMessages(prev => [...prev, { role: 'assistant', content: 'Maaf, saya tidak menerima respons dari AI.' }]);
