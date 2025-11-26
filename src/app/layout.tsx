@@ -12,6 +12,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://nuralim.dev"),
   title: "Nuralim - Product & Technology Development Manager",
   description:
     "Product & Technology Development Manager dengan 6+ tahun pengalaman membangun solusi software end-to-end di berbagai domain industri.",
@@ -77,6 +78,7 @@ export default function RootLayout({
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
+          forcedTheme={undefined}
         >
           {children}
           <ChatWidgetModern />

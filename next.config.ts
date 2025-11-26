@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
         pathname: '/dms/image/**',
       },
     ],
+    // Define allowed quality values for image optimization
+    qualities: [50, 75, 95],
   },
 };
 

@@ -12,7 +12,7 @@ export const personalInfo = {
   // 2. Dari Local: Taruh foto di public/profile-photo.jpg → Isi: "/profile-photo.jpg"
   // 3. Kosongkan untuk menggunakan initial "N" dengan gradient (default)
 
-  photo: "https://media.licdn.com/dms/image/v2/D5603AQGosK48viiJsg/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1667830699770?e=1763596800&v=beta&t=UM_4_ilPNBpMgvlL7c0U7ZCQiB4rPGDVWINZv22iYAw", // Kosong = Initial gradient, URL = LinkedIn photo, Path = Local photo
+  photo: "https://media.licdn.com/dms/image/v2/D5603AQGosK48viiJsg/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1667830699770?e=1766016000&v=beta&t=GMICDW5VVWRu6A3hESEngcW6INaNtsPjLCEsU_kcBo0", // Currently using gradient initial - uncomment local path or LinkedIn URL when ready
 
   social: {
     linkedin: "https://linkedin.com/in/nuralim",
@@ -373,6 +373,13 @@ export const certifications: Array<{
   skills: string[];
 }> = [
     //AWS
+    {
+      "id": "aws-data-scientence-sagemaker",
+      "title": "Practical Data Science with Amazon SageMaker",
+      "issuer": "AWS",
+      "certificateImage": "/certifications/aws-data-science-sagemaker.jpg",
+      "skills": ["AWS Cloud", "Data Science", "Machine Learning", "Amazon SageMaker"]
+    },
     {
       "id": "aws-agentic-ai",
       "title": "Agentic AI Foundations",

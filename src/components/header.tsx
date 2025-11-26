@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, ChevronDown } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { personalInfo } from "@/data/portfolio";
+import { featureFlags } from "@/config/features";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 
 const navigation = [
@@ -104,33 +105,35 @@ export function Header() {
               </Link>
             ))}
             
-            {/* Services Dropdown */}
-            <DropdownMenu.Root>
-              <DropdownMenu.Trigger asChild>
-                <button className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-accent/50 flex items-center gap-1">
-                  Services
-                  <ChevronDown className="h-4 w-4" />
-                </button>
-              </DropdownMenu.Trigger>
-              <DropdownMenu.Portal>
-                <DropdownMenu.Content 
-                  className="min-w-[220px] bg-background border rounded-md shadow-lg p-1 z-50"
-                  sideOffset={5}
-                >
-                  {servicesMenu.map((service) => (
-                    <DropdownMenu.Item key={service.name} asChild>
-                      <Link
-                        href={service.href}
-                        className="block px-3 py-2 text-sm rounded-md hover:bg-accent cursor-pointer outline-none"
-                      >
-                        <div className="font-medium">{service.name}</div>
-                        <div className="text-xs text-muted-foreground">{service.description}</div>
-                      </Link>
-                    </DropdownMenu.Item>
-                  ))}
-                </DropdownMenu.Content>
-              </DropdownMenu.Portal>
-            </DropdownMenu.Root>
+            {/* Services Dropdown - Hidden by feature flag */}
+            {featureFlags.SHOW_SERVICES_MENU && (
+              <DropdownMenu.Root>
+                <DropdownMenu.Trigger asChild>
+                  <button className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-accent/50 flex items-center gap-1">
+                    Services
+                    <ChevronDown className="h-4 w-4" />
+                  </button>
+                </DropdownMenu.Trigger>
+                <DropdownMenu.Portal>
+                  <DropdownMenu.Content 
+                    className="min-w-[220px] bg-background border rounded-md shadow-lg p-1 z-50"
+                    sideOffset={5}
+                  >
+                    {servicesMenu.map((service) => (
+                      <DropdownMenu.Item key={service.name} asChild>
+                        <Link
+                          href={service.href}
+                          className="block px-3 py-2 text-sm rounded-md hover:bg-accent cursor-pointer outline-none"
+                        >
+                          <div className="font-medium">{service.name}</div>
+                          <div className="text-xs text-muted-foreground">{service.description}</div>
+                        </Link>
+                      </DropdownMenu.Item>
+                    ))}
+                  </DropdownMenu.Content>
+                </DropdownMenu.Portal>
+              </DropdownMenu.Root>
+            )}
           </nav>
 
           {/* Right Section */}
@@ -160,19 +163,21 @@ export function Header() {
                     </Link>
                   ))}
                   
-                  {/* Mobile Services Section */}
-                  <div className="pt-2 border-t">
-                    <div className="text-sm font-semibold text-muted-foreground mb-2">Services</div>
-                    {servicesMenu.map((service) => (
-                      <Link
-                        key={service.name}
-                        href={service.href}
-                        className="block py-2 text-lg font-medium hover:text-primary transition-colors"
-                      >
-                        {service.name}
-                      </Link>
-                    ))}
-                  </div>
+                  {/* Mobile Services Section - Hidden by feature flag */}
+                  {featureFlags.SHOW_SERVICES_MENU && (
+                    <div className="pt-2 border-t">
+                      <div className="text-sm font-semibold text-muted-foreground mb-2">Services</div>
+                      {servicesMenu.map((service) => (
+                        <Link
+                          key={service.name}
+                          href={service.href}
+                          className="block py-2 text-lg font-medium hover:text-primary transition-colors"
+                        >
+                          {service.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                   
                   <Button asChild className="w-full mt-4">
                     <Link href="#contact">Hire Me</Link>
