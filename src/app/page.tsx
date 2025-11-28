@@ -15,6 +15,7 @@ export default function Home() {
     "@context": "https://schema.org",
     "@type": "Person",
     name: personalInfo.name,
+    givenName: "Nuralim",
     jobTitle: personalInfo.title,
     email: personalInfo.email,
     telephone: personalInfo.phone,
@@ -22,6 +23,7 @@ export default function Home() {
       "@type": "PostalAddress",
       addressLocality: "Jakarta",
       addressCountry: "ID",
+      streetAddress: "Segara City Cluster Baltic, SC 2.9 No.8",
     },
     url: "https://nuralim.dev",
     sameAs: [
@@ -44,8 +46,39 @@ export default function Home() {
       "Product Development",
       "Backend Development",
       ".NET Development",
+      "C# Programming",
       "Microservices Architecture",
       "Team Leadership",
+      "Technical Management",
+      "Engineering Management",
+      "Agile Methodology",
+      "Architecture Design",
+    ],
+    workLocation: {
+      "@type": "City",
+      name: "Jakarta",
+      address: {
+        "@type": "Country",
+        name: "Indonesia",
+      },
+    },
+  };
+
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "Nuralim Portfolio",
+    url: "https://nuralim.dev",
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "Contact",
+      email: personalInfo.email,
+      telephone: personalInfo.phone,
+    },
+    sameAs: [
+      personalInfo.social.linkedin,
+      personalInfo.social.tiktok,
+      personalInfo.social.instagram,
     ],
   };
 
@@ -54,6 +87,10 @@ export default function Home() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
       />
       <div className="flex flex-col min-h-screen">
         <Header />

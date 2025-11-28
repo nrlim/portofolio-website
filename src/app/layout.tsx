@@ -13,18 +13,31 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://nuralim.dev"),
-  title: "Nuralim - Product & Technology Development Manager",
+  title: "Nuralim - Product & Technology Development Manager | 7+ Years Experience",
   description:
-    "Product & Technology Development Manager dengan 6+ tahun pengalaman membangun solusi software end-to-end di berbagai domain industri.",
+    "Nuralim: Product & Technology Development Manager dengan 7+ tahun pengalaman membangun solusi software end-to-end. Spesialisasi dalam .NET, Backend Development, dan Technical Leadership di Indonesia.",
   keywords: [
     "Nuralim",
+    "Nuralim.dev",
+    "Product & Technology Development Manager",
     "Software Engineer",
     "Product Manager",
     "Technology Lead",
+    "Technical Lead",
     ".NET Developer",
+    "C# Developer",
     "Backend Developer",
+    "Microservices Architecture",
+    "Software Architect",
+    "Team Lead",
+    "Engineering Manager",
     "Indonesia",
+    "Jakarta",
+    "Portfolio",
   ],
+  alternates: {
+    canonical: "https://nuralim.dev",
+  },
   authors: [{ name: "Nuralim", url: personalInfo.social.linkedin }],
   creator: "Nuralim",
   openGraph: {
@@ -33,14 +46,14 @@ export const metadata: Metadata = {
     url: "https://nuralim.dev",
     title: "Nuralim - Product & Technology Development Manager",
     description:
-      "Product & Technology Development Manager dengan 6+ tahun pengalaman membangun solusi software end-to-end di berbagai domain industri.",
+      "7+ tahun pengalaman membangun solusi software scalable dan memberdayakan tim engineering excellence.",
     siteName: "Nuralim Portfolio",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Nuralim Portfolio",
+        alt: "Nuralim - Product & Technology Development Manager",
       },
     ],
   },
@@ -48,7 +61,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Nuralim - Product & Technology Development Manager",
     description:
-      "Product & Technology Development Manager dengan 6+ tahun pengalaman membangun solusi software end-to-end.",
+      "7+ tahun pengalaman dalam software engineering, product development, dan technical leadership.",
     images: ["/og-image.jpg"],
     creator: "@nuralim",
   },
@@ -62,6 +75,9 @@ export const metadata: Metadata = {
       "max-image-preview": "large",
       "max-snippet": -1,
     },
+  },
+  verification: {
+    google: "your-google-verification-code", // Replace with actual Google Search Console verification code
   },
 };
 

@@ -1,0 +1,29 @@
+# Nuralim Portfolio - SEO Robots Configuration
+
+# Allow all search engines
+User-agent: *
+Allow: /
+
+# Disallow admin and private paths (if any)
+Disallow: /admin/
+Disallow: /private/
+
+# Specific rules for Googlebot
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+# Specific rules for Bingbot
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+# Specific rules for other bots
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+# Sitemap location
+Sitemap: https://nuralim.dev/sitemap.xml
