@@ -91,6 +91,13 @@ export default function CMSDashboard() {
         return;
       }
 
+      // Revalidate the articles page cache
+      await fetch('/api/revalidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: '/articles' }),
+      });
+
       // Update local state
       setArticles(articles.map(a => a.id === id ? { ...a, published: false } : a));
       showAlert('success', `"${title}" has been unpublished`);
@@ -120,6 +127,13 @@ export default function CMSDashboard() {
         showAlert('error', 'Failed to delete article');
         return;
       }
+
+      // Revalidate the articles page cache
+      await fetch('/api/revalidate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ path: '/articles' }),
+      });
 
       setArticles(articles.filter((a) => a.id !== id));
       showAlert('success', `"${title}" has been deleted`);
