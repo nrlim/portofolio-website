@@ -8,6 +8,10 @@ import { supabaseServer } from '@/lib/supabase';
 import { Suspense } from 'react';
 import type { BlogArticle } from '@/types/database';
 
+// Mark this page as dynamic to always fetch fresh data
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;
 }

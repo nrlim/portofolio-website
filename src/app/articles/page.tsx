@@ -6,6 +6,10 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import type { BlogArticle } from '@/types/database';
 
+// Mark this page as dynamic to always fetch fresh data
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 async function ArticlesContent() {
   // Fetch published articles from database
   const { data: articles, error } = await supabaseServer
@@ -32,12 +36,7 @@ async function ArticlesContent() {
 
 export default function ArticlesPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-white via-blue-50 to-white dark:from-slate-950 dark:via-blue-950/20 dark:to-slate-950 pt-20 pb-12 relative overflow-hidden">
-      {/* Background decorative elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 right-1/3 w-72 h-72 bg-blue-200/20 dark:bg-blue-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-40 left-1/4 w-96 h-96 bg-cyan-200/20 dark:bg-cyan-500/10 rounded-full blur-3xl" />
-      </div>
+    <div className="bg-white dark:bg-slate-950 pt-20 pb-12">
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header with navigation */}
