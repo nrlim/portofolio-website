@@ -6,7 +6,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, ChevronDown } from "lucide-react";
+import { Menu, ChevronDown, LogIn } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { personalInfo } from "@/data/portfolio";
 import { featureFlags } from "@/config/features";
@@ -19,6 +19,7 @@ const navigation = [
   { name: "Projects", href: "#projects" },
   { name: "Education", href: "#education" },
   { name: "Certifications", href: "#certifications" },
+  { name: "Articles", href: "/articles" },
   { name: "Contact", href: "#contact" },
 ];
 
@@ -142,6 +143,17 @@ export function Header() {
             <Button asChild className="hidden sm:inline-flex">
               <Link href="#contact">Hire Me</Link>
             </Button>
+            <Button 
+              asChild 
+              variant="ghost" 
+              size="icon" 
+              title="CMS Login" 
+              className="hidden sm:inline-flex text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+            >
+              <Link href="/cms/login">
+                <LogIn className="w-5 h-5 stroke-[2.5]" />
+              </Link>
+            </Button>
 
             {/* Mobile Menu */}
             <Sheet>
@@ -181,6 +193,9 @@ export function Header() {
                   
                   <Button asChild className="w-full mt-4">
                     <Link href="#contact">Hire Me</Link>
+                  </Button>
+                  <Button asChild variant="outline" className="w-full">
+                    <Link href="/cms/login">CMS Login</Link>
                   </Button>
                 </div>
               </SheetContent>

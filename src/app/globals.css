@@ -147,3 +147,85 @@
       linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px);
   }
 }
+
+/* Blog Content Styling */
+div[dangerouslySetInnerHTML] {
+  @apply leading-relaxed;
+}
+
+div[dangerouslySetInnerHTML] h1 {
+  @apply text-4xl font-bold text-gray-900 dark:text-white mt-8 mb-4;
+}
+
+div[dangerouslySetInnerHTML] h2 {
+  @apply text-3xl font-bold text-gray-900 dark:text-white mt-6 mb-3;
+}
+
+div[dangerouslySetInnerHTML] h3 {
+  @apply text-2xl font-bold text-gray-900 dark:text-white mt-5 mb-2;
+}
+
+div[dangerouslySetInnerHTML] h4 {
+  @apply text-xl font-bold text-gray-900 dark:text-white mt-4 mb-2;
+}
+
+div[dangerouslySetInnerHTML] p {
+  @apply text-gray-700 dark:text-gray-300 mb-4 leading-relaxed;
+}
+
+div[dangerouslySetInnerHTML] a {
+  @apply text-blue-600 dark:text-blue-400 hover:underline;
+}
+
+div[dangerouslySetInnerHTML] strong {
+  @apply font-bold text-gray-900 dark:text-white;
+}
+
+div[dangerouslySetInnerHTML] em {
+  @apply italic text-gray-700 dark:text-gray-300;
+}
+
+div[dangerouslySetInnerHTML] ul {
+  @apply list-disc list-inside mb-4 space-y-2;
+}
+
+div[dangerouslySetInnerHTML] ol {
+  @apply list-decimal list-inside mb-4 space-y-2;
+}
+
+div[dangerouslySetInnerHTML] li {
+  @apply text-gray-700 dark:text-gray-300;
+}
+
+div[dangerouslySetInnerHTML] code {
+  @apply bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 px-2 py-1 rounded font-mono text-sm;
+}
+
+div[dangerouslySetInnerHTML] pre {
+  @apply bg-gray-900 dark:bg-black text-gray-100 p-4 rounded-lg overflow-x-auto mb-4 font-mono text-sm;
+}
+
+div[dangerouslySetInnerHTML] pre code {
+  @apply bg-transparent text-gray-100 px-0 py-0;
+}
+
+div[dangerouslySetInnerHTML] blockquote {
+  @apply border-l-4 border-blue-500 pl-4 py-2 mb-4 text-gray-700 dark:text-gray-300 italic bg-blue-50 dark:bg-blue-900/20 rounded;
+}
+
+div[dangerouslySetInnerHTML] table {
+  @apply w-full border-collapse mb-4;
+}
+
+div[dangerouslySetInnerHTML] th {
+  @apply bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 px-4 py-2 text-left font-bold text-gray-900 dark:text-white;
+}
+
+div[dangerouslySetInnerHTML] td {
+  @apply border border-gray-300 dark:border-gray-700 px-4 py-2 text-gray-700 dark:text-gray-300;
+}
+
+div[dangerouslySetInnerHTML] hr {
+  @apply border-gray-300 dark:border-gray-700 my-6;
+}
+
