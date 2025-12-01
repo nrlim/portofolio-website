@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     siteName: "Nuralim Portfolio",
     images: [
       {
-        url: "/og-image.jpg",
+        url: "https://nuralim.dev/og",
         width: 1200,
         height: 630,
         alt: "Nuralim - Product & Technology Development Manager",
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
     title: "Nuralim - Product & Technology Development Manager",
     description:
       "7+ tahun pengalaman dalam software engineering, product development, dan technical leadership.",
-    images: ["/og-image.jpg"],
+    images: ["https://nuralim.dev/og"],
     creator: "@nuralim",
   },
   robots: {

@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { notFound } from 'next/navigation';
 import { ArticleContent } from '@/components/article-content';
 import { ArticleImage } from '@/components/article-image';
+import { ArticleShare } from '@/components/article-share';
 import { supabaseServer } from '@/lib/supabase';
 import { Suspense } from 'react';
+import type { Metadata } from 'next';
 import type { BlogArticle } from '@/types/database';
 
 // Mark this page as dynamic to always fetch fresh data
@@ -14,6 +16,63 @@ export const revalidate = 0;
 
 interface ArticlePageProps {
   params: Promise<{ slug: string }>;
+}
+
+// Generate dynamic metadata for article pages (for social sharing)
+export async function generateMetadata({ params }: ArticlePageProps): Promise<Metadata> {
+  const { slug } = await params;
+
+  // Fetch the article for metadata
+  const { data: article } = await supabaseServer
+    .from('blog_articles')
+    .select('*')
+    .eq('id', slug)
+    .eq('published', true)
+    .single();
+
+  if (!article) {
+    return {
+      title: 'Article Not Found',
+      description: 'The article you are looking for does not exist.',
+    };
+  }
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://nuralim.dev';
+  const articleUrl = `${siteUrl}/articles/${slug}`;
+  const imageUrl = article.image_url || `${siteUrl}/og`;
+
+  return {
+    title: article.title,
+    description: article.description || 'Read this interesting article on Nuralim\'s portfolio',
+    metadataBase: new URL(siteUrl),
+    alternates: {
+      canonical: articleUrl,
+    },
+    openGraph: {
+      type: 'article',
+      title: article.title,
+      description: article.description || '',
+      url: articleUrl,
+      siteName: 'Nuralim Portfolio',
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: article.title,
+        },
+      ],
+      publishedTime: article.created_at,
+      authors: ['Nuralim'],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: article.title,
+      description: article.description || '',
+      images: [imageUrl],
+      creator: '@nuralim',
+    },
+  };
 }
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
@@ -125,25 +184,39 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               {post.title}
             </h1>
 
-            {/* Meta Information */}
-            <div className="flex flex-wrap gap-6 text-sm text-gray-600 dark:text-gray-400">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 flex-shrink-0" />
-                <time dateTime={post.date}>
-                  {new Date(post.date).toLocaleDateString('id-ID', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </time>
+            {/* Meta Information with Share Button */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 pb-6 border-b border-gray-200 dark:border-slate-800">
+              {/* Meta Info Left Side */}
+              <div className="flex flex-wrap gap-6 text-sm text-gray-600 dark:text-gray-400">
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 flex-shrink-0" />
+                  <time dateTime={post.date}>
+                    {new Date(post.date).toLocaleDateString('id-ID', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })}
+                  </time>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 flex-shrink-0" />
+                  {post.readingTime} min read
+                </div>
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 flex-shrink-0" />
+                  {post.author}
+                </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 flex-shrink-0" />
-                {post.readingTime} min read
-              </div>
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4 flex-shrink-0" />
-                {post.author}
+
+              {/* Share Button Right Side */}
+              <div className="flex-shrink-0">
+                <ArticleShare
+                  title={post.title}
+                  url={`${process.env.NEXT_PUBLIC_SITE_URL || 'https://nuralim.dev'}/articles/${post.slug}`}
+                  description={post.description}
+                  imageUrl={post.thumbnail}
+                  compact={true}
+                />
               </div>
             </div>
           </header>
