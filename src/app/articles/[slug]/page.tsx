@@ -1,4 +1,4 @@
-import { Calendar, Clock, User, ArrowLeft, Loader } from 'lucide-react';
+import { Calendar, Clock, User, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { notFound } from 'next/navigation';

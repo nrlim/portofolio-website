@@ -192,10 +192,11 @@ async function fetchUnsplashImages(searchTerms: string[], limit: number = 1): Pr
         if (data.results && data.results.length > 0) {
           // Get top 3-4 most relevant images from this search for variety
           // This ensures we get different images for content vs thumbnail
-          data.results.slice(0, 4).forEach((photo: any) => {
-            if (photo.urls?.regular) {
+          data.results.slice(0, 4).forEach((photo: Record<string, unknown>) => {
+            if (photo.urls && typeof photo.urls === 'object' && 'regular' in photo.urls) {
+              const urls = photo.urls as Record<string, unknown>;
               console.log(`  - Selected: ${photo.description || photo.alt_description || 'No description'}`);
-              images.push(photo.urls.regular);
+              images.push(urls.regular as string);
             }
           });
 
@@ -457,7 +458,7 @@ export async function POST(request: NextRequest) {
     const description = rawDescription.replace(/!\[.*?\]\(.*?\)/g, '').substring(0, 160).trim();
 
     // Use different image as featured image (thumbnail) vs content images
-    let imageUrl = thumbnailImage;
+    const imageUrl = thumbnailImage;
 
     // Save article to database
     const { data: article, error: dbError } = await supabaseServer

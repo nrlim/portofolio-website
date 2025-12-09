@@ -3,8 +3,7 @@ import { personalInfo } from '@/data/portfolio';
 
 export const runtime = 'nodejs';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function GET(): Promise<any> {
+export async function GET(): Promise<Response> {
   try {
     // Fetch the profile photo if it's a URL
     let photoBuffer: ArrayBuffer | null = null;
@@ -146,7 +145,6 @@ export async function GET(): Promise<any> {
               }}
             >
               {photoBuffer ? (
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 <img
                   src={`data:image/jpeg;base64,${Buffer.from(photoBuffer).toString('base64')}`}
                   style={{

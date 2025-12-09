@@ -2,8 +2,6 @@
 
 import { Share, MessageCircle, Mail, Copy, Facebook, Linkedin, Twitter, Check } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
 
 interface ArticleShareProps {
   title: string;
@@ -16,7 +14,6 @@ interface ArticleShareProps {
 export function ArticleShare({ title, url, description, imageUrl, compact = false }: ArticleShareProps) {
   const [copied, setCopied] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
