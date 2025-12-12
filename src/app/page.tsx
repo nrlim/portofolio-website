@@ -7,7 +7,7 @@ import { ExperienceSection } from "@/components/sections/experience-section";
 import { ProjectsSection } from "@/components/sections/projects-section";
 import { EducationSection } from "@/components/sections/education-section";
 import { CertificationsSection } from "@/components/sections/certifications-section";
-import { ArticleSection } from "@/components/sections/article-section";
+// import { ArticleSection } from "@/components/sections/article-section";
 import { ContactSection } from "@/components/sections/contact-section";
 import { personalInfo } from "@/data/portfolio";
 import { supabaseServer } from "@/lib/supabase";
@@ -15,26 +15,26 @@ import type { BlogArticle } from "@/types/database";
 
 export default async function Home() {
   // Fetch featured published articles from database
-  const { data: featuredArticles } = await supabaseServer
-    .from('blog_articles')
-    .select('*')
-    .eq('published', true)
-    .eq('featured', true)
-    .order('created_at', { ascending: false })
-    .limit(3);
+  // const { data: featuredArticles } = await supabaseServer
+  //   .from('blog_articles')
+  //   .select('*')
+  //   .eq('published', true)
+  //   .eq('featured', true)
+  //   .order('created_at', { ascending: false })
+  //   .limit(3);
 
-  const featuredPosts = (featuredArticles as BlogArticle[])?.map((article) => ({
-    slug: article.id,
-    title: article.title,
-    description: article.description,
-    date: article.created_at,
-    author: 'Nuralim',
-    category: article.category || 'General',
-    readingTime: Math.ceil((article.content.split(/\s+/).length || 0) / 200),
-    featured: article.featured,
-    thumbnail: '',
-    content: article.content,
-  })) || [];
+  // const featuredPosts = (featuredArticles as BlogArticle[])?.map((article) => ({
+  //   slug: article.id,
+  //   title: article.title,
+  //   description: article.description,
+  //   date: article.created_at,
+  //   author: 'Nuralim',
+  //   category: article.category || 'General',
+  //   readingTime: Math.ceil((article.content.split(/\s+/).length || 0) / 200),
+  //   featured: article.featured,
+  //   thumbnail: '',
+  //   content: article.content,
+  // })) || [];
   const personSchema = {
     "@context": "https://schema.org",
     "@type": "Person",
@@ -126,7 +126,7 @@ export default async function Home() {
           <ProjectsSection />
           <EducationSection />
           <CertificationsSection />
-          <ArticleSection featuredPosts={featuredPosts} />
+          {/* <ArticleSection featuredPosts={featuredPosts} /> */}
           <ContactSection />
         </main>
         <Footer />
