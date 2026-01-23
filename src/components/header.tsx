@@ -5,8 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, ChevronDown } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { Menu, ChevronDown, ArrowRight, Linkedin, Instagram, MessageCircle } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { personalInfo } from "@/data/portfolio";
 import { featureFlags } from "@/config/features";
@@ -30,6 +30,7 @@ const servicesMenu = [
 export function Header() {
   const [isScrolled, setIsScrolled] = React.useState(false);
   const [showLogo, setShowLogo] = React.useState(false);
+  const [isSheetOpen, setIsSheetOpen] = React.useState(false);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -146,45 +147,114 @@ export function Header() {
 
 
             {/* Mobile Menu */}
-            <Sheet>
+            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
               <SheetTrigger asChild className="md:hidden">
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" suppressHydrationWarning>
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">Open menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[300px]">
-                <div className="flex flex-col space-y-4 mt-8">
-                  {navigation.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className="text-lg font-medium hover:text-primary transition-colors"
-                    >
-                      {item.name}
-                    </Link>
-                  ))}
+              <SheetContent side="right" className="w-[300px] sm:w-[350px] p-0 border-l">
+                <div className="flex flex-col h-full bg-background">
+                  <SheetHeader className="p-6 text-left border-b">
+                    <SheetTitle className="flex items-center gap-3">
+                      <div className="relative h-8 w-8 rounded-full overflow-hidden bg-gradient-to-br from-primary via-accent to-primary/80 flex items-center justify-center ring-2 ring-primary/20">
+                        {personalInfo.photo && personalInfo.photo.startsWith('http') ? (
+                          <Image
+                            src={personalInfo.photo}
+                            alt={personalInfo.name}
+                            fill
+                            className="object-cover"
+                            sizes="32px"
+                          />
+                        ) : personalInfo.photo ? (
+                          <Image
+                            src={personalInfo.photo}
+                            alt={personalInfo.name}
+                            fill
+                            className="object-cover"
+                            sizes="32px"
+                          />
+                        ) : (
+                          <span className="text-sm font-bold text-white">N</span>
+                        )}
+                      </div>
+                      <span className="font-bold text-lg">Nuralim</span>
+                    </SheetTitle>
+                    <SheetDescription className="text-xs text-muted-foreground mt-1">
+                      Product & Technology Development Manager
+                    </SheetDescription>
+                  </SheetHeader>
 
-                  {/* Mobile Services Section - Hidden by feature flag */}
-                  {featureFlags.SHOW_SERVICES_MENU && (
-                    <div className="pt-2 border-t">
-                      <div className="text-sm font-semibold text-muted-foreground mb-2">Services</div>
-                      {servicesMenu.map((service) => (
+                  <div className="flex-1 overflow-y-auto py-6 px-6">
+                    <nav className="flex flex-col space-y-2">
+                      {navigation.map((item) => (
                         <Link
-                          key={service.name}
-                          href={service.href}
-                          className="block py-2 text-lg font-medium hover:text-primary transition-colors"
+                          key={item.name}
+                          href={item.href}
+                          className="flex items-center justify-between px-4 py-3 text-sm font-medium rounded-md hover:bg-accent hover:text-accent-foreground transition-all group"
+                          onClick={() => setIsSheetOpen(false)}
                         >
-                          {service.name}
+                          {item.name}
+                          <ArrowRight className="h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                         </Link>
                       ))}
+
+                      {featureFlags.SHOW_SERVICES_MENU && (
+                        <div className="pt-4 mt-2">
+                          <div className="px-4 pb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                            Services
+                          </div>
+                          {servicesMenu.map((service) => (
+                            <Link
+                              key={service.name}
+                              href={service.href}
+                              className="flex flex-col px-4 py-3 text-sm rounded-md hover:bg-accent hover:text-accent-foreground transition-all"
+                              onClick={() => setIsSheetOpen(false)}
+                            >
+                              <span className="font-medium">{service.name}</span>
+                              <span className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                                {service.description}
+                              </span>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </nav>
+                  </div>
+
+                  <div className="p-6 border-t bg-muted/10 space-y-4">
+                    <Button asChild className="w-full shadow-md" size="lg">
+                      <Link href="#contact" onClick={() => setIsSheetOpen(false)}>
+                        <MessageCircle className="mr-2 h-4 w-4" />
+                        Hire Me
+                      </Link>
+                    </Button>
+
+                    <div className="flex items-center justify-center gap-4 text-muted-foreground">
+                      <Link
+                        href={personalInfo.social.linkedin}
+                        target="_blank"
+                        className="hover:text-primary transition-colors p-2 hover:bg-accent rounded-full"
+                      >
+                        <Linkedin className="h-5 w-5" />
+                      </Link>
+                      <Link
+                        href={personalInfo.social.instagram}
+                        target="_blank"
+                        className="hover:text-primary transition-colors p-2 hover:bg-accent rounded-full"
+                      >
+                        <Instagram className="h-5 w-5" />
+                      </Link>
+                      <Link
+                        href={personalInfo.whatsapp}
+                        target="_blank"
+                        className="hover:text-primary transition-colors p-2 hover:bg-accent rounded-full"
+                      >
+                        <MessageCircle className="h-5 w-5" />
+                      </Link>
                     </div>
-                  )}
-
-                  <Button asChild className="w-full mt-4">
-                    <Link href="#contact">Hire Me</Link>
-                  </Button>
-
+                  </div>
                 </div>
               </SheetContent>
             </Sheet>
