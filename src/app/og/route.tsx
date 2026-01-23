@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og';
-import { personalInfo } from '@/data/portfolio';
+import { personalInfo, about } from '@/data/portfolio';
 
 export const runtime = 'nodejs';
 
@@ -14,7 +14,7 @@ export async function GET(): Promise<Response> {
           photoBuffer = await response.arrayBuffer();
         }
       } catch (error) {
-        console.log('Failed to fetch profile photo:', error);
+        console.error('Failed to fetch profile photo:', error);
       }
     }
 
@@ -105,7 +105,7 @@ export async function GET(): Promise<Response> {
                   color: 'rgba(255,255,255,0.9)',
                 }}
               >
-                7+ Years Experience
+                {about.metrics[0].value} Experience
               </div>
 
               <div
@@ -205,7 +205,7 @@ export async function GET(): Promise<Response> {
       }
     );
   } catch (error) {
-    console.log(`${error}`);
+    console.error(`${error}`);
     return new Response('Failed to generate image', {
       status: 500,
     });

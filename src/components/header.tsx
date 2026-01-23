@@ -6,7 +6,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, ChevronDown, LogIn } from "lucide-react";
+import { Menu, ChevronDown } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { personalInfo } from "@/data/portfolio";
 import { featureFlags } from "@/config/features";
@@ -35,7 +35,7 @@ export function Header() {
     const handleScroll = () => {
       const scrollPosition = window.scrollY;
       setIsScrolled(scrollPosition > 10);
-      
+
       // Show logo when scrolled past hero section (approximately 80vh)
       const heroHeight = window.innerHeight * 0.8;
       setShowLogo(scrollPosition > heroHeight);
@@ -58,12 +58,12 @@ export function Header() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo - Hidden saat di hero section */}
-          <Link 
-            href="/" 
+          <Link
+            href="/"
             className={cn(
               "flex items-center space-x-3 transition-all duration-300",
-              showLogo 
-                ? "opacity-100 translate-x-0" 
+              showLogo
+                ? "opacity-100 translate-x-0"
                 : "opacity-0 -translate-x-4 pointer-events-none"
             )}
           >
@@ -105,7 +105,7 @@ export function Header() {
                 {item.name}
               </Link>
             ))}
-            
+
             {/* Services Dropdown - Hidden by feature flag */}
             {featureFlags.SHOW_SERVICES_MENU && (
               <DropdownMenu.Root>
@@ -116,7 +116,7 @@ export function Header() {
                   </button>
                 </DropdownMenu.Trigger>
                 <DropdownMenu.Portal>
-                  <DropdownMenu.Content 
+                  <DropdownMenu.Content
                     className="min-w-[220px] bg-background border rounded-md shadow-lg p-1 z-50"
                     sideOffset={5}
                   >
@@ -143,17 +143,7 @@ export function Header() {
             <Button asChild className="hidden sm:inline-flex">
               <Link href="#contact">Hire Me</Link>
             </Button>
-            <Button 
-              asChild 
-              variant="ghost" 
-              size="icon" 
-              title="CMS Login" 
-              className="hidden sm:inline-flex text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
-            >
-              <Link href="/cms/login">
-                <LogIn className="w-5 h-5 stroke-[2.5]" />
-              </Link>
-            </Button>
+
 
             {/* Mobile Menu */}
             <Sheet>
@@ -174,7 +164,7 @@ export function Header() {
                       {item.name}
                     </Link>
                   ))}
-                  
+
                   {/* Mobile Services Section - Hidden by feature flag */}
                   {featureFlags.SHOW_SERVICES_MENU && (
                     <div className="pt-2 border-t">
@@ -190,13 +180,11 @@ export function Header() {
                       ))}
                     </div>
                   )}
-                  
+
                   <Button asChild className="w-full mt-4">
                     <Link href="#contact">Hire Me</Link>
                   </Button>
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href="/cms/login">CMS Login</Link>
-                  </Button>
+
                 </div>
               </SheetContent>
             </Sheet>

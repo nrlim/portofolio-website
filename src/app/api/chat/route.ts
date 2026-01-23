@@ -74,7 +74,7 @@ export async function POST(request: Request) {
   try {
     const { messages } = await request.json();
 
-    // console.log('Chat API received:', { messageCount: messages?.length, firstMessage: messages?.[0] });
+
 
     if (!messages || !Array.isArray(messages)) {
       return new Response(JSON.stringify({ error: 'Invalid messages format' }), {

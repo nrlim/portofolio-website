@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ChatWidgetProvider } from "@/components/chat-widget-provider";
-import { personalInfo } from "@/data/portfolio";
+import { personalInfo, about } from "@/data/portfolio";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -13,9 +13,9 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://nuralim.dev"),
-  title: "Nuralim - Product & Technology Development Manager | 7+ Years Experience",
+  title: `Nuralim - Product & Technology Development Manager | ${about.metrics[0].value} Years Experience`,
   description:
-    "Nuralim: Product & Technology Development Manager dengan 7+ tahun pengalaman membangun solusi software end-to-end. Spesialisasi dalam .NET, Backend Development, dan Technical Leadership di Indonesia.",
+    `Nuralim: Product & Technology Development Manager dengan ${about.metrics[0].value} tahun pengalaman membangun solusi software end-to-end. Spesialisasi dalam .NET, Backend Development, dan Technical Leadership di Indonesia.`,
   keywords: [
     "Nuralim",
     "Nuralim.dev",
@@ -25,6 +25,7 @@ export const metadata: Metadata = {
     "Technology Lead",
     "Technical Lead",
     ".NET Developer",
+    "Next.js Developer",
     "C# Developer",
     "Backend Developer",
     "Microservices Architecture",
@@ -46,7 +47,7 @@ export const metadata: Metadata = {
     url: "https://nuralim.dev",
     title: "Nuralim - Product & Technology Development Manager",
     description:
-      "7+ tahun pengalaman membangun solusi software scalable dan memberdayakan tim engineering excellence.",
+      `${about.metrics[0].value} tahun pengalaman membangun solusi software scalable dan memberdayakan tim engineering excellence.`,
     siteName: "Nuralim Portfolio",
     images: [
       {
@@ -61,7 +62,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Nuralim - Product & Technology Development Manager",
     description:
-      "7+ tahun pengalaman dalam software engineering, product development, dan technical leadership.",
+      `${about.metrics[0].value} tahun pengalaman dalam software engineering, product development, dan technical leadership.`,
     images: ["https://nuralim.dev/og"],
     creator: "@nuralim",
   },

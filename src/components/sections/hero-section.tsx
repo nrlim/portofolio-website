@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, MessageCircle } from "lucide-react";
-import { personalInfo } from "@/data/portfolio";
+import { personalInfo, about, projects } from "@/data/portfolio";
 
 export function HeroSection() {
   return (
@@ -42,8 +42,8 @@ export function HeroSection() {
               >
                 <div className="flex items-center gap-3">
                   <div className="h-1 w-12 bg-gradient-to-r from-primary to-accent rounded-full" />
-                  <Badge 
-                    variant="outline" 
+                  <Badge
+                    variant="outline"
                     className="border-primary/50 text-primary font-semibold px-4 py-1.5 text-sm"
                   >
                     ROLE
@@ -64,22 +64,22 @@ export function HeroSection() {
                 className="space-y-4"
               >
                 <p className="text-xl sm:text-2xl font-medium leading-relaxed text-foreground/90">
-                  Building <span className="text-primary font-bold">scalable software</span> and 
+                  Building <span className="text-primary font-bold">scalable software</span> and
                   <span className="text-accent font-bold"> empowering teams</span> to deliver excellence.
                 </p>
-                
+
                 {/* Key Stats/Highlights */}
                 <div className="flex flex-wrap gap-6 pt-2">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                     <span className="text-sm font-semibold text-muted-foreground">
-                      7+ Years Experience
+                      {about.metrics[0].value} Experience
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-accent animate-pulse" />
                     <span className="text-sm font-semibold text-muted-foreground">
-                      10+ Projects Delivered
+                      {projects.length}+ Projects Delivered
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -98,9 +98,9 @@ export function HeroSection() {
                 transition={{ duration: 0.6, delay: 0.4 }}
                 className="flex flex-col sm:flex-row gap-4 pt-4"
               >
-                <Button 
-                  size="lg" 
-                  asChild 
+                <Button
+                  size="lg"
+                  asChild
                   className="group relative overflow-hidden bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all"
                 >
                   <Link href={personalInfo.whatsapp} target="_blank">
@@ -109,9 +109,9 @@ export function HeroSection() {
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
+                <Button
+                  size="lg"
+                  variant="outline"
                   asChild
                   className="border-2 hover:bg-accent/10 hover:border-accent transition-all"
                 >
@@ -169,7 +169,7 @@ export function HeroSection() {
                       <div className="absolute inset-0 opacity-10">
                         <div className="absolute inset-0 bg-grid-pattern" />
                       </div>
-                      
+
                       {/* Company/Brand Name */}
                       <div className="relative z-10 p-4 text-white">
                         <div className="text-xs font-medium opacity-90">EMPLOYEE ID</div>
@@ -218,7 +218,7 @@ export function HeroSection() {
                         </div>
                         <div className="flex items-center justify-center gap-2 pt-2">
                           <Badge variant="secondary" className="text-xs px-3 py-1">
-                            7+ Years
+                            {about.metrics[0].value} Years
                           </Badge>
                           <Badge variant="secondary" className="text-xs px-3 py-1">
                             Engineering

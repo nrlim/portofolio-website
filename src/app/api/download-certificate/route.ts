@@ -30,9 +30,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Log successful download attempt
-    console.log(
-      `Certificate download authorized for: ${certificateId} from IP: ${request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown"}`
-    );
+
 
     // Return authorization token for downloading
     return NextResponse.json(

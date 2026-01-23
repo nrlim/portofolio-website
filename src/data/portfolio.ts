@@ -1,3 +1,8 @@
+// Calculate years of experience dynamically
+const startYear = 2017;
+const currentYear = new Date().getFullYear();
+const yearsOfExperience = currentYear - startYear;
+
 export const personalInfo = {
   name: "Nuralim",
   title: "Product & Technology Development Manager",
@@ -23,15 +28,16 @@ export const personalInfo = {
 
 export const hero = {
   headline: "Membangun software yang adaptif dan tim yang berdaya.",
-  subheadline: "Product & Technology Development Manager dengan 7+ tahun pengalaman membangun solusi software end-to-end di berbagai domain industri. Berfokus pada arsitektur yang scalable, tim yang produktif, dan budaya engineering excellence.",
+  subheadline: `Product & Technology Development Manager dengan ${yearsOfExperience}+ tahun pengalaman membangun solusi software end-to-end di berbagai domain industri. Berfokus pada arsitektur yang scalable, tim yang produktif, dan budaya engineering excellence.`,
   techBadges: ["C#/.NET", "NHibernate", "RabbitMQ", "Camunda BPM", "Docker", "Elasticsearch"]
 };
 
+
 export const about = {
-  description: "Saya adalah seorang Product & Technology Development Manager dengan pengalaman lebih dari 7 tahun dalam membangun solusi software yang scalable dan memberdayakan tim engineering. Keahlian saya mencakup pengembangan backend, mobile, hingga kepemimpinan teknis dan produk. Saya memiliki track record yang solid dalam menangani proyek-proyek kompleks di berbagai industri seperti asuransi, manufaktur, perbankan, dan sektor pemerintahan. Dengan pendekatan yang adaptif dan kolaboratif, saya berkomitmen untuk menghasilkan solusi berkualitas tinggi yang memberikan nilai bisnis nyata.",
+  description: `Saya adalah seorang Product & Technology Development Manager dengan pengalaman lebih dari ${yearsOfExperience} tahun dalam membangun solusi software yang scalable dan memberdayakan tim engineering. Keahlian saya mencakup pengembangan backend, mobile, hingga kepemimpinan teknis dan produk. Saya memiliki track record yang solid dalam menangani proyek-proyek kompleks di berbagai industri seperti asuransi, manufaktur, perbankan, dan sektor pemerintahan. Dengan pendekatan yang adaptif dan kolaboratif, saya berkomitmen untuk menghasilkan solusi berkualitas tinggi yang memberikan nilai bisnis nyata.`,
   metrics: [
     {
-      value: "7+",
+      value: `${yearsOfExperience}+`,
       label: "Tahun Pengalaman Profesional"
     },
     {
