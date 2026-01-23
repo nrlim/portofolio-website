@@ -12,7 +12,7 @@ export const personalInfo = {
   // 2. Dari Local: Taruh foto di public/profile-photo.jpg → Isi: "/profile-photo.jpg"
   // 3. Kosongkan untuk menggunakan initial "N" dengan gradient (default)
 
-  photo: "https://media.licdn.com/dms/image/v2/D5603AQGosK48viiJsg/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1667830699770?e=1766016000&v=beta&t=GMICDW5VVWRu6A3hESEngcW6INaNtsPjLCEsU_kcBo0", // Currently using gradient initial - uncomment local path or LinkedIn URL when ready
+  photo: "/profile-photo.jpg",
 
   social: {
     linkedin: "https://linkedin.com/in/nuralim",
@@ -126,6 +126,19 @@ export const experience = [
 
 
 export const projects = [
+  {
+    id: "tpanuruliman",
+    title: "TPA - Nurul Iman",
+    category: "Others",
+    description: "Platform digital terintegrasi untuk pendaftaran santri baru, monitoring hafalan, dan laporan perkembangan santri berbasis web.",
+    tech: ["Next.js", "React", "TypeScript", "PostgreSQL", "Supabase", "REST API", "Email Gateway"],
+    image: "/projects/tpanuruliman.png",
+    caseStudy: {
+      problem: "Proses pendaftaran santri baru masih manual menggunakan formulir kertas yang menyulitkan pendataan. Orang tua kesulitan memantau perkembangan hafalan dan pembelajaran anak secara real-time karena laporan hanya diberikan secara fisik setiap akhir semester.",
+      solution: "Membangun sistem informasi akademik TPA yang mencakup Penerimaan Peserta Didik Baru (PPDB) Online, Dashboard Monitoring Hafalan untuk orang tua, dan Laporan Hasil Belajar Digital (E-Rapor).",
+      result: "Pendaftaran santri baru menjadi 100% paperless dan efisien. Orang tua kini memiliki akses real-time terhadap progress hafalan dan kehadiran anak melalui dashboard. Transparansi dan komunikasi antara lembaga dan wali santri meningkat signifikan."
+    }
+  },
   {
     id: "liriq",
     title: "Liriq - RFID Asset Tracking System",
