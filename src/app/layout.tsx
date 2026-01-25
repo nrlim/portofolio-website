@@ -90,6 +90,9 @@ export const metadata: Metadata = {
   verification: {
     google: "sFXAYSel4Ugp208zkp16wm48cKIgHYH9bEeiA9WEqq4",
   },
+  icons: {
+    icon: "/personal-logo-bnw.png",
+  },
 };
 
 export default function RootLayout({
