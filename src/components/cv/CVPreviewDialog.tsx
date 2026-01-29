@@ -200,7 +200,15 @@ export function CVPreviewDialog() {
             const linkElements = clone.querySelectorAll('a')
             const mmPerDomPx = 210 / domRoot.width // Width is fixed 210mm
 
-            const linkData: any[] = []
+            interface LinkData {
+                relX: number;
+                relY: number;
+                relW: number;
+                relH: number;
+                href: string;
+            }
+
+            const linkData: LinkData[] = []
             linkElements.forEach(link => {
                 const rect = link.getBoundingClientRect()
                 linkData.push({
@@ -286,7 +294,6 @@ export function CVPreviewDialog() {
 
         } catch (error) {
             console.error("Error generating PDF:", error)
-            alert("Failed to generate PDF. Please try again.")
         } finally {
             setIsDownloading(false)
         }

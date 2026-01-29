@@ -2,7 +2,7 @@
 import React from 'react';
 import { personalInfo, about, skills, experience, projects, education, certifications, interests } from '@/data/portfolio';
 
-export const CVTemplate = React.forwardRef<HTMLDivElement, {}>((props, ref) => {
+export const CVTemplate = React.forwardRef<HTMLDivElement, object>((props, ref) => {
     // Helper styles for common patterns
     const styles = {
         page: {
@@ -267,28 +267,28 @@ export const CVTemplate = React.forwardRef<HTMLDivElement, {}>((props, ref) => {
             style={{
                 // Override all global variables that might use 'lab' or 'oklch' to safe hex values
                 // This prevents html2canvas from crashing when parsing computed styles
-                ['--background' as any]: '#ffffff',
-                ['--foreground' as any]: '#000000',
-                ['--card' as any]: '#ffffff',
-                ['--card-foreground' as any]: '#000000',
-                ['--popover' as any]: '#ffffff',
-                ['--popover-foreground' as any]: '#000000',
-                ['--primary' as any]: '#000000',
-                ['--primary-foreground' as any]: '#ffffff',
-                ['--secondary' as any]: '#f3f4f6',
-                ['--secondary-foreground' as any]: '#111827',
-                ['--muted' as any]: '#f3f4f6',
-                ['--muted-foreground' as any]: '#6b7280',
-                ['--accent' as any]: '#f3f4f6',
-                ['--accent-foreground' as any]: '#111827',
-                ['--destructive' as any]: '#ef4444',
-                ['--destructive-foreground' as any]: '#ffffff',
-                ['--border' as any]: '#e5e7eb',
-                ['--input' as any]: '#e5e7eb',
-                ['--ring' as any]: '#000000',
-                ['--radius' as any]: '0.5rem',
+                '--background': '#ffffff',
+                '--foreground': '#000000',
+                '--card': '#ffffff',
+                '--card-foreground': '#000000',
+                '--popover': '#ffffff',
+                '--popover-foreground': '#000000',
+                '--primary': '#000000',
+                '--primary-foreground': '#ffffff',
+                '--secondary': '#f3f4f6',
+                '--secondary-foreground': '#111827',
+                '--muted': '#f3f4f6',
+                '--muted-foreground': '#6b7280',
+                '--accent': '#f3f4f6',
+                '--accent-foreground': '#111827',
+                '--destructive': '#ef4444',
+                '--destructive-foreground': '#ffffff',
+                '--border': '#e5e7eb',
+                '--input': '#e5e7eb',
+                '--ring': '#000000',
+                '--radius': '0.5rem',
                 ...styles.page
-            }}
+            } as React.CSSProperties}
         >
 
             {/* Header Section */}
