@@ -302,9 +302,6 @@ export const CVTemplate = React.forwardRef<HTMLDivElement, object>((props, ref) 
                         <p style={styles.contactItem}>{personalInfo.email}</p>
                         <p style={styles.contactItem}>{personalInfo.phone}</p>
                         <p style={styles.contactItem}>{personalInfo.address}</p>
-                        <p style={styles.contactItem}>
-                            <a href="https://nuralim.dev" style={styles.link}>nuralim.dev</a>
-                        </p>
                     </div>
                 </div>
             </header>
