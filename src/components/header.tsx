@@ -11,6 +11,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { personalInfo } from "@/data/portfolio";
 import { featureFlags } from "@/config/features";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { CVPreviewDialog } from "@/components/cv/CVPreviewDialog";
 
 const navigation = [
   { name: "About", href: "#about" },
@@ -140,6 +141,7 @@ export function Header() {
 
           {/* Right Section */}
           <div className="flex items-center space-x-2">
+            <CVPreviewDialog />
             <ThemeToggle />
             <Button asChild className="hidden sm:inline-flex">
               <Link href="#contact">Hire Me</Link>
