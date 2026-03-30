@@ -1,17 +1,14 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Loader } from 'lucide-react';
 
 export function ArticlePageTransition() {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const handleStart = () => setIsLoading(true);
-    const handleComplete = () => setIsLoading(false);
 
     // Listen to route changes
     window.addEventListener('beforeunload', handleStart);

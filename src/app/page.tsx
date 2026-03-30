@@ -10,8 +10,6 @@ import { CertificationsSection } from "@/components/sections/certifications-sect
 // import { ArticleSection } from "@/components/sections/article-section";
 import { ContactSection } from "@/components/sections/contact-section";
 import { personalInfo } from "@/data/portfolio";
-import { supabaseServer } from "@/lib/supabase";
-import type { BlogArticle } from "@/types/database";
 
 export default async function Home() {
   // Fetch featured published articles from database

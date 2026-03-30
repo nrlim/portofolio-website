@@ -145,6 +145,7 @@ export async function GET(): Promise<Response> {
               }}
             >
               {photoBuffer ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
                 <img
                   src={`data:image/jpeg;base64,${Buffer.from(photoBuffer).toString('base64')}`}
                   style={{

@@ -1,9 +1,9 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogHeader, DialogDescription } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Download, FileDown, Printer } from "lucide-react"
+import { Download, FileDown } from "lucide-react"
 import { CVTemplate } from "./CVTemplate"
 import html2canvas from "html2canvas"
 import jsPDF from "jspdf"
@@ -12,46 +12,6 @@ export function CVPreviewDialog() {
     const [isOpen, setIsOpen] = useState(false)
     const [isDownloading, setIsDownloading] = useState(false)
     const cvRef = useRef<HTMLDivElement>(null)
-
-    const handlePrint = () => {
-        if (!cvRef.current) return;
-
-        const printContent = cvRef.current.innerHTML;
-        const originalContents = document.body.innerHTML;
-
-        // Create a temporary container for printing to avoid messing up the current state too much,
-        // or better, use a print window.
-        const printWindow = window.open('', '_blank');
-        if (printWindow) {
-            printWindow.document.write(`
-        <html>
-          <head>
-            <title>Nuralim CV</title>
-            <script src="https://cdn.tailwindcss.com"></script>
-            <style>
-               body { margin: 0; padding: 0; }
-               @media print {
-                 @page { margin: 0; }
-                 body { -webkit-print-color-adjust: exact; }
-               }
-            </style>
-          </head>
-          <body>
-            ${printContent}
-            <script>
-              // Wait for tailwind to process (simplified approach, might miss custom config but mostly works for standard classes)
-              // Better: wait a bit then print
-              setTimeout(() => {
-                window.print();
-                window.close();
-              }, 1000);
-            </script>
-          </body>
-        </html>
-      `);
-            printWindow.document.close();
-        }
-    }
 
     const handleDownload = async () => {
         if (!cvRef.current) return

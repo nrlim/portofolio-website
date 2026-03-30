@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { Wand2, Loader, X, Check } from 'lucide-react';
-import Link from 'next/link';
 
 interface AIArticleGeneratorProps {
   onArticleGenerated?: () => void;
@@ -14,11 +13,9 @@ export function AIArticleGenerator({ onArticleGenerated }: AIArticleGeneratorPro
   const [isOpen, setIsOpen] = useState(false);
   const [instruction, setInstruction] = useState('');
   const [category, setCategory] = useState('Technology');
-  const [featured, setFeatured] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const [generatedArticleId, setGeneratedArticleId] = useState('');
 
   const handleGenerate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,7 +30,7 @@ export function AIArticleGenerator({ onArticleGenerated }: AIArticleGeneratorPro
         body: JSON.stringify({
           instruction,
           category,
-          featured,
+          featured: false,
           published: false,
         }),
       });
@@ -46,7 +43,6 @@ export function AIArticleGenerator({ onArticleGenerated }: AIArticleGeneratorPro
       }
 
       setSuccess(true);
-      setGeneratedArticleId(data.article.id);
       setInstruction('');
       
       // Refresh articles list after 2 seconds

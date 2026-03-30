@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase';
-import { BlogArticle } from '@/types/database';
 
 // Get auth session from cookies
 function getAuthSession(request: NextRequest) {

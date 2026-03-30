@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import { Trash2, Edit2, Plus, LogOut, Eye, EyeOff, Star, AlertCircle, CheckCircle } from 'lucide-react';
+import { Trash2, Edit2, Plus, LogOut, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { AIArticleGenerator } from '@/components/ai-article-generator';
 import type { BlogArticle } from '@/types/database';
 
@@ -35,12 +35,13 @@ export default function CMSDashboard() {
         }
         setAuthenticated(true);
         fetchArticles();
-      } catch (err) {
+      } catch {
         router.push('/cms/login');
       }
     };
 
     checkAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
   const fetchArticles = async () => {

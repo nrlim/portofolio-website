@@ -79,7 +79,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   const { slug } = await params;
 
   // Fetch the specific article
-  const { data: article, error } = await supabaseServer
+  const { data: article } = await supabaseServer
     .from('blog_articles')
     .select('*')
     .eq('id', slug)

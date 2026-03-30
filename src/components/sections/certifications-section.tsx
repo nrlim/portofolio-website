@@ -24,11 +24,9 @@ export function CertificationsSection() {
   const [error, setError] = useState('');
   const [downloadStatus, setDownloadStatus] = useState<'idle' | 'verifying' | 'success' | 'error'>('idle');
   const abortControllerRef = useRef<AbortController | null>(null);
-  const [isMounted, setIsMounted] = useState(false);
 
   // Protect against developer tools/inspect element access (client-side only)
   useEffect(() => {
-    setIsMounted(true);
 
     // Disable right-click on certificate images
     const handleContextMenu = (e: MouseEvent) => {

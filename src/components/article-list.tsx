@@ -61,7 +61,7 @@ export function ArticleList({ posts }: ArticleListProps) {
             </p>
           </motion.div>
         ) : (
-          posts.map((post, idx) => (
+          posts.map((post) => (
             <motion.article
               key={post.slug}
               variants={itemVariants}
@@ -128,6 +128,7 @@ export function ArticleList({ posts }: ArticleListProps) {
                   {post.thumbnail && (
                     <div className="hidden sm:block flex-shrink-0 w-40 h-28 rounded-lg overflow-hidden">
                       <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 group-hover:shadow-lg transition-shadow">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={post.thumbnail}
                           alt={post.title}

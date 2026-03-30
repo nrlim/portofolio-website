@@ -14,6 +14,7 @@ export function ArticleImage({ src, alt, className }: ArticleImageProps) {
   if (error || !src) return null;
 
   return (
+    /* eslint-disable-next-line @next/next/no-img-element */
     <img
       src={src}
       alt={alt}

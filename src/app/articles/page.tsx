@@ -12,7 +12,7 @@ export const revalidate = 0;
 
 async function ArticlesContent() {
   // Fetch published articles from database
-  const { data: articles, error } = await supabaseServer
+  const { data: articles } = await supabaseServer
     .from('blog_articles')
     .select('*')
     .eq('published', true)

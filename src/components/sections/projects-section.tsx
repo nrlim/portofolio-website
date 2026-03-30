@@ -151,7 +151,7 @@ export function ProjectsSection() {
                     <div className="flex gap-2 w-full mt-auto">
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button variant="outline" className={`transition-colors group-hover:bg-primary group-hover:text-primary-foreground ${(project as any).link ? 'flex-1' : 'w-full'}`}>
+                          <Button variant="outline" className={`transition-colors group-hover:bg-primary group-hover:text-primary-foreground ${(project as { link?: string }).link ? 'flex-1' : 'w-full'}`}>
                             <FileText className="mr-2 h-4 w-4" />
                             Studi Kasus
                           </Button>
@@ -222,9 +222,9 @@ export function ProjectsSection() {
                         </div>
                       </DialogContent>
                     </Dialog>
-                    {(project as any).link && (
+                    {(project as { link?: string }).link && (
                       <Button className="flex-1" asChild>
-                        <a href={(project as any).link} target="_blank" rel="noopener noreferrer">
+                        <a href={(project as { link?: string }).link} target="_blank" rel="noopener noreferrer">
                           <ExternalLink className="mr-2 h-4 w-4" />
                           Live Demo
                         </a>

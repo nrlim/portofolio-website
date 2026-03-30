@@ -29,6 +29,7 @@ export default function EditArticle() {
 
   useEffect(() => {
     loadArticle();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [articleId]);
 
   useEffect(() => {
@@ -219,6 +220,7 @@ export default function EditArticle() {
                   />
                   {imageUrl && (
                     <div className="mt-3 rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={imageUrl}
                         alt="Preview"
@@ -627,6 +629,7 @@ export default function EditArticle() {
                   {/* Featured Image */}
                   {imageUrl && (
                     <div className="mb-8 rounded-lg overflow-hidden h-96 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={imageUrl}
                         alt={title}
