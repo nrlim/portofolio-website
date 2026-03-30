@@ -133,6 +133,32 @@ export const experience = [
 
 export const projects = [
   {
+    id: "disbot",
+    title: "DISBOT - Premium Discord Mirroring & Sync Engine",
+    category: "Product",
+    description: "Automate your Discord server with the #1 professional mirroring tool. Safe, fast, and reliable with zero latency.",
+    tech: ["Node.js", "Discord.js", "WebSocket", "React", "Next.js"],
+    image: "/projects/disbot.png",
+    caseStudy: {
+      problem: "Komunitas dan trader crypto kesulitan menduplikasi informasi, sinyal, dan pengumuman antar server Discord secara real-time tanpa delay, serta rentan terkena banned system saat menggunakan bot biasa.",
+      solution: "Membangun sistem dengan private WebSocket instance untuk zero latency, menerapkan algoritma mimicking perilaku manusia (no-ban guarantee), serta enkripsi tingkat militer untuk mirroring lintas server.",
+      result: "Sistem memberikan performa mirroring multi-server tanpa delay (milliseconds), 100% aman dari deteksi bot, dan mendukung penuh media/embeds secara utuh, yang diadopsi pesat oleh pengelola komunitas besar."
+    }
+  },
+  {
+    id: "ptvea",
+    title: "PT Vanguard Energy Amanah",
+    category: "Manufacturing",
+    description: "Platform company profile dan katalog untuk penyedia instrumen presisi dan valves berkualitas tinggi sektor Oil & Gas.",
+    tech: ["Next.js", "React", "TypeScript", "Tailwind CSS"],
+    image: "/projects/vea.png",
+    caseStudy: {
+      problem: "Sektor industri Oil & Gas serta Power Plants membutuhkan informasi alat dengan spesifikasi teknis presisi tinggi secara cepat, namun kerap kesulitan mengakses katalog lengkap pengadaan melalui satu kanal informasi komprehensif.",
+      solution: "Merancang arsitektur website interaktif yang menonjolkan katalog produk (pressure gauge, valves, tubing) dan mendirikan kanal komunikasi instan yang menghubungkan calon partner dengan engineering team secara real-time.",
+      result: "Meningkatkan profesionalitas dan online awareness perusahaan, memangkas turnaround time respon konsultasi teknis menjadi kurang dari 1x24 jam, dan memperkuat relasi kemitraan strategis di skala nasional."
+    }
+  },
+  {
     id: "tpanuruliman",
     title: "TPA - Nurul Iman",
     category: "Others",

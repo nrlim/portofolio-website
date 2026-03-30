@@ -15,7 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { projects, projectCategories } from "@/data/portfolio";
-import { FileText } from "lucide-react";
+import { FileText, ExternalLink } from "lucide-react";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -147,15 +147,16 @@ export function ProjectsSection() {
                       )}
                     </div>
 
-                    {/* Case Study Dialog */}
-                    <Dialog>
-                      <DialogTrigger asChild>
-                        <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                          <FileText className="mr-2 h-4 w-4" />
-                          Detail Studi Kasus
-                        </Button>
-                      </DialogTrigger>
-                      <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                    {/* Action Buttons */}
+                    <div className="flex gap-2 w-full mt-auto">
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" className={`transition-colors group-hover:bg-primary group-hover:text-primary-foreground ${(project as any).link ? 'flex-1' : 'w-full'}`}>
+                            <FileText className="mr-2 h-4 w-4" />
+                            Studi Kasus
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
                         <DialogHeader>
                           <DialogTitle className="text-2xl mb-2">
                             {project.title}
@@ -221,6 +222,15 @@ export function ProjectsSection() {
                         </div>
                       </DialogContent>
                     </Dialog>
+                    {(project as any).link && (
+                      <Button className="flex-1" asChild>
+                        <a href={(project as any).link} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="mr-2 h-4 w-4" />
+                          Live Demo
+                        </a>
+                      </Button>
+                    )}
+                    </div>
                   </CardContent>
                 </Card>
               </div>
