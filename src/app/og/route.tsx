@@ -1,20 +1,33 @@
 import { ImageResponse } from 'next/og';
 import { personalInfo, about } from '@/data/portfolio';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 export const runtime = 'nodejs';
 
 export async function GET(): Promise<Response> {
   try {
-    // Fetch the profile photo if it's a URL
     let photoBuffer: ArrayBuffer | null = null;
-    if (personalInfo.photo && personalInfo.photo.startsWith('http')) {
-      try {
-        const response = await fetch(personalInfo.photo);
-        if (response.ok) {
-          photoBuffer = await response.arrayBuffer();
+
+    // Handle profile photo (Remote vs Local)
+    if (personalInfo.photo) {
+      if (personalInfo.photo.startsWith('http')) {
+        try {
+          const response = await fetch(personalInfo.photo);
+          if (response.ok) {
+            photoBuffer = await response.arrayBuffer();
+          }
+        } catch (error) {
+          console.error('Failed to fetch remote profile photo:', error);
         }
-      } catch (error) {
-        console.error('Failed to fetch profile photo:', error);
+      } else {
+        try {
+          // Read from public directory for local photos
+          const publicPath = join(process.cwd(), 'public', personalInfo.photo);
+          photoBuffer = readFileSync(publicPath).buffer as ArrayBuffer;
+        } catch (error) {
+          console.error('Failed to read local profile photo:', error);
+        }
       }
     }
 
@@ -26,13 +39,26 @@ export async function GET(): Promise<Response> {
             flexDirection: 'row',
             width: '100%',
             height: '100%',
-            background: 'linear-gradient(135deg, #0A84FF 0%, #00C2A8 100%)',
-            padding: '60px',
+            background: '#09090b', // Dark obsidian theme
+            padding: '80px',
             position: 'relative',
             overflow: 'hidden',
           }}
         >
-          {/* Background Pattern */}
+          {/* Decorative Mesh Gradient Background */}
+          <div
+            style={{
+              position: 'absolute',
+              top: '-10%',
+              left: '-10%',
+              width: '120%',
+              height: '120%',
+              background: 'radial-gradient(circle at 10% 20%, rgba(10, 132, 255, 0.15) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(0, 194, 168, 0.15) 0%, transparent 40%)',
+              opacity: 0.8,
+            }}
+          />
+
+          {/* Abstract Grid Pattern */}
           <div
             style={{
               position: 'absolute',
@@ -40,91 +66,88 @@ export async function GET(): Promise<Response> {
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundImage:
-                'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 1px, transparent 1px)',
-              backgroundSize: '50px 50px',
-              opacity: 0.3,
+              backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)',
+              backgroundSize: '40px 40px',
             }}
           />
 
-          {/* Left Content */}
+          {/* Main Content Area */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
-              justifyContent: 'space-between',
+              justifyContent: 'center',
               height: '100%',
               position: 'relative',
               zIndex: 10,
               flex: 1,
-              marginRight: '40px',
             }}
           >
             <div
               style={{
                 display: 'flex',
-                flexDirection: 'column',
-                gap: '24px',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '20px',
               }}
             >
-              <div
-                style={{
-                  fontSize: '72px',
-                  fontWeight: 900,
-                  color: 'white',
-                  lineHeight: 1.1,
-                  letterSpacing: '-2px',
-                }}
-              >
-                Nuralim
-              </div>
-
-              <div
-                style={{
-                  fontSize: '40px',
-                  fontWeight: 700,
-                  color: 'rgba(255,255,255,0.95)',
-                  lineHeight: 1.2,
-                }}
-              >
-                Product &amp; Technology Development Manager
+              <div style={{ width: '40px', height: '4px', background: '#0A84FF', borderRadius: '2px' }} />
+              <div style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '20px', fontWeight: 600, letterSpacing: '4px' }}>
+                PORTFOLIO
               </div>
             </div>
 
             <div
               style={{
+                fontSize: '84px',
+                fontWeight: 900,
+                color: 'white',
+                lineHeight: 1,
+                letterSpacing: '-3px',
+                marginBottom: '16px',
+              }}
+            >
+              {personalInfo.name}
+            </div>
+
+            <div
+              style={{
+                fontSize: '32px',
+                fontWeight: 500,
+                color: 'rgba(255, 255, 255, 0.8)',
+                marginBottom: '40px',
+                maxWidth: '600px',
+              }}
+            >
+              {personalInfo.title}
+            </div>
+
+            {/* Experience Badge */}
+            <div
+              style={{
                 display: 'flex',
-                flexDirection: 'column',
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                padding: '12px 24px',
+                borderRadius: '100px',
+                width: 'fit-content',
+                alignItems: 'center',
                 gap: '12px',
               }}
             >
-              <div
-                style={{
-                  fontSize: '24px',
-                  fontWeight: 600,
-                  color: 'rgba(255,255,255,0.9)',
-                }}
-              >
-                {about.metrics[0].value} Experience
-              </div>
-
-              <div
-                style={{
-                  fontSize: '18px',
-                  fontWeight: 500,
-                  color: 'rgba(255,255,255,0.8)',
-                }}
-              >
-                Building scalable software &amp; empowering teams
+              <div style={{ width: '8px', height: '8px', background: '#00C2A8', borderRadius: '50%' }} />
+              <div style={{ color: 'white', fontSize: '20px', fontWeight: 600 }}>
+                {about.metrics[0].value} Professional Experience
               </div>
             </div>
           </div>
 
-          {/* Right - Profile Image */}
+          {/* Right Column - Profile & branding */}
           <div
             style={{
               display: 'flex',
-              alignItems: 'center',
+              flexDirection: 'column',
+              alignItems: 'flex-end',
               justifyContent: 'center',
               position: 'relative',
               zIndex: 20,
@@ -132,16 +155,17 @@ export async function GET(): Promise<Response> {
           >
             <div
               style={{
-                width: '280px',
-                height: '280px',
-                borderRadius: '20px',
+                width: '320px',
+                height: '320px',
+                borderRadius: '32px',
                 overflow: 'hidden',
-                background: 'white',
-                boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-                border: '8px solid rgba(255,255,255,0.2)',
+                background: '#1c1c1e',
+                boxShadow: '0 40px 100px rgba(0,0,0,0.5)',
+                border: '1px solid rgba(255,255,255,0.1)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                marginBottom: '24px',
               }}
             >
               {photoBuffer ? (
@@ -164,40 +188,20 @@ export async function GET(): Promise<Response> {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    fontSize: '120px',
+                    fontSize: '140px',
                     fontWeight: 'bold',
                     color: 'white',
                   }}
                 >
-                  N
+                  {personalInfo.name.charAt(0)}
                 </div>
               )}
             </div>
+            
+            <div style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: '18px', fontWeight: 500 }}>
+              nuralim.dev
+            </div>
           </div>
-
-          {/* Accent Elements */}
-          <div
-            style={{
-              position: 'absolute',
-              width: '300px',
-              height: '300px',
-              background: 'rgba(255,255,255,0.1)',
-              borderRadius: '50%',
-              top: '-100px',
-              right: '-100px',
-            }}
-          />
-          <div
-            style={{
-              position: 'absolute',
-              width: '200px',
-              height: '200px',
-              background: 'rgba(255,255,255,0.05)',
-              borderRadius: '50%',
-              bottom: '-50px',
-              left: '50px',
-            }}
-          />
         </div>
       ),
       {
@@ -206,7 +210,7 @@ export async function GET(): Promise<Response> {
       }
     );
   } catch (error) {
-    console.error(`${error}`);
+    console.error(`OG Generation Error: ${error}`);
     return new Response('Failed to generate image', {
       status: 500,
     });

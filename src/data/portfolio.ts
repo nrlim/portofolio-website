@@ -74,7 +74,7 @@ export const experience = [
           "Mempercepat time-to-market melalui standardisasi dan automation"
         ],
         achievementNarrative:
-          "Ketika saya dipercaya untuk memimpin divisi Product & Technology Development, tantangan utama adalah membangun struktur organisasi yang solid dan scalable untuk mendukung pertumbuhan perusahaan. Dalam kuartal pertama, saya fokus pada recruitment strategy yang tepat—mengidentifikasi kompetensi kunci yang dibutuhkan, mendesain proses interview yang efektif, dan membangun employer branding untuk menarik talenta terbaik. Hasilnya, tim teknologi berkembang pesat dari beberapa engineer menjadi organisasi lengkap dengan 20+ profesional di berbagai fungsi: Backend, Frontend, Mobile, dan QA. Tidak hanya menambah headcount, saya juga membentuk research team khusus yang bertugas melakukan continuous improvement terhadap arsitektur dan framework internal—memastikan keputusan teknis kami berbasis data dan eksperimen, bukan asumsi. Namun, membangun tim yang besar tanpa kultur yang kuat adalah resep bencana. Saya menyadari bahwa skill dan headcount saja tidak cukup—yang lebih penting adalah membangun lingkungan kerja di mana setiap engineer merasa valued, challenged, dan continuously growing. Saya memulai dengan menetapkan engineering values yang jelas: ownership mindset, collaborative spirit, continuous learning, dan bias for action. Kami rutin mengadakan knowledge sharing session di mana setiap engineer, dari junior hingga senior, punya kesempatan untuk berbagi expertise mereka—menciptakan kultur belajar yang organik dan saling menghormati. Saya juga memperkenalkan konsep 'blameless postmortem' ketika ada incident atau bug kritis, fokus pada system improvement bukan mencari kambing hitam. Hasilnya? Psychological safety meningkat drastis, tim tidak takut eksperimen dan mengambil calculated risk, dan turnover rate turun signifikan karena engineer merasa engaged dan berkembang. Melalui implementasi standardisasi workflow, automation pipeline CI/CD, dan penguatan quality gates, kami berhasil memangkas time-to-market secara signifikan. Tim kini tidak lagi terjebak dalam ritual release yang melelahkan, melainkan fokus menciptakan nilai bisnis yang terukur dan berkelanjutan—semua ini dijalankan dalam kultur engineering excellence yang kami bangun bersama."
+          "Ketika saya dipercaya untuk memimpin divisi Product & Technology Development, tantangan utama adalah membangun struktur organisasi yang solid dan scalable untuk mendukung pertumbuhan perusahaan. Dalam kuartal pertama, saya fokus pada recruitment strategy yang tepat—mengidentifikasi kompetensi kunci yang dibutuhkan, mendesain proses interview yang efektif, dan membangun employer branding untuk menarik talenta terbaik. Hasilnya, tim teknologi berkembang pesat dari beberapa engineer menjadi organisasi lengkap dengan 20+ profesional di berbagai fungsi: Backend, Frontend, Mobile, dan QA. Tidak hanya menambah headcount, saya juga memimpin research team khusus yang bertugas melakukan continuous improvement terhadap arsitektur dan framework internal—memastikan keputusan teknis kami berbasis data dan eksperimen, bukan asumsi. Namun, membangun tim yang besar tanpa kultur yang kuat adalah resep bencana. Saya menyadari bahwa skill dan headcount saja tidak cukup—yang lebih penting adalah membangun lingkungan kerja di mana setiap engineer merasa valued, challenged, dan continuously growing. Saya memulai dengan menetapkan engineering values yang jelas: ownership mindset, collaborative spirit, continuous learning, dan bias for action. Kami rutin mengadakan knowledge sharing session di mana setiap engineer, dari junior hingga senior, punya kesempatan untuk berbagi expertise mereka—menciptakan kultur belajar yang organik dan saling menghormati. Saya juga memperkenalkan konsep 'blameless postmortem' ketika ada incident atau bug kritis, fokus pada system improvement bukan mencari kambing hitam. Hasilnya? Psychological safety meningkat drastis, tim tidak takut eksperimen dan mengambil calculated risk, dan turnover rate turun signifikan karena engineer merasa engaged dan berkembang. Melalui implementasi standardisasi workflow, automation pipeline CI/CD, dan penguatan quality gates, kami berhasil memangkas time-to-market secara signifikan. Tim kini tidak lagi terjebak dalam ritual release yang melelahkan, melainkan fokus menciptakan nilai bisnis yang terukur dan berkelanjutan—semua ini dijalankan dalam kultur engineering excellence yang kami bangun bersama."
       },
       {
         title: "Product Development Lead",
@@ -132,6 +132,58 @@ export const experience = [
 
 
 export const projects = [
+  {
+    id: "agenthive",
+    title: "AgentHive - Multi-Agent Autonomous Engineering Platform",
+    category: "Product",
+    description: "Platform orkestrasi multi-agent yang memungkinkan AI untuk menulis kode, menjalankan perintah terminal, dan berkolaborasi secara otonom dalam sandbox yang aman.",
+    tech: ["Next.js", "FastAPI", "LangChain", "Python", "TypeScript", "SSE", "Docker", "Tailwind CSS"],
+    image: "/projects/agenthive.png",
+    caseStudy: {
+      problem: "Kebutuhan akan lingkungan AI yang dapat beraksi secara otonom (menulis & mengeksekusi kode) seringkali terbentur pada masalah keamanan (sandbox), transparansi proses (real-time logs), dan orkestrasi antar model AI yang berbeda.",
+      solution: "Membangun platform monorepo dengan Python Engine berbasis LangChain untuk eksekusi logic dan Next.js Dashboard untuk monitoring. Implementasi Server-Sent Events (SSE) untuk streaming log terminal secara live dan file explorer visual untuk memantau output agent.",
+      result: "Memungkinkan developer untuk mendelegasikan tugas coding kompleks kepada agent AI dengan monitoring real-time. Sistem mendukung berbagai provider LLM (Gemini, Claude, GPT) dan menjamin keamanan melalui sandboxed execution di level workspace."
+    }
+  },
+  {
+    id: "truxos",
+    title: "truxOS - Efisiensi Biaya & Operasional Armada",
+    category: "Product",
+    description: "Platform manajemen armada berbasis data untuk operator logistik modern yang fokus pada efisiensi biaya operasional.",
+    tech: ["Next.js", "React", "TypeScript", "Tailwind CSS", "PostgreSQL", "Supabase"],
+    image: "/projects/truxos.png",
+    caseStudy: {
+      problem: "Operator logistik seringkali kesulitan dalam melacak biaya operasional armada secara presisi, menebak keuntungan tanpa data yang akurat, dan menghadapi inefisiensi rute.",
+      solution: "Membangun platform manajemen armada yang mengubah data mentah menjadi intelijen biaya, dengan fitur perhitungan biaya per kilometer (BBM, tol, perawatan), analitik real-time, dan wawasan prediktif.",
+      result: "Membantu operator armada meningkatkan margin keuntungan hingga 18% melalui pelacakan biaya yang presisi, identifikasi anomali biaya secara instan, dan optimalisasi rute."
+    }
+  },
+  {
+    id: "accuwrite",
+    title: "Accuwrite — Precision Cloud Accounting",
+    category: "Product",
+    description: "Platform akuntansi cloud eksklusif untuk korporasi besar yang membutuhkan presisi tinggi, sinkronisasi real-time, dan keamanan tingkat militer.",
+    tech: ["Next.js", "React", "TypeScript", "Node.js", "GraphQL", "PostgreSQL", "AES-256"],
+    image: "/projects/accuwrite.png",
+    caseStudy: {
+      problem: "Entitas bisnis skala besar menghadapi tantangan dalam menjembatani sistem operasional dengan laporan keuangan standar industri secara real-time, sering terjebak dalam input manual massal dan latensi rekonsiliasi.",
+      solution: "Mengembangkan sistem akuntansi cloud dengan buku besar otomatis via API, sinkronisasi real-time dua arah, dan algoritma pencocokan dinamis berbasis AI untuk mencegah bottleneck audit.",
+      result: "Mengahasilkan laporan finansial berstandar audit (Laba/Rugi, Neraca) secara instan, mengurangi beban input manual hingga 100% melalui integrasi API, dan memastikan keamanan data dengan enkripsi AES-256."
+    }
+  },
+  {
+    id: "expos",
+    title: "ex-POS — Sistem POS Multi-Store untuk Bisnis Modern",
+    category: "Product",
+    description: "Sistem Point of Sale (POS) multi-cabang yang dirancang untuk skalabilitas bisnis, manajemen inventaris terpusat, dan analitik laba mendalam.",
+    tech: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Node.js", "PostgreSQL", "WebSocket"],
+    image: "/projects/expos.png",
+    caseStudy: {
+      problem: "Pemilik bisnis multi-cabang sering mengalami ketidaksinkronan data stok antar outlet, kesulitan menghitung HPP dan laba bersih secara otomatis, serta kurangnya visibilitas terhadap proses produksi di tiap cabang.",
+      solution: "Membangun sistem POS dengan dashboard konsolidasi terpusat, fitur sinkronisasi stok lintas cabang secara real-time, universal order tracking, dan kalkulasi HPP otomatis per produk.",
+      result: "Memberikan transparansi penuh bagi pemilik bisnis, mengeliminasi laporan manual antar cabang, dan membantu identifikasi produk paling menguntungkan melalui analitik profitabilitas yang mendalam."
+    }
+  },
   {
     id: "disbot",
     title: "DISBOT - Premium Discord Mirroring & Sync Engine",
