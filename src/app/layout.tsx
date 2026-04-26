@@ -23,45 +23,47 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://nuralim.dev"),
-  title: `Nuralim - Product & Technology Development Manager | ${about.metrics[0].value} Years Experience`,
+  title: {
+    default: `Nuralim - Product & Technology Development Manager | Nuralim Dev`,
+    template: `%s | Nuralim Dev`,
+  },
   description:
-    `Nuralim: Product & Technology Development Manager dengan ${about.metrics[0].value} tahun pengalaman membangun solusi software end-to-end. Spesialisasi dalam .NET, Backend Development, dan Technical Leadership di Indonesia.`,
+    "Nuralim (nuralim.dev): Product & Technology Development Manager dengan 7+ tahun pengalaman membangun solusi software end-to-end. Spesialisasi dalam .NET, Next.js, Backend Development, dan Technical Leadership di Indonesia.",
   keywords: [
     "Nuralim",
-    "Nuralim.dev",
+    "Nuralim Dev",
+    "nuralim.dev",
+    "Nuralim Portfolio",
     "Product & Technology Development Manager",
-    "Software Engineer",
-    "Product Manager",
+    "Software Engineer Indonesia",
+    "Product Manager Jakarta",
     "Technology Lead",
-    "Technical Lead",
-    ".NET Developer",
-    "Next.js Developer",
+    "Technical Lead .NET",
+    ".NET Developer Indonesia",
+    "Next.js Developer Jakarta",
     "C# Developer",
     "Backend Developer",
     "Microservices Architecture",
     "Software Architect",
-    "Team Lead",
-    "Engineering Manager",
-    "Indonesia",
-    "Jakarta",
-    "Portfolio",
+    "Engineering Manager Indonesia",
   ],
   alternates: {
     canonical: "https://nuralim.dev",
   },
-  authors: [{ name: "Nuralim", url: personalInfo.social.linkedin }],
+  authors: [{ name: "Nuralim", url: "https://nuralim.dev" }],
   creator: "Nuralim",
+  publisher: "Nuralim",
   openGraph: {
     type: "website",
     locale: "id_ID",
     url: "https://nuralim.dev",
-    title: "Nuralim - Product & Technology Development Manager",
+    title: "Nuralim - Product & Technology Development Manager | Nuralim Dev",
     description:
-      `${about.metrics[0].value} tahun pengalaman membangun solusi software scalable dan memberdayakan tim engineering excellence.`,
+      "Expert dalam membangun scalable software dan memberdayakan tim engineering excellence. 7+ tahun pengalaman profesional di berbagai industri.",
     siteName: "Nuralim Portfolio",
     images: [
       {
-        url: "https://nuralim.dev/og",
+        url: "/og",
         width: 1200,
         height: 630,
         alt: "Nuralim - Product & Technology Development Manager",
@@ -70,10 +72,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Nuralim - Product & Technology Development Manager",
+    title: "Nuralim - Product & Technology Development Manager | Nuralim Dev",
     description:
-      `${about.metrics[0].value} tahun pengalaman dalam software engineering, product development, dan technical leadership.`,
-    images: ["https://nuralim.dev/og"],
+      "7+ tahun pengalaman dalam software engineering, product development, dan technical leadership.",
+    images: ["/og"],
     creator: "@nuralim",
   },
   robots: {
@@ -92,8 +94,10 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: "/personal-logo-bnw.png",
+    apple: "/personal-logo-bnw.png",
   },
 };
+
 
 export default function RootLayout({
   children,

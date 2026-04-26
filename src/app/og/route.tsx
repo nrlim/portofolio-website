@@ -1,33 +1,27 @@
 import { ImageResponse } from 'next/og';
 import { personalInfo, about } from '@/data/portfolio';
-import { readFileSync } from 'fs';
-import { join } from 'path';
 
 export const runtime = 'nodejs';
 
-export async function GET(): Promise<Response> {
+export async function GET(request: Request): Promise<Response> {
   try {
+    const baseUrl = new URL(request.url).origin;
+
     let photoBuffer: ArrayBuffer | null = null;
 
-    // Handle profile photo (Remote vs Local)
+    // Handle profile photo
     if (personalInfo.photo) {
-      if (personalInfo.photo.startsWith('http')) {
-        try {
-          const response = await fetch(personalInfo.photo);
-          if (response.ok) {
-            photoBuffer = await response.arrayBuffer();
-          }
-        } catch (error) {
-          console.error('Failed to fetch remote profile photo:', error);
+      try {
+        const photoUrl = personalInfo.photo.startsWith('http') 
+          ? personalInfo.photo 
+          : `${baseUrl}${personalInfo.photo}`;
+        
+        const response = await fetch(photoUrl);
+        if (response.ok) {
+          photoBuffer = await response.arrayBuffer();
         }
-      } else {
-        try {
-          // Read from public directory for local photos
-          const publicPath = join(process.cwd(), 'public', personalInfo.photo);
-          photoBuffer = readFileSync(publicPath).buffer as ArrayBuffer;
-        } catch (error) {
-          console.error('Failed to read local profile photo:', error);
-        }
+      } catch (error) {
+        console.error('Failed to fetch profile photo for OG:', error);
       }
     }
 
@@ -55,6 +49,7 @@ export async function GET(): Promise<Response> {
               height: '120%',
               background: 'radial-gradient(circle at 10% 20%, rgba(10, 132, 255, 0.15) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(0, 194, 168, 0.15) 0%, transparent 40%)',
               opacity: 0.8,
+              display: 'flex',
             }}
           />
 
@@ -68,6 +63,7 @@ export async function GET(): Promise<Response> {
               bottom: 0,
               backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px)',
               backgroundSize: '40px 40px',
+              display: 'flex',
             }}
           />
 
@@ -91,8 +87,8 @@ export async function GET(): Promise<Response> {
                 marginBottom: '20px',
               }}
             >
-              <div style={{ width: '40px', height: '4px', background: '#0A84FF', borderRadius: '2px' }} />
-              <div style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '20px', fontWeight: 600, letterSpacing: '4px' }}>
+              <div style={{ width: '40px', height: '4px', background: '#0A84FF', borderRadius: '2px', display: 'flex' }} />
+              <div style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '20px', fontWeight: 600, letterSpacing: '4px', display: 'flex' }}>
                 PORTFOLIO
               </div>
             </div>
@@ -105,6 +101,7 @@ export async function GET(): Promise<Response> {
                 lineHeight: 1,
                 letterSpacing: '-3px',
                 marginBottom: '16px',
+                display: 'flex',
               }}
             >
               {personalInfo.name}
@@ -117,6 +114,7 @@ export async function GET(): Promise<Response> {
                 color: 'rgba(255, 255, 255, 0.8)',
                 marginBottom: '40px',
                 maxWidth: '600px',
+                display: 'flex',
               }}
             >
               {personalInfo.title}
@@ -135,8 +133,8 @@ export async function GET(): Promise<Response> {
                 gap: '12px',
               }}
             >
-              <div style={{ width: '8px', height: '8px', background: '#00C2A8', borderRadius: '50%' }} />
-              <div style={{ color: 'white', fontSize: '20px', fontWeight: 600 }}>
+              <div style={{ width: '8px', height: '8px', background: '#00C2A8', borderRadius: '50%', display: 'flex' }} />
+              <div style={{ color: 'white', fontSize: '20px', fontWeight: 600, display: 'flex' }}>
                 {about.metrics[0].value} Professional Experience
               </div>
             </div>
@@ -198,12 +196,13 @@ export async function GET(): Promise<Response> {
               )}
             </div>
             
-            <div style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: '18px', fontWeight: 500 }}>
+            <div style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: '18px', fontWeight: 500, display: 'flex' }}>
               nuralim.dev
             </div>
           </div>
         </div>
       ),
+
       {
         width: 1200,
         height: 630,
@@ -216,3 +215,4 @@ export async function GET(): Promise<Response> {
     });
   }
 }
+

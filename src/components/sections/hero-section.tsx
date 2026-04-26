@@ -28,7 +28,7 @@ export function HeroSection() {
               >
                 <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tight">
                   <span className="bg-clip-text text-transparent bg-gradient-to-r from-foreground via-foreground to-primary">
-                    Nuralim
+                    Nuralim <span className="text-primary font-light">Dev</span>
                   </span>
                 </h1>
               </motion.div>

@@ -96,7 +96,7 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <div className="border-t pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <p>© {currentYear} Nuralim. All rights reserved.</p>
+          <p>© {currentYear} Nuralim (nuralim.dev). All rights reserved.</p>
         </div>
       </div>
     </footer>

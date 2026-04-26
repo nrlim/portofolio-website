@@ -92,7 +92,7 @@ export function Header() {
               )}
             </div>
             <span className="font-bold text-xl hidden sm:inline-block">
-              Nuralim
+              Nuralim <span className="text-primary">Dev</span>
             </span>
           </Link>
 
