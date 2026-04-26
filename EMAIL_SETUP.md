@@ -1,29 +1,23 @@
-# Email Setup Guide
+# Email Setup Guide (Resend)
 
-## Option 1: Web3Forms (Recommended - Free & Easy)
-
-Web3Forms adalah layanan gratis untuk mengirim email dari form contact.
+Project ini menggunakan **Resend** untuk mengirim email dari form kontak secara profesional.
 
 ### Setup Steps:
 
-1. **Daftar di Web3Forms**
-   - Buka https://web3forms.com
-   - Klik "Get Started" atau "Create Access Key"
-   - Masukkan email Anda (nuralim.mail@gmail.com)
-   - Verifikasi email Anda
+1. **Daftar di Resend**
+   - Buka https://resend.com
+   - Sign up dengan GitHub atau email
+   - Verifikasi domain Anda (optional, untuk custom sender)
 
-2. **Dapatkan Access Key**
-   - Setelah verifikasi, Anda akan mendapat Access Key
-   - Copy Access Key tersebut
+2. **Dapatkan API Key**
+   - Dashboard → API Keys → Create API Key
+   - Copy API key
 
 3. **Konfigurasi di Project**
-   - Copy file `.env.example` menjadi `.env.local`
-   ```bash
-   copy .env.example .env.local
+   - Buka file `.env` di root directory
+   - Tambahkan API Key Anda:
    ```
-   - Buka `.env.local` dan isi dengan Access Key Anda:
-   ```
-   WEB3FORMS_ACCESS_KEY=your_actual_access_key_here
+   RESEND_API_KEY=re_your_actual_api_key_here
    ```
 
 4. **Deploy ke Vercel**
@@ -31,49 +25,11 @@ Web3Forms adalah layanan gratis untuk mengirim email dari form contact.
    - Pilih project "portofolio-website"
    - Masuk ke Settings → Environment Variables
    - Tambahkan variable baru:
-     - Name: `WEB3FORMS_ACCESS_KEY`
-     - Value: (paste access key Anda)
+     - Name: `RESEND_API_KEY`
+     - Value: (paste API key Anda)
      - Environment: Production, Preview, Development
    - Klik "Save"
-   - Redeploy project Anda
-
-### Features:
-- ✅ Gratis untuk 250 submissions/bulan
-- ✅ No server configuration needed
-- ✅ Email notifications langsung ke inbox Anda
-- ✅ Anti-spam protection
-- ✅ File attachment support (optional)
-
----
-
-## Option 2: Resend (Professional)
-
-Untuk production-grade email dengan branding lebih baik.
-
-### Setup Steps:
-
-1. **Install Resend**
-   ```bash
-   npm install resend
-   ```
-
-2. **Daftar di Resend**
-   - Buka https://resend.com
-   - Sign up dengan GitHub atau email
-   - Verifikasi domain Anda (optional, untuk custom sender)
-
-3. **Dapatkan API Key**
-   - Dashboard → API Keys → Create API Key
-   - Copy API key
-
-4. **Update API Route**
-   - Edit file `src/app/api/send-email/route.ts`
-   - Uncomment kode Resend, comment kode Web3Forms
-
-5. **Environment Variables**
-   ```
-   RESEND_API_KEY=your_resend_api_key_here
-   ```
+   - Redeploy project Anda (atau push perubahan ke GitHub)
 
 ---
 
@@ -88,41 +44,29 @@ Untuk production-grade email dengan branding lebih baik.
 
 3. Isi form dan klik "Kirim Pesan"
 
-4. Check email Anda (nuralim.mail@gmail.com)
+4. Check dashboard Resend atau email tujuan (`nuralim.mail@gmail.com`) untuk melihat pesan yang terkirim.
 
 ---
 
 ## Troubleshooting
 
 ### Email tidak terkirim?
-1. Check console browser untuk error messages
-2. Pastikan `.env.local` sudah benar
+1. Check console terminal/server untuk error messages
+2. Pastikan `RESEND_API_KEY` sudah benar di file `.env`
 3. Restart development server setelah menambah env variables
 4. Check email spam/junk folder
+5. Jika menggunakan domain `onboarding@resend.dev`, pastikan Anda mengirim ke email yang terdaftar di akun Resend Anda.
 
 ### Fallback Mode
-Jika API gagal, sistem akan otomatis membuka mailto link sebagai fallback.
-
----
-
-## Production Deployment
-
-Setelah setup environment variables di Vercel, push perubahan ke GitHub:
-
-```bash
-git add .
-git commit -m "Add email functionality"
-git push
-```
-
-Vercel akan otomatis redeploy dengan konfigurasi email yang baru.
+Jika API gagal (misal API key salah atau limit habis), sistem akan otomatis mencoba membuka `mailto` link sebagai fallback agar user tetap bisa mengirim pesan secara manual.
 
 ---
 
 ## Security Notes
 
-- ✅ Honeypot field untuk mencegah spam bots
-- ✅ Email validation
-- ✅ Rate limiting (built-in di Web3Forms)
-- ✅ Environment variables tidak ter-commit ke GitHub
-- ✅ Fallback ke mailto jika API gagal
+- ✅ **Honeypot field**: Mencegah spam bots mengisi form.
+- ✅ **Rate Limiting**: Membatasi jumlah pengiriman pesan dari IP yang sama.
+- ✅ **Email Validation**: Memastikan format email benar dan bukan temporary email.
+- ✅ **Spam Detection**: Deteksi konten spam berbasis keyword.
+- ✅ **Environment Variables**: API Key disimpan aman di server-side, tidak pernah terekspos ke browser.
+- ✅ **Fallback Mechanism**: Tetap bisa menerima pesan via mailto jika layanan API down.
