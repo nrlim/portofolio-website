@@ -388,23 +388,31 @@ export const CVTemplate = React.forwardRef<HTMLDivElement, object>((props, ref) 
                         <div>
                             <div style={styles.skillGroup} className="cv-item">
                                 <h4 style={styles.skillTitle}>Languages</h4>
-                                <p style={styles.skillList}>{skills.languages.join(', ')}</p>
+                                <p style={styles.skillList}>{skills.techStack.languages.join(', ')}</p>
                             </div>
                             <div style={styles.skillGroup} className="cv-item">
-                                <h4 style={styles.skillTitle}>Backend</h4>
-                                <p style={styles.skillList}>{skills.backend.join(', ')}</p>
+                                <h4 style={styles.skillTitle}>Frontend</h4>
+                                <p style={styles.skillList}>{skills.techStack.frontend.join(', ')}</p>
+                            </div>
+                            <div style={styles.skillGroup} className="cv-item">
+                                <h4 style={styles.skillTitle}>Backend & AI</h4>
+                                <p style={styles.skillList}>{skills.techStack.backend.join(', ')}</p>
                             </div>
                             <div style={styles.skillGroup} className="cv-item">
                                 <h4 style={styles.skillTitle}>Databases</h4>
-                                <p style={styles.skillList}>{skills.databases.join(', ')}</p>
+                                <p style={styles.skillList}>{skills.techStack.databases.join(', ')}</p>
                             </div>
                             <div style={styles.skillGroup} className="cv-item">
                                 <h4 style={styles.skillTitle}>DevOps</h4>
-                                <p style={styles.skillList}>{skills.devops.join(', ')}</p>
+                                <p style={styles.skillList}>{skills.techStack.devops.join(', ')}</p>
                             </div>
                             <div style={styles.skillGroup} className="cv-item">
                                 <h4 style={styles.skillTitle}>Architecture</h4>
-                                <p style={styles.skillList}>{skills.architecture.join(', ')}</p>
+                                <p style={styles.skillList}>{skills.professionalSkills.architecture.join(', ')}</p>
+                            </div>
+                            <div style={styles.skillGroup} className="cv-item">
+                                <h4 style={styles.skillTitle}>Leadership</h4>
+                                <p style={styles.skillList}>{skills.professionalSkills.leadership.join(', ')}</p>
                             </div>
                         </div>
                     </section>
