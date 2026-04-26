@@ -29,7 +29,7 @@ export const personalInfo = {
 export const hero = {
   headline: "Membangun software yang adaptif dan tim yang berdaya.",
   subheadline: `Product & Technology Development Manager dengan ${yearsOfExperience}+ tahun pengalaman membangun solusi software end-to-end di berbagai domain industri. Berfokus pada arsitektur yang scalable, tim yang produktif, dan budaya engineering excellence.`,
-  techBadges: ["C#/.NET", "NHibernate", "RabbitMQ", "Camunda BPM", "Docker", "Elasticsearch"]
+  techBadges: ["Next.js", "Vercel AI SDK", "C#/.NET", "Prisma/Drizzle", "Docker", "PostgreSQL"]
 };
 
 
@@ -52,12 +52,18 @@ export const about = {
 };
 
 export const skills = {
-  languages: ["C#", "JavaScript", "TypeScript"],
-  backend: ["NHibernate", "Masstransit", "Authentication (Oauth/AD/JWT)", "Log4net", "Hangfire", "Camunda BPM", "Telerik Report", "FluentValidation", "Automapper", "Quartz", "EF", "Xunit"],
-  databases: ["SQL Server", "PostgreSQL", "SQLite", "RavenDB", "CouchDB", "WatermelonDB", "MongoDB"],
-  devops: ["Docker", "Git", "Nexus", "Jenkins", "SonarQube", "Azure DevOps", "Redmine"],
-  architecture: ["OOP", "Microservices", "Design Patterns", "Clean Code", "Clean Architecture", "SOLID", "DRY"],
-  tools: []
+  techStack: {
+    languages: ["C#", "JavaScript", "TypeScript", "Python"],
+    frontend: ["React 19", "Next.js (App Router)", "Tailwind CSS 4", "Framer Motion", "Shadcn UI", "TanStack Table", "Recharts"],
+    backend: ["Vercel AI SDK", "LangChain", "Prisma", "Drizzle ORM", "Better Auth", "Midtrans", "WhatsApp API", "NHibernate", "Masstransit", "Hangfire", "Camunda BPM", "Telerik Report", "FluentValidation", "Automapper", "Quartz", "EF", "Xunit"],
+    databases: ["PostgreSQL", "SQL Server", "Supabase", "MongoDB", "SQLite", "Redis", "RavenDB"],
+    devops: ["Docker", "Git", "Azure DevOps", "Jenkins", "SonarQube", "Nexus", "Vercel"],
+  },
+  professionalSkills: {
+    architecture: ["AI Orchestration", "Multi-Agent Systems", "RAG", "Microservices", "Clean Architecture", "SOLID", "Design Patterns"],
+    leadership: ["Product Management", "Team Leadership", "Agile/Scrum", "Stakeholder Management", "Engineering Excellence", "Strategic Planning"],
+    domain: ["InsurTech", "Manufacturing Systems", "Banking Solutions", "Government E-Services", "Logistics & Fleet Management"],
+  }
 };
 
 export const experience = [
@@ -133,6 +139,48 @@ export const experience = [
 
 export const projects = [
   {
+    id: "wifme",
+    title: "Wif-Me – Marketplace Muthawif & Umrah Mandiri",
+    category: "Product",
+    description: "Platform marketplace Muthawif profesional pertama untuk jamaah Umrah dan Haji mandiri dengan sistem ketersediaan real-time dan manajemen perjalanan terpadu.",
+    tech: ["Next.js", "TypeScript", "Prisma ORM", "PostgreSQL", "Tailwind CSS", "Midtrans"],
+    image: "/projects/wifme.png",
+    link: "https://wifme.vercel.app/",
+    caseStudy: {
+      problem: "Jamaah Umrah mandiri sering kesulitan menemukan pembimbing (Muthawif) yang terpercaya, transparan dalam harga, dan memiliki ketersediaan jadwal yang pasti di tanah suci.",
+      solution: "Membangun marketplace yang memverifikasi profil Muthawif, menyediakan kalender ketersediaan real-time, serta memfasilitasi transaksi aman dan pelacakan status perjalanan dalam satu platform.",
+      result: "Meningkatkan kepercayaan jamaah mandiri dalam beribadah, memberdayakan ratusan Muthawif lokal dengan sistem booking yang terorganisir, dan menciptakan ekosistem Umrah mandiri yang lebih transparan."
+    }
+  },
+  {
+    id: "cobapns",
+    title: "COBA PNS — Platform Try Out CAT CPNS #1 dengan AI",
+    category: "Product",
+    description: "Platform Try Out CAT CPNS terpintar dengan AI Diagnostic, Ranking Nasional, dan Pembahasan Lengkap untuk membantu persiapan seleksi CPNS secara komprehensif.",
+    tech: ["Next.js 15", "React 19", "Prisma ORM", "PostgreSQL", "Tailwind CSS 4", "Zod", "TanStack Table", "PDFKit", "Recharts"],
+    image: "/projects/cobapns.png",
+    link: "https://cobapns.com/",
+    caseStudy: {
+      problem: "Banyak calon peserta CPNS merasa kesulitan belajar secara terarah, sering terjebak menghafal posisi jawaban pada tryout statis, dan minimnya visibilitas terhadap posisi kemampuan mereka dibandingkan kompetitor lain secara nasional.",
+      solution: "Membangun platform dengan Smart Shuffle Engine untuk variasi soal yang dinamis, AI Diagnostic Roadmap yang menganalisis kelemahan materi secara personal, dan sistem Ranking Nasional real-time untuk simulasi kompetisi yang sesungguhnya.",
+      result: "Berhasil melayani 50rb+ pengguna aktif, membantu ribuan alumni lulus CPNS melalui persiapan yang lebih terukur, dan menjadi salah satu platform tryout CPNS dengan pertumbuhan tercepat."
+    }
+  },
+  {
+    id: "snaptext",
+    title: "SnapText - AI-Powered Document Intelligence Engine",
+    category: "Product",
+    description: "Engine OCR modern yang mentransformasi dokumen tidak terstruktur menjadi data JSON siap pakai, ringkasan akurat, dan konteks cerdas untuk aplikasi AI.",
+    tech: ["Next.js 16", "React 19", "Vercel AI SDK", "Drizzle ORM", "PostgreSQL", "Tailwind CSS 4", "Framer Motion", "Better Auth", "PDF.js"],
+    image: "/projects/snaptext.png",
+    link: "https://snaptextid.vercel.app/",
+    caseStudy: {
+      problem: "Mengolah data dari dokumen fisik, PDF, atau gambar menjadi format terstruktur (JSON) biasanya membutuhkan waktu lama, tidak akurat, dan sulit diotomasi secara massal dengan akurasi tinggi.",
+      solution: "Mengembangkan platform berbasis Vision Models yang mampu memahami struktur dokumen secara visual, mengekstraksi data poin spesifik sesuai skema JSON yang diinginkan, dan melakukan chunking cerdas untuk integrasi RAG (Retrieval-Augmented Generation).",
+      result: "Menghasilkan ekstraksi data dengan akurasi tinggi (>95%), memangkas waktu pemrosesan dokumen dari menit menjadi milidetik, dan menyediakan SDK yang memudahkan developer membangun aplikasi berbasis dokumen."
+    }
+  },
+  {
     id: "agenthive",
     title: "AgentHive - Multi-Agent Autonomous Engineering Platform",
     category: "Product",
@@ -152,6 +200,7 @@ export const projects = [
     description: "Platform manajemen armada berbasis data untuk operator logistik modern yang fokus pada efisiensi biaya operasional.",
     tech: ["Next.js", "React", "TypeScript", "Tailwind CSS", "PostgreSQL", "Supabase"],
     image: "/projects/truxos.png",
+    link: "https://truxos.vercel.app/",
     caseStudy: {
       problem: "Operator logistik seringkali kesulitan dalam melacak biaya operasional armada secara presisi, menebak keuntungan tanpa data yang akurat, dan menghadapi inefisiensi rute.",
       solution: "Membangun platform manajemen armada yang mengubah data mentah menjadi intelijen biaya, dengan fitur perhitungan biaya per kilometer (BBM, tol, perawatan), analitik real-time, dan wawasan prediktif.",
@@ -165,6 +214,7 @@ export const projects = [
     description: "Platform akuntansi cloud eksklusif untuk korporasi besar yang membutuhkan presisi tinggi, sinkronisasi real-time, dan keamanan tingkat militer.",
     tech: ["Next.js", "React", "TypeScript", "Node.js", "GraphQL", "PostgreSQL", "AES-256"],
     image: "/projects/accuwrite.png",
+    link: "https://accuwrite.vercel.app/",
     caseStudy: {
       problem: "Entitas bisnis skala besar menghadapi tantangan dalam menjembatani sistem operasional dengan laporan keuangan standar industri secara real-time, sering terjebak dalam input manual massal dan latensi rekonsiliasi.",
       solution: "Mengembangkan sistem akuntansi cloud dengan buku besar otomatis via API, sinkronisasi real-time dua arah, dan algoritma pencocokan dinamis berbasis AI untuk mencegah bottleneck audit.",
@@ -178,10 +228,39 @@ export const projects = [
     description: "Sistem Point of Sale (POS) multi-cabang yang dirancang untuk skalabilitas bisnis, manajemen inventaris terpusat, dan analitik laba mendalam.",
     tech: ["Next.js", "React", "TypeScript", "Tailwind CSS", "Node.js", "PostgreSQL", "WebSocket"],
     image: "/projects/expos.png",
+    link: "https://expos-indol.vercel.app/",
     caseStudy: {
       problem: "Pemilik bisnis multi-cabang sering mengalami ketidaksinkronan data stok antar outlet, kesulitan menghitung HPP dan laba bersih secara otomatis, serta kurangnya visibilitas terhadap proses produksi di tiap cabang.",
       solution: "Membangun sistem POS dengan dashboard konsolidasi terpusat, fitur sinkronisasi stok lintas cabang secara real-time, universal order tracking, dan kalkulasi HPP otomatis per produk.",
       result: "Memberikan transparansi penuh bagi pemilik bisnis, mengeliminasi laporan manual antar cabang, dan membantu identifikasi produk paling menguntungkan melalui analitik profitabilitas yang mendalam."
+    }
+  },
+  {
+    id: "u-wa",
+    title: "uWA - WhatsApp Automation Engine",
+    category: "Product",
+    description: "Platform otomasi WhatsApp enterprise-grade dengan algoritma anti-banned cerdas, spintax dinamis, dan analitik real-time untuk efisiensi komunikasi bisnis.",
+    tech: ["Next.js", "TypeScript", "Tailwind CSS", "PostgreSQL", "AI", "Node.js"],
+    image: "/projects/u-wa.png",
+    link: "https://u-wa.vercel.app/",
+    caseStudy: {
+      problem: "Risiko akun diblokir saat pengiriman pesan massal dan sulitnya memantau performa kampanye secara real-time menjadi hambatan utama bagi bisnis dalam menggunakan WhatsApp sebagai kanal komunikasi.",
+      solution: "Membangun sistem dengan teknologi 'shared connection pool', simulasi perilaku manusia (human mimicry), dan interval acak yang dinamis untuk meminimalkan deteksi spam.",
+      result: "Meningkatkan efisiensi operasional hingga 90%, memastikan keamanan akun pengguna, dan memberikan wawasan mendalam melalui dashboard analitik performa kampanye."
+    }
+  },
+  {
+    id: "eread",
+    title: "e-Read — Your Personal Digital Library",
+    category: "Product",
+    description: "Pengalaman membaca digital yang imersif dengan pencahayaan hangat, dirancang khusus untuk meningkatkan fokus dan kenyamanan mata saat membaca koleksi PDF.",
+    tech: ["Next.js", "TypeScript", "PDF.js", "Cloud Storage API", "Tailwind CSS", "Auth.js"],
+    image: "/projects/eread.png",
+    link: "https://e-read-three.vercel.app/",
+    caseStudy: {
+      problem: "Pembaca sering mengalami kelelahan mata akibat paparan cahaya biru yang tajam dan distraksi antarmuka saat membaca dokumen PDF dalam waktu lama.",
+      solution: "Membangun perpustakaan digital dengan mode baca 'warm-light', tipografi serif yang dioptimalkan, dan integrasi cloud storage untuk akses dokumen yang mulus.",
+      result: "Menciptakan lingkungan baca yang tenang dan terfokus, memudahkan manajemen ribuan dokumen PDF, dan meningkatkan kenyamanan pengguna selama sesi membaca yang panjang."
     }
   },
   {
@@ -191,6 +270,7 @@ export const projects = [
     description: "Automate your Discord server with the #1 professional mirroring tool. Safe, fast, and reliable with zero latency.",
     tech: ["Node.js", "Discord.js", "WebSocket", "React", "Next.js"],
     image: "/projects/disbot.png",
+    link: "https://disbot-neon.vercel.app/",
     caseStudy: {
       problem: "Komunitas dan trader crypto kesulitan menduplikasi informasi, sinyal, dan pengumuman antar server Discord secara real-time tanpa delay, serta rentan terkena banned system saat menggunakan bot biasa.",
       solution: "Membangun sistem dengan private WebSocket instance untuk zero latency, menerapkan algoritma mimicking perilaku manusia (no-ban guarantee), serta enkripsi tingkat militer untuk mirroring lintas server.",
@@ -204,6 +284,7 @@ export const projects = [
     description: "Platform company profile dan katalog untuk penyedia instrumen presisi dan valves berkualitas tinggi sektor Oil & Gas.",
     tech: ["Next.js", "React", "TypeScript", "Tailwind CSS"],
     image: "/projects/vea.png",
+    link: "https://ptvea.com/",
     caseStudy: {
       problem: "Sektor industri Oil & Gas serta Power Plants membutuhkan informasi alat dengan spesifikasi teknis presisi tinggi secara cepat, namun kerap kesulitan mengakses katalog lengkap pengadaan melalui satu kanal informasi komprehensif.",
       solution: "Merancang arsitektur website interaktif yang menonjolkan katalog produk (pressure gauge, valves, tubing) dan mendirikan kanal komunikasi instan yang menghubungkan calon partner dengan engineering team secara real-time.",
@@ -213,10 +294,11 @@ export const projects = [
   {
     id: "tpanuruliman",
     title: "TPA - Nurul Iman",
-    category: "Others",
+    category: "Product",
     description: "Platform digital terintegrasi untuk pendaftaran santri baru, monitoring hafalan, dan laporan perkembangan santri berbasis web.",
     tech: ["Next.js", "React", "TypeScript", "PostgreSQL", "Supabase", "REST API", "Email Gateway"],
     image: "/projects/tpanuruliman.png",
+    link: "https://tpanuruliman.com/",
     caseStudy: {
       problem: "Proses pendaftaran santri baru masih manual menggunakan formulir kertas yang menyulitkan pendataan. Orang tua kesulitan memantau perkembangan hafalan dan pembelajaran anak secara real-time karena laporan hanya diberikan secara fisik setiap akhir semester.",
       solution: "Membangun sistem informasi akademik TPA yang mencakup Penerimaan Peserta Didik Baru (PPDB) Online, Dashboard Monitoring Hafalan untuk orang tua, dan Laporan Hasil Belajar Digital (E-Rapor).",

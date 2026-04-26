@@ -15,11 +15,13 @@ KEY METRICS:
 ${about.metrics.map(m => `- ${m.value}: ${m.label}`).join('\n')}
 
 TECHNICAL SKILLS:
-Languages: ${skills.languages.join(', ')}
-Backend: ${skills.backend.join(', ')}
-Databases: ${skills.databases.join(', ')}
-DevOps: ${skills.devops.join(', ')}
-Architecture: ${skills.architecture.join(', ')}
+Languages: ${skills.techStack.languages.join(', ')}
+Backend: ${skills.techStack.backend.join(', ')}
+Databases: ${skills.techStack.databases.join(', ')}
+DevOps: ${skills.techStack.devops.join(', ')}
+Architecture: ${skills.professionalSkills.architecture.join(', ')}
+Leadership: ${skills.professionalSkills.leadership.join(', ')}
+Domain Expertise: ${skills.professionalSkills.domain.join(', ')}
 
 PROFESSIONAL EXPERIENCE:
 ${experience.map(exp => `
