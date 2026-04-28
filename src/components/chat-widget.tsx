@@ -335,22 +335,28 @@ export function ChatWidgetModern() {
             </div>
           ) : (
             <>
-              {messages.map((msg: Message, idx: number) => (
-                <div
-                  key={idx}
-                  className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}
-                >
-                  <div
-                    className={`max-w-xs px-5 py-3 rounded-xl ${
-                      msg.role === 'user'
-                        ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-br-none shadow-lg hover:shadow-blue-500/50'
-                        : 'bg-gradient-to-br from-slate-700 to-slate-800 text-slate-100 rounded-bl-none border border-slate-600/50 hover:border-slate-500/50 shadow-lg'
-                    } transition-all duration-200 hover:shadow-xl`}
-                  >
-                    <p className="text-sm leading-relaxed">{msg.content}</p>
+              {messages.map((msg: Message, idx: number) => {
+                const chunks = msg.role === 'assistant' 
+                  ? msg.content.split(/\n+/).filter(c => c.trim().length > 0)
+                  : [msg.content];
+                
+                return (
+                  <div key={idx} className={`flex flex-col space-y-2 ${msg.role === 'user' ? 'items-end' : 'items-start'} animate-fade-in`}>
+                    {chunks.map((chunk, chunkIdx) => (
+                      <div
+                        key={`${idx}-${chunkIdx}`}
+                        className={`max-w-xs px-5 py-3 rounded-xl ${
+                          msg.role === 'user'
+                            ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-br-none shadow-lg hover:shadow-blue-500/50'
+                            : 'bg-gradient-to-br from-slate-700 to-slate-800 text-slate-100 rounded-bl-none border border-slate-600/50 hover:border-slate-500/50 shadow-lg'
+                        } transition-all duration-200 hover:shadow-xl`}
+                      >
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{chunk.trim()}</p>
+                      </div>
+                    ))}
                   </div>
-                </div>
-              ))}
+                );
+              })}
               {isLoading && (
                 <div className="flex justify-start animate-fade-in">
                   <div className="bg-gradient-to-r from-slate-700 to-slate-800 px-5 py-3 rounded-xl rounded-bl-none border border-slate-600/50">
