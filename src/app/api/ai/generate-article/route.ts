@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase';
-import OpenAI from 'openai';
+import { generateText, createGateway } from 'ai';
+
+const aiGateway = createGateway({
+  apiKey: process.env.AI_GATEWAY_API_KEY,
+});
 
 // Get auth session from cookies
 function getAuthSession(request: NextRequest) {
@@ -12,10 +16,6 @@ function getAuthSession(request: NextRequest) {
     return null;
   }
 }
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || 'dummy_key_for_build',
-});
 
 const UNSPLASH_API_KEY = process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY || process.env.UNSPLASH_ACCESS_KEY;
 
@@ -236,12 +236,9 @@ async function generateCustomSearchTerms(instruction: string, articleContent: st
     // Combine instruction and content for better context
     const fullContext = `${instruction}\n\nGenerated content preview:\n${articleContent.substring(0, 800)}`;
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: `You are an expert at creating highly specific Unsplash image search queries that match article topics precisely.
+    const { text: termsText } = await generateText({
+      model: aiGateway('openai/gpt-4o'),
+      system: `You are an expert at creating highly specific Unsplash image search queries that match article topics precisely.
 
 CRITICAL: Your search terms MUST match the specific technologies and topics mentioned in the article.
 
@@ -260,26 +257,17 @@ Rules:
 6. No explanations, no numbering, just comma-separated terms
 
 CRITICAL: If article mentions "Flutter", do NOT return "react" or "angular". Match the EXACT technology!`,
-        },
-        {
-          role: 'user',
-          content: `Generate image search terms for this article:\n\n${fullContext}`,
-        },
-      ],
-      max_tokens: 250,
+      prompt: `Generate image search terms for this article:\n\n${fullContext}`,
+      maxOutputTokens: 250,
       temperature: 0.2,
     });
 
-    const termsText = response.choices[0].message.content || '';
-
-
     // Parse with more flexible filtering
-    const terms = termsText
+    const terms = (termsText || '')
       .split(',')
-      .map(t => t.trim().replace(/^["\']|["\']$/g, '')) // Remove quotes
-      .filter(t => t.length > 2 && !t.includes(':') && !t.startsWith('No') && !t.includes('http') && !t.includes('?'))
+      .map((t: string) => t.trim().replace(/^["\']|["\']$/g, '')) // Remove quotes
+      .filter((t: string) => t.length > 2 && !t.includes(':') && !t.startsWith('No') && !t.includes('http') && !t.includes('?'))
       .slice(0, 5);
-
 
     return terms.length > 0 ? terms : [];
   } catch (error) {
@@ -356,24 +344,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate article using OpenAI
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: ARTICLE_SYSTEM_PROMPT,
-        },
-        {
-          role: 'user',
-          content: `Generate a technical article based on this instruction:\n\n${instruction}\n\nRemember to add [IMAGE] markers throughout the content.`,
-        },
-      ],
+    // Generate article using Vercel AI Gateway
+    const { text: generatedContent } = await generateText({
+      model: aiGateway('openai/gpt-4o'),
+      system: ARTICLE_SYSTEM_PROMPT,
+      prompt: `Generate a technical article based on this instruction:\n\n${instruction}\n\nRemember to add [IMAGE] markers throughout the content.`,
       temperature: 0.7,
-      max_tokens: 2000,
+      maxOutputTokens: 2000,
     });
 
-    let content = completion.choices[0].message.content || '';
+    let content = generatedContent || '';
 
     // Extract topics from instruction and content
     const detectedTopics = extractTopics(instruction + ' ' + content);
