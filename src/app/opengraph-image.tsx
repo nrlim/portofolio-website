@@ -1,27 +1,42 @@
+import fs from 'fs';
+import path from 'path';
 import { ImageResponse } from 'next/og';
 import { personalInfo, about } from '@/data/portfolio';
 
 export const runtime = 'nodejs';
 
-export async function GET(request: Request): Promise<Response> {
-  try {
-    const baseUrl = new URL(request.url).origin;
+export const alt = 'Nuralim - Product & Technology Development Manager';
+export const size = {
+  width: 1200,
+  height: 630,
+};
 
+export const contentType = 'image/png';
+
+export default async function Image() {
+  try {
     let photoBuffer: ArrayBuffer | null = null;
 
     // Handle profile photo
     if (personalInfo.photo) {
       try {
-        const photoUrl = personalInfo.photo.startsWith('http') 
-          ? personalInfo.photo 
-          : `${baseUrl}${personalInfo.photo}`;
-        
-        const response = await fetch(photoUrl);
-        if (response.ok) {
-          photoBuffer = await response.arrayBuffer();
+        if (personalInfo.photo.startsWith('http')) {
+          const response = await fetch(personalInfo.photo);
+          if (response.ok) {
+            photoBuffer = await response.arrayBuffer();
+          }
+        } else {
+          const filePath = path.join(process.cwd(), 'public', personalInfo.photo);
+          if (fs.existsSync(filePath)) {
+            const fileData = fs.readFileSync(filePath);
+            photoBuffer = fileData.buffer.slice(
+              fileData.byteOffset,
+              fileData.byteOffset + fileData.byteLength
+            ) as ArrayBuffer;
+          }
         }
       } catch (error) {
-        console.error('Failed to fetch profile photo for OG:', error);
+        console.error('Failed to load profile photo for OG:', error);
       }
     }
 
@@ -128,7 +143,6 @@ export async function GET(request: Request): Promise<Response> {
                 border: '1px solid rgba(255, 255, 255, 0.1)',
                 padding: '12px 24px',
                 borderRadius: '100px',
-                width: 'fit-content',
                 alignItems: 'center',
                 gap: '12px',
               }}
@@ -204,8 +218,7 @@ export async function GET(request: Request): Promise<Response> {
       ),
 
       {
-        width: 1200,
-        height: 630,
+        ...size,
       }
     );
   } catch (error) {

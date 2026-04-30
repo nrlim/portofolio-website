@@ -60,21 +60,12 @@ export const metadata: Metadata = {
     description:
       "Expert dalam membangun scalable software dan memberdayakan tim engineering excellence. 7+ tahun pengalaman profesional di berbagai industri.",
     siteName: "Nuralim Portfolio",
-    images: [
-      {
-        url: "/og",
-        width: 1200,
-        height: 630,
-        alt: "Nuralim - Product & Technology Development Manager",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Nuralim - Product & Technology Development Manager | Nuralim Dev",
     description:
       "7+ tahun pengalaman dalam software engineering, product development, dan technical leadership.",
-    images: ["/og"],
     creator: "@nuralim",
   },
   robots: {

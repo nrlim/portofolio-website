@@ -372,7 +372,7 @@ export default function CalculatorPage() {
                       <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Billing Type</label>
                       <select
                         value={ai.billingType || 'one-time'}
-                        onChange={e => updateAI(ai.id, 'billingType', e.target.value as any)}
+                        onChange={e => updateAI(ai.id, 'billingType', e.target.value as "monthly" | "yearly" | "one-time")}
                         className="h-9 w-full px-3 text-sm rounded-sm border border-input bg-background shadow-sm"
                       >
                         <option value="monthly">Monthly</option>

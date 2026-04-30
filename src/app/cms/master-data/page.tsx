@@ -273,7 +273,7 @@ export default function MasterDataPage() {
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Billing Type</label>
                           <select
                             value={ai.billingType || 'one-time'}
-                            onChange={e => setConfig(p => ({ ...p, aiServices: p.aiServices.map(r => r.id === ai.id ? { ...r, billingType: e.target.value as any } : r) }))}
+                            onChange={e => setConfig(p => ({ ...p, aiServices: p.aiServices.map(r => r.id === ai.id ? { ...r, billingType: e.target.value as "monthly" | "yearly" | "one-time" } : r) }))}
                             className="h-9 w-full px-3 text-sm rounded-sm border border-input bg-background shadow-sm"
                           >
                             <option value="monthly">Monthly</option>

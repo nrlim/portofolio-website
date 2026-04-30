@@ -20,7 +20,7 @@ interface ProjectRecord {
 interface DevRole { id: string; role: string; qty: number; days: number; dailyRate: number; dailyAllowance: number; }
 interface InfraItem { id: string; name: string; type: 'monthly' | 'yearly' | 'one-time'; price: number; ppnPercent: number; }
 interface AdditionalFee { id: string; name: string; price: number; }
-interface AIService { id: string; name: string; aiModel?: string; pricingModel: string; price: number; qty?: number; }
+interface AIService { id: string; name: string; aiModel?: string; pricingModel: string; billingType?: 'monthly' | 'yearly' | 'one-time'; price: number; qty?: number; }
 
 interface ProjectData {
   clientName: string;
@@ -79,145 +79,174 @@ export default function DashboardPage() {
   const handleExportPDF = (projectData: ProjectData) => {
     const project = projectData || {};
 
-    const devRoles      = Array.isArray(project.devRoles)       ? project.devRoles       : [];
-    const infraItems    = Array.isArray(project.infraItems)     ? project.infraItems     : [];
-    const additionalFees= Array.isArray(project.additionalFees) ? project.additionalFees : [];
-    const aiServices    = Array.isArray(project.aiServices)     ? project.aiServices     : [];
-    const licensePercent= typeof project.licensePercent === 'number' ? project.licensePercent : 10;
-    const notes         = project.notes || '';
+    const devRoles = Array.isArray(project.devRoles) ? project.devRoles : [];
+    const infraItems = Array.isArray(project.infraItems) ? project.infraItems : [];
+    const additionalFees = Array.isArray(project.additionalFees) ? project.additionalFees : [];
+    const aiServices = Array.isArray(project.aiServices) ? project.aiServices : [];
+    const licensePercent = typeof project.licensePercent === 'number' ? project.licensePercent : 10;
+    const notes = project.notes || '';
 
-    const totalDevCost        = devRoles.reduce((s: number, r: DevRole) => s + (r.qty||0)*(r.days||0)*((r.dailyRate||0)+(r.dailyAllowance||0)), 0);
-    const totalInfraCost      = infraItems.reduce((s: number, i: InfraItem) => s + ((i.type==='monthly'?(i.price||0)*12:(i.price||0))*(1+(i.ppnPercent||0)/100)), 0);
-    const totalAdditionalCost = additionalFees.reduce((s: number, f: AdditionalFee) => s + (f.price||0), 0);
-    const totalAICost = aiServices.reduce((s: number, a: AIService) => {
-      const basePrice = (a.price || 0) * (a.qty || 1);
-      return s + (a.billingType === 'monthly' ? basePrice * 12 : basePrice);
-    }, 0);
-    const subTotal     = totalDevCost + totalInfraCost + totalAdditionalCost + totalAICost;
-    const licenseCost  = subTotal * (licensePercent / 100);
-    const grandTotal   = subTotal + licenseCost;
+    const totalDevCost = devRoles.reduce((s: number, r: DevRole) => s + (r.qty || 0) * (r.days || 0) * ((r.dailyRate || 0) + (r.dailyAllowance || 0)), 0);
+    const totalInfraCost = infraItems.reduce((s: number, i: InfraItem) => s + ((i.type === 'monthly' ? (i.price || 0) * 12 : (i.price || 0)) * (1 + (i.ppnPercent || 0) / 100)), 0);
+    const totalAdditionalCost = additionalFees.reduce((s: number, f: AdditionalFee) => s + (f.price || 0), 0);
+    const subTotal = totalDevCost + totalInfraCost + totalAdditionalCost;
+    const licenseCost = subTotal * (licensePercent / 100);
+    const grandTotal = subTotal + licenseCost;
 
     // Helper: table cell
     const td = (val: string, align = 'left', bold = false) =>
-      `<td style="padding:7px 10px;border-bottom:1px solid #e5e7eb;text-align:${align};${bold?'font-weight:600;':''}">${val}</td>`;
+      `<td style="padding:7px 10px;border-bottom:1px solid #e5e7eb;text-align:${align};${bold ? 'font-weight:600;' : ''}">${val}</td>`;
 
     // Helper: table header cell
     const th = (label: string, align = 'left', w = '') =>
-      `<th style="padding:7px 10px;background:#f1f5f9;color:#475569;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;text-align:${align};${w?`width:${w};`:''}white-space:nowrap">${label}</th>`;
+      `<th style="padding:7px 10px;background:#f1f5f9;color:#475569;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;text-align:${align};${w ? `width:${w};` : ''}white-space:nowrap">${label}</th>`;
 
     // Helper: section heading
     const sec = (n: string, t: string) =>
       `<div style="margin:18px 0 8px;padding-bottom:5px;border-bottom:1.5px solid #e2e8f0"><span style="font-size:13px;font-weight:700;color:#1e40af;text-transform:uppercase">${n}. ${t}</span></div>`;
 
     const devRows = devRoles.map((r: DevRole) =>
-      `<tr>${td(r.role||'-')}${td(`${r.qty||0} org`,'center')}${td(`${r.days||0} hari`,'center')}${td(fmt((r.dailyRate||0)+(r.dailyAllowance||0)),'right')}${td(fmt((r.qty||0)*(r.days||0)*((r.dailyRate||0)+(r.dailyAllowance||0))),'right',true)}</tr>`
+      `<tr>${td(r.role || '-')}${td(`${r.qty || 0} pax`, 'center')}${td(`${r.days || 0} days`, 'right')}${td(fmt((r.dailyRate || 0) + (r.dailyAllowance || 0)), 'right')}${td(fmt((r.qty || 0) * (r.days || 0) * ((r.dailyRate || 0) + (r.dailyAllowance || 0))), 'right', true)}</tr>`
     ).join('');
 
     const infraRows = infraItems.map((i: InfraItem) => {
-      const base = i.type==='monthly'?(i.price||0)*12:(i.price||0);
-      const tipe = i.type==='monthly'?'Bulanan':i.type==='yearly'?'Tahunan':'Sekali Bayar';
-      return `<tr>${td(i.name||'-')}${td(tipe,'center')}${td(fmt(i.price||0),'right')}${td(`${i.ppnPercent||0}%`,'right')}${td(fmt(base*(1+(i.ppnPercent||0)/100)),'right',true)}</tr>`;
+      const base = i.type === 'monthly' ? (i.price || 0) * 12 : (i.price || 0);
+      const tipe = i.type === 'monthly' ? 'Monthly' : i.type === 'yearly' ? 'Yearly' : 'One-time';
+      return `<tr>${td(i.name || '-')}${td(tipe, 'center')}${td(fmt(i.price || 0), 'right')}${td(`${i.ppnPercent || 0}%`, 'right')}${td(fmt(base * (1 + (i.ppnPercent || 0) / 100)), 'right', true)}</tr>`;
     }).join('');
 
     const feeRows = additionalFees.map((f: AdditionalFee) =>
-      `<tr>${td(f.name||'-')}${td(fmt(f.price||0),'right',true)}</tr>`
+      `<tr>${td(f.name || '-')}${td(fmt(f.price || 0), 'right', true)}</tr>`
     ).join('');
 
     const aiRows = aiServices.map((a: AIService) => {
-      const isUsageBased = ['per_page','per_1k_requests','per_1k_tokens','per_1m_tokens'].includes(a.pricingModel);
-      const qtyText = isUsageBased ? `(${a.qty||1} x ${fmt(a.price||0)})` : fmt(a.price||0);
-      const base = a.billingType === 'monthly' ? (a.price||0) * 12 : (a.price||0);
-      const total = base * (a.qty||1);
-      return `<tr>${td(a.name||'-')}${td(a.pricingModel||'-','center')}${td(qtyText,'right')}${td(fmt(total),'right',true)}</tr>`;
+      const isUsageBased = ['per_page', 'per_1k_requests', 'per_1k_tokens', 'per_1m_tokens'].includes(a.pricingModel);
+      const qtyText = isUsageBased ? `(${a.qty || 1} x ${fmt(a.price || 0)})` : fmt(a.price || 0);
+      const base = a.billingType === 'yearly' ? (a.price || 0) * 12 : (a.price || 0);
+      const total = base * (a.qty || 1);
+      const periodLabel = a.billingType === 'yearly' ? '/ Year' : a.billingType === 'monthly' ? '/ Month' : '/ One-time';
+      const formattedTotal = `${fmt(total)}<div style="font-size:8px;color:#64748b;font-weight:400">${periodLabel}</div>`;
+      return `<tr>${td(a.name || '-')}${td(a.pricingModel || '-', 'center')}${td(qtyText, 'right')}<td style="padding:7px 10px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:600">${formattedTotal}</td></tr>`;
     }).join('');
 
     const sumRow = (label: string, val: string, cls = '') =>
       `<div style="display:flex;justify-content:space-between;padding:7px 12px;border-bottom:1px solid #e2e8f0;font-size:12px;${cls}">${label}<span>${val}</span></div>`;
 
-    const html = `<!DOCTYPE html><html lang="id"><head>
+    const html = `<!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8">
-<title>Estimasi Biaya Proyek - ${project.projectName||'Tanpa Nama'}</title>
+<title>Project Quotation - ${project.projectName || 'Unnamed'}</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
   @page { size: A4 portrait; margin: 0; }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:'Inter',sans-serif; color:#1e293b; background:#fff; font-size:12px; line-height:1.5; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-  table { width:100%; border-collapse:collapse; }
+  table { width:100%; border-collapse:collapse; margin-bottom: 40mm; }
+  .page-footer { position: fixed; bottom: 0; left: 0; right: 0; height: 35mm; padding: 0 14mm 8mm; display: flex; justify-content: space-between; align-items: flex-end; }
 </style></head><body>
+<div class="page-footer">
+  <div style="width:100%;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #e2e8f0;padding-top:3mm;margin-bottom:4px">
+    <span style="font-size:8px;color:#94a3b8;font-style:italic">This document is strictly confidential and intended only for the addressed party.</span>
+  </div>
+</div>
 <table>
   <thead style="display:table-header-group">
     <tr><td style="padding:0">
-      <div style="padding:10mm 14mm 5mm;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #1e293b">
-        <div>
-          <div style="font-size:20px;font-weight:900;letter-spacing:-0.5px;line-height:1;color:#1e293b">Nuralim<span style="color:#2563eb">Dev</span></div>
-          <div style="font-size:9px;color:#94a3b8;margin-top:2px">nuralimdev.com</div>
+      <div style="padding:5mm 14mm 4mm;display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #1e293b">
+        <div style="display:flex;align-items:center;gap:12px">
+          <img src="${window.location.origin}/personal-logo.png" alt="Logo" style="width:36px;height:36px;object-fit:contain" />
+          <div>
+            <div style="font-size:20px;font-weight:900;letter-spacing:-0.5px;line-height:1;color:#1e293b">Nuralim<span style="color:#2563eb">.Dev</span></div>
+          </div>
         </div>
-        <div style="text-align:right">
-          <div style="font-size:22px;font-weight:800;color:#2563eb">ESTIMASI BIAYA</div>
-          <div style="font-size:9px;color:#94a3b8;margin-top:2px">${project.projectDate||''}</div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          <div style="text-align:right;margin-bottom:4px">
+            <div style="display:inline-block;background-color:#1e3a8a;color:#ffffff;padding:5px 12px;border-radius:4px;font-size:15px;font-weight:900;letter-spacing:0.2em;line-height:1">QUOTATION</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg" alt="BCA" style="height:10px;" />
+            <div style="text-align:right">
+              <div style="font-size:12px;color:#374151;font-weight:700;font-family:monospace;letter-spacing:0.5px;line-height:1">5485087858</div>
+              <div style="font-size:9px;color:#6b7280;line-height:1;margin-top:2px">a.n Nuralim</div>
+            </div>
+          </div>
         </div>
       </div>
     </td></tr>
   </thead>
-  <tfoot style="display:table-footer-group">
-    <tr><td style="padding:0">
-      <div style="padding:3mm 14mm 8mm;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #e2e8f0">
-        <span style="font-size:8px;color:#94a3b8;font-weight:600">NuralimDev · nuralimdev.com</span>
-        <span style="font-size:8px;color:#94a3b8;font-style:italic">Dokumen ini bersifat rahasia dan hanya untuk pihak yang dituju.</span>
-      </div>
-    </td></tr>
-  </tfoot>
+
   <tbody><tr><td style="padding:0">
     <div style="padding:6mm 14mm 4mm">
 
       <!-- Project Meta -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 32px;padding:10px 12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:3px;margin-bottom:14px">
-        <div style="font-size:12px"><strong>Klien:</strong> ${project.clientName||'-'}</div>
-        <div style="font-size:12px"><strong>Tanggal:</strong> ${project.projectDate||'-'}</div>
-        <div style="font-size:12px"><strong>Proyek:</strong> ${project.projectName||'-'}</div>
-        <div style="font-size:12px"><strong>Timeline:</strong> ${project.timelineStr||'-'} &nbsp;&middot;&nbsp; <strong>Total Fitur:</strong> ${project.totalFeatures||0}</div>
-      </div>
-
-      <!-- Development -->
-      ${devRoles.length > 0 ? `${sec('1','Jasa Pembuatan Aplikasi (Development)')}
-      <table><thead><tr>${th('Peran / Role','left','40%')}${th('Qty','center','10%')}${th('Durasi','center','12%')}${th('Daily Rate','right','19%')}${th('Total','right','19%')}</tr></thead>
-      <tbody>${devRows}</tbody></table>` : ''}
-
-      <!-- Infrastructure -->
-      ${infraItems.length > 0 ? `${sec('2','Infrastruktur (Server & Domain)')}
-      <table><thead><tr>${th('Item','left','32%')}${th('Tipe','center','13%')}${th('Harga / Periode','right','18%')}${th('PPN','right','8%')}${th('Total / Tahun','right','19%')}</tr></thead>
-      <tbody>${infraRows}</tbody></table>` : ''}
-
-      <!-- Additional Fees -->
-      ${additionalFees.length > 0 ? `${sec('3','Biaya Tambahan (Lain-lain)')}
-      <table><thead><tr>${th('Deskripsi','left','82%')}${th('Biaya','right','18%')}</tr></thead>
-      <tbody>${feeRows}</tbody></table>` : ''}
-
-      <!-- AI Services -->
-      ${aiServices.length > 0 ? `${sec('4','AI Models / API Services')}
-      <table><thead><tr>${th('Layanan','left','36%')}${th('Pricing Model','center','20%')}${th('Harga / Periode','right','22%')}${th('Total / Tahun','right','22%')}</tr></thead>
-      <tbody>${aiRows}</tbody></table>` : ''}
-
-      <!-- Summary -->
-      <div style="width:340px;margin-left:auto;margin-top:16px;border:1px solid #e2e8f0;border-radius:3px;overflow:hidden">
-        ${totalDevCost > 0 ? sumRow('<span>Development Cost</span>',fmt(totalDevCost)) : ''}
-        ${totalInfraCost > 0 ? sumRow('<span>Infrastructure Cost</span>',fmt(totalInfraCost)) : ''}
-        ${totalAdditionalCost > 0 ? sumRow('<span>Additional Fees</span>',fmt(totalAdditionalCost)) : ''}
-        ${totalAICost > 0 ? sumRow('<span>AI Services</span>',fmt(totalAICost)) : ''}
-        ${sumRow('<span style="font-weight:600">Subtotal</span>',fmt(subTotal),'background:#f8fafc;font-weight:600')}
-        ${sumRow(`<span style="color:#475569">License / Margin (${licensePercent}%)</span>`,fmt(licenseCost))}
-        <div style="display:flex;justify-content:space-between;padding:10px 12px;background:#1e293b;color:#fff;font-size:14px;font-weight:800">
-          <span>GRAND TOTAL</span><span>${fmt(grandTotal)}</span>
+      <div style="display:flex;justify-content:space-between;padding:12px 16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:3px;margin-bottom:24px">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <div style="font-size:12px;display:grid;grid-template-columns:60px 1fr;gap:8px"><span style="color:#64748b;font-weight:600">Client</span> <span style="font-weight:600">${project.clientName || '-'}</span></div>
+          <div style="font-size:12px;display:grid;grid-template-columns:60px 1fr;gap:8px"><span style="color:#64748b;font-weight:600">Project</span> <span style="font-weight:600">${project.projectName || '-'}</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;text-align:right">
+          <div style="font-size:12px"><span style="color:#64748b;font-weight:600">Date</span> &nbsp;&nbsp;<span style="font-weight:600">${project.projectDate || '-'}</span></div>
+          <div style="font-size:12px"><span style="color:#64748b;font-weight:600">Timeline</span> &nbsp;&nbsp;<span style="font-weight:600">${project.timelineStr || '-'}</span> &nbsp;&nbsp;<span style="color:#cbd5e1">|</span>&nbsp;&nbsp; <span style="color:#64748b;font-weight:600">Total Features</span> &nbsp;&nbsp;<span style="font-weight:600">${project.totalFeatures || 0}</span></div>
         </div>
       </div>
 
-      <!-- Notes -->
-      ${notes ? `<div style="display:inline-block;max-width:100%;margin-top:16px">
-        <div style="padding:10px 14px;background:#eff6ff;border-left:3px solid #2563eb;border-radius:2px">
-          <div style="font-size:10px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Catatan / Syarat &amp; Ketentuan</div>
-          <div style="font-size:12px;color:#475569;white-space:pre-line;line-height:1.6">${notes.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br/>')}</div>
+      ${(() => {
+        let sectionIndex = 1;
+        let contentHtml = '';
+
+        if (devRoles.length > 0) {
+          contentHtml += `${sec(sectionIndex.toString(), 'Application Development Services')}
+          <table style="margin-bottom:24px"><thead><tr>${th('Role', 'left', '40%')}${th('Qty', 'center', '15%')}${th('Duration', 'right', '15%')}${th('Daily Rate', 'right', '15%')}${th('Total', 'right', '15%')}</tr></thead>
+          <tbody>${devRows}</tbody></table>`;
+          sectionIndex++;
+        }
+
+        if (infraItems.length > 0) {
+          contentHtml += `${sec(sectionIndex.toString(), 'Infrastructure (Server & Domain)')}
+          <table style="margin-bottom:24px"><thead><tr>${th('Item', 'left', '40%')}${th('Type', 'center', '15%')}${th('Price / Period', 'right', '15%')}${th('VAT', 'right', '15%')}${th('Total', 'right', '15%')}</tr></thead>
+          <tbody>${infraRows}</tbody></table>`;
+          sectionIndex++;
+        }
+
+        if (additionalFees.length > 0) {
+          contentHtml += `${sec(sectionIndex.toString(), 'Additional Fees (Misc)')}
+          <table style="margin-bottom:24px"><thead><tr>${th('Description', 'left', '85%')}${th('Cost', 'right', '15%')}</tr></thead>
+          <tbody>${feeRows}</tbody></table>`;
+          sectionIndex++;
+        }
+
+        if (aiServices.length > 0) {
+          contentHtml += `${sec(sectionIndex.toString(), 'AI Models & API Services')}
+          <table style="margin-bottom:24px"><thead><tr>${th('Service', 'left', '40%')}${th('Pricing Model', 'center', '30%')}${th('Price / Period', 'right', '15%')}${th('Total', 'right', '15%')}</tr></thead>
+          <tbody>${aiRows}</tbody></table>`;
+          sectionIndex++;
+        }
+        return contentHtml;
+      })()}
+
+      <!-- Summary & Notes (Side-by-side) -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:24px;page-break-inside:avoid">
+        
+        <!-- Notes (Left Side) -->
+        <div style="flex:1">
+          ${notes ? `
+          <div style="padding:10px 14px;background:#eff6ff;border-left:3px solid #2563eb;border-radius:2px">
+            <div style="font-size:10px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Notes / Terms &amp; Conditions</div>
+            <div style="font-size:12px;color:#475569;white-space:pre-line;line-height:1.6">${notes.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br/>')}</div>
+          </div>` : ''}
         </div>
-      </div>` : ''}
+
+        <!-- Summary (Right Side) -->
+        <div style="width:340px;flex-shrink:0;border:1px solid #e2e8f0;border-radius:3px;overflow:hidden">
+          ${totalDevCost > 0 ? sumRow('<span>Development Cost</span>', fmt(totalDevCost)) : ''}
+          ${totalInfraCost > 0 ? sumRow('<span>Infrastructure Cost</span>', fmt(totalInfraCost)) : ''}
+          ${totalAdditionalCost > 0 ? sumRow('<span>Additional Fees</span>', fmt(totalAdditionalCost)) : ''}
+          ${sumRow('<span style="font-weight:600">Subtotal</span>', fmt(subTotal), 'background:#f8fafc;font-weight:600')}
+          ${sumRow(`<span style="color:#475569">License / Margin (${licensePercent}%)</span>`, fmt(licenseCost))}
+          <div style="display:flex;justify-content:space-between;padding:10px 12px;background:#1e293b;color:#fff;font-size:14px;font-weight:800">
+            <span>GRAND TOTAL</span><span>${fmt(grandTotal)}</span>
+          </div>
+        </div>
+      </div>
 
     </div>
   </td></tr></tbody>
