@@ -6,12 +6,13 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { Menu, ChevronDown, ArrowRight, Linkedin, Instagram, MessageCircle } from "lucide-react";
+import { Menu, ChevronDown, ArrowRight, Linkedin, Instagram, MessageCircle, Lock } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { personalInfo } from "@/data/portfolio";
 import { featureFlags } from "@/config/features";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { CVPreviewDialog } from "@/components/cv/CVPreviewDialog";
+import { LoginDialog } from "@/components/cms/login-dialog";
 
 const navigation = [
   { name: "About", href: "#about" },
@@ -146,6 +147,7 @@ export function Header() {
             <Button asChild className="hidden sm:inline-flex">
               <Link href="#contact">Hire Me</Link>
             </Button>
+            <LoginDialog />
 
 
             {/* Mobile Menu */}

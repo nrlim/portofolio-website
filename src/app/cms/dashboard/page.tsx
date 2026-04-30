@@ -4,355 +4,219 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import { Trash2, Edit2, Plus, LogOut, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
-import { AIArticleGenerator } from '@/components/ai-article-generator';
-import type { BlogArticle } from '@/types/database';
+import { Plus, Trash2, FileText, Search, FolderOpen, Printer, Pencil } from 'lucide-react';
+import Link from 'next/link';
+import { Input } from '@/components/ui/input';
 
-interface AlertState {
-  show: boolean;
-  type: 'error' | 'success' | 'warning';
-  message: string;
-  articleId?: string;
+interface ProjectRecord {
+  id: string;
+  client_name: string;
+  project_name: string;
+  total_cost: number;
+  data: any;
+  created_at: string;
 }
 
-export default function CMSDashboard() {
+const fmt = (n: number) =>
+  new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
+
+export default function DashboardPage() {
   const router = useRouter();
-  const [articles, setArticles] = useState<BlogArticle[]>([]);
+  const [projects, setProjects] = useState<ProjectRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [alert, setAlert] = useState<AlertState>({ show: false, type: 'error', message: '' });
-  const [authenticated, setAuthenticated] = useState(false);
-  const [actionInProgress, setActionInProgress] = useState<string | null>(null);
+  const [search, setSearch] = useState('');
 
-  // Check authentication and fetch articles
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        // Try to fetch articles to check if authenticated
-        const response = await fetch('/api/blog/articles');
-        if (!response.ok && response.status === 401) {
-          router.push('/cms/login');
-          return;
-        }
-        setAuthenticated(true);
-        fetchArticles();
-      } catch {
-        router.push('/cms/login');
-      }
-    };
-
-    checkAuth();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router]);
-
-  const fetchArticles = async () => {
+  const fetchProjects = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/blog/articles?published=false&limit=1000');
-      if (response.ok) {
-        const data = await response.json();
-        setArticles(Array.isArray(data) ? data : data.articles || []);
+      const res = await fetch('/api/cms/projects');
+      if (res.ok) {
+        const data = await res.json();
+        setProjects(data.projects || []);
       }
-    } catch (err) {
-      showAlert('error', 'Failed to fetch articles');
-      console.error(err);
+    } catch {
+      // silently fail — list will remain empty
     } finally {
       setLoading(false);
     }
   };
 
-  const showAlert = (type: 'error' | 'success' | 'warning', message: string) => {
-    setAlert({ show: true, type, message });
-    setTimeout(() => setAlert({ ...alert, show: false }), 5000);
-  };
+  useEffect(() => {
+    fetchProjects();
+  }, []);
 
-  const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/cms/login');
-  };
-
-  const handleTakedown = async (id: string, title: string) => {
-    if (!confirm(`Unpublish "${title}"? It will no longer be visible to the public.`)) return;
-
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Hapus proyek ${name}?`)) return;
     try {
-      setActionInProgress(id);
-      const article = articles.find(a => a.id === id);
-      if (!article) return;
-
-      const response = await fetch(`/api/blog/articles/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...article,
-          published: false,
-        }),
-      });
-
-      if (!response.ok) {
-        showAlert('error', 'Failed to unpublish article');
-        return;
+      const res = await fetch(`/api/cms/projects?id=${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        fetchProjects();
       }
-
-      // Update local state
-      setArticles(articles.map(a => a.id === id ? { ...a, published: false } : a));
-      showAlert('success', `"${title}" has been unpublished`);
-    } catch (err) {
-      showAlert('error', 'Failed to unpublish article');
-      console.error(err);
-    } finally {
-      setActionInProgress(null);
+    } catch {
+      // silently fail
     }
   };
 
-  const handleDelete = async (id: string, title: string, isPublished: boolean) => {
-    if (isPublished) {
-      showAlert('warning', 'Cannot delete published articles. Please unpublish first.');
-      return;
-    }
+  const filtered = projects.filter(p => 
+    p.client_name.toLowerCase().includes(search.toLowerCase()) || 
+    p.project_name.toLowerCase().includes(search.toLowerCase())
+  );
 
-    if (!confirm(`Permanently delete "${title}"? This action cannot be undone.`)) return;
+  const handleExportPDF = (projectData: any) => {
+    const project = projectData || {};
+    const win = window.open('', '_blank');
+    if (!win) return;
 
-    try {
-      setActionInProgress(id);
-      const response = await fetch(`/api/blog/articles/${id}`, {
-        method: 'DELETE',
-      });
+    // Defensive arrays
+    const devRoles = Array.isArray(project.devRoles) ? project.devRoles : [];
+    const infraItems = Array.isArray(project.infraItems) ? project.infraItems : [];
+    const additionalFees = Array.isArray(project.additionalFees) ? project.additionalFees : [];
+    const aiServices = Array.isArray(project.aiServices) ? project.aiServices : [];
+    const licensePercent = typeof project.licensePercent === 'number' ? project.licensePercent : 10;
+    const notes = project.notes || '';
 
-      if (!response.ok) {
-        showAlert('error', 'Failed to delete article');
-        return;
-      }
+    // Recalculate totals for PDF
+    const totalDevCost = devRoles.reduce((sum: number, role: any) => sum + ((role.qty || 0) * (role.days || 0) * ((role.dailyRate || 0) + (role.dailyAllowance || 0))), 0);
+    const totalInfraCost = infraItems.reduce((sum: number, item: any) => sum + (((item.type === 'monthly' ? (item.price || 0) * 12 : (item.price || 0))) * (1 + (item.ppnPercent || 0) / 100)), 0);
+    const totalAdditionalCost = additionalFees.reduce((sum: number, fee: any) => sum + (fee.price || 0), 0);
+    const totalAICost = aiServices.reduce((sum: number, ai: any) => sum + (ai.price || 0), 0);
+    const subTotalCost = totalDevCost + totalInfraCost + totalAdditionalCost + totalAICost;
+    const licenseCost = subTotalCost * (licensePercent / 100);
+    const grandTotal = subTotalCost + licenseCost;
 
-      setArticles(articles.filter((a) => a.id !== id));
-      showAlert('success', `"${title}" has been deleted`);
-    } catch (err) {
-      showAlert('error', 'Failed to delete article');
-      console.error(err);
-    } finally {
-      setActionInProgress(null);
-    }
+    const devRows = devRoles.map((item: any) => `<tr><td style="padding:8px;border-bottom:1px solid #e5e7eb">${item.role || '-'}</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:center">${item.qty || 0} Org</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:center">${item.days || 0} Hr</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:right">${fmt((item.qty || 0) * (item.days || 0) * ((item.dailyRate || 0) + (item.dailyAllowance || 0)))}</td></tr>`).join('');
+    const infraRows = infraItems.map((item: any) => `<tr><td style="padding:8px;border-bottom:1px solid #e5e7eb">${item.name || '-'}</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:center">${item.type === 'monthly' ? 'Bulanan' : 'Tahunan'}</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:right">${item.ppnPercent || 0}%</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:right">${fmt(((item.type === 'monthly' ? (item.price || 0) * 12 : (item.price || 0))) * (1 + (item.ppnPercent || 0) / 100))}</td></tr>`).join('');
+    const aiRows = aiServices.map((item: any) => `<tr><td style="padding:8px;border-bottom:1px solid #e5e7eb">${item.name || '-'}</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:center">${item.pricingModel || '-'}</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:right">${fmt(item.price || 0)}</td></tr>`).join('');
+
+    win.document.write(`<!DOCTYPE html><html lang="id"><head>
+<meta charset="UTF-8"><title>Estimasi Biaya Proyek - ${project.projectName || 'Tanpa Nama'}</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',sans-serif;color:#1e293b;background:#fff;padding:40px;font-size:13px;line-height:1.5}
+  .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:30px;padding-bottom:20px;border-bottom:2px solid #2563eb}
+  .brand{font-size:24px;font-weight:800;color:#1e293b} .brand span{color:#2563eb}
+  .doc-label h1{font-size:24px;font-weight:800;color:#2563eb;text-align:right}
+  .meta{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:30px;background:#f8fafc;padding:15px;border-radius:4px}
+  .section-title{font-size:14px;font-weight:700;color:#1e40af;margin:20px 0 10px;text-transform:uppercase;border-bottom:1px solid #e2e8f0;padding-bottom:5px}
+  table{width:100%;border-collapse:collapse;margin-bottom:15px}
+  thead th{background:#f1f5f9;padding:8px;color:#475569;font-size:11px;font-weight:700;text-transform:uppercase;text-align:left}
+  .summary-box{width:350px;float:right;border:1px solid #e2e8f0;margin-top:20px}
+  .sum-row{display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid #e2e8f0}
+  .sum-row.bold{font-weight:700;background:#f8fafc}
+  .sum-row.total{background:#2563eb;color:#fff;font-size:16px;font-weight:800;border:none;padding:12px}
+  .clearfix::after{content:"";clear:both;display:table}
+  .notes{margin-top:40px;padding:15px;background:#f0f9ff;border-left:4px solid #2563eb;clear:both}
+  .notes h3{font-size:12px;font-weight:700;color:#1e40af;margin-bottom:5px;text-transform:uppercase}
+</style></head><body>
+<div class="header"><div class="brand">Nuralim<span>Dev</span></div><div class="doc-label"><h1>ESTIMASI BIAYA</h1></div></div>
+<div class="meta">
+  <div><p><strong>Klien:</strong> ${project.clientName || '-'}</p><p><strong>Proyek:</strong> ${project.projectName || '-'}</p></div>
+  <div><p><strong>Tanggal:</strong> ${project.projectDate || '-'}</p><p><strong>Timeline:</strong> ${project.timelineStr || '-'} | <strong>Total Fitur:</strong> ${project.totalFeatures || 0}</p></div>
+</div>
+<h2 class="section-title">1. Jasa Pembuatan Aplikasi (Development)</h2><table><thead><tr><th>Peran (Role)</th><th style="text-align:center">Qty</th><th style="text-align:center">Durasi</th><th style="text-align:right">Total Biaya</th></tr></thead><tbody>${devRows}</tbody></table>
+<h2 class="section-title">2. Infrastruktur (Server & Domain 1 Tahun Pertama)</h2><table><thead><tr><th>Item</th><th style="text-align:center">Tipe</th><th style="text-align:right">PPN</th><th style="text-align:right">Total Biaya</th></tr></thead><tbody>${infraRows}</tbody></table>
+${additionalFees.length > 0 ? `<h2 class="section-title">3. Biaya Tambahan (Lain-lain)</h2><table><thead><tr><th>Deskripsi</th><th style="text-align:right">Biaya</th></tr></thead><tbody>${additionalFees.map((fee: any) => `<tr><td style="padding:8px;border-bottom:1px solid #e5e7eb">${fee.name || '-'}</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:right">${fmt(fee.price || 0)}</td></tr>`).join('')}</tbody></table>` : ''}
+${aiServices.length > 0 ? `<h2 class="section-title">4. AI Models / API Services</h2><table><thead><tr><th>Deskripsi Layanan AI</th><th style="text-align:center">Model Pricing</th><th style="text-align:right">Biaya (Est)</th></tr></thead><tbody>${aiRows}</tbody></table>` : ''}
+<div class="clearfix"><div class="summary-box">
+  <div class="sum-row"><span>Total Jasa Development</span><span>${fmt(totalDevCost)}</span></div>
+  <div class="sum-row"><span>Total Infrastruktur</span><span>${fmt(totalInfraCost)}</span></div>
+  <div class="sum-row"><span>Biaya Tambahan</span><span>${fmt(totalAdditionalCost)}</span></div>
+  ${aiServices.length > 0 ? `<div class="sum-row"><span>AI Services</span><span>${fmt(totalAICost)}</span></div>` : ''}
+  <div class="sum-row bold"><span>Subtotal</span><span>${fmt(subTotalCost)}</span></div>
+  <div class="sum-row"><span>License Cost (${licensePercent}%)</span><span>${fmt(licenseCost)}</span></div>
+  <div class="sum-row total"><span>GRAND TOTAL</span><span>${fmt(grandTotal)}</span></div>
+</div></div>
+${notes ? `<div class="notes"><h3>Catatan / Syarat & Ketentuan</h3><p>${notes.replace(/\n/g, '<br/>')}</p></div>` : ''}
+<script>window.onload=()=>{window.print()}<\/script></body></html>`);
+    win.document.close();
   };
-
-  if (!authenticated) return null;
-
-  const publishedCount = articles.filter(a => a.published).length;
-  const draftCount = articles.filter(a => !a.published).length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-950">
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-white dark:bg-slate-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-accent bg-clip-text text-transparent">
-              CMS Dashboard
-            </h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Manage your articles and content
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <AIArticleGenerator onArticleGenerated={fetchArticles} />
-            <Button
-              onClick={() => router.push('/cms/editor')}
-              className="gap-2 bg-gradient-to-r from-blue-600 to-accent hover:shadow-lg transition-all"
-            >
-              <Plus size={18} />
-              New Article
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleLogout}
-              className="gap-2"
-            >
-              <LogOut size={18} />
-              Logout
-            </Button>
+    <main className="p-4 md:p-6 space-y-6">
+      
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <p className="text-sm text-muted-foreground">Manage your saved project estimations.</p>
+        </div>
+        
+        <Link href="/cms/calculator">
+          <Button className="gap-2 shadow-sm rounded-sm h-9 text-sm font-semibold whitespace-nowrap">
+            <Plus className="w-4 h-4" />
+            New Project
+          </Button>
+        </Link>
+      </div>
+
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-card rounded-sm border border-border shadow-sm overflow-hidden flex flex-col min-h-[400px]">
+        <div className="p-4 border-b border-border flex items-center gap-4 bg-muted/10">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input 
+              placeholder="Search client or project..." 
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pl-9 h-9 rounded-sm"
+            />
           </div>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Alert Toast */}
-        {alert.show && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className={`mb-6 p-4 rounded-lg border flex items-start gap-3 ${
-              alert.type === 'error'
-                ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-900'
-                : alert.type === 'success'
-                ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-900'
-                : 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-900'
-            }`}
-          >
-            {alert.type === 'error' && <AlertCircle className={`flex-shrink-0 w-5 h-5 text-red-600 dark:text-red-400 mt-0.5`} />}
-            {alert.type === 'success' && <CheckCircle className={`flex-shrink-0 w-5 h-5 text-green-600 dark:text-green-400 mt-0.5`} />}
-            {alert.type === 'warning' && <AlertCircle className={`flex-shrink-0 w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5`} />}
-            <div className="flex-1">
-              <p className={`text-sm font-medium ${
-                alert.type === 'error'
-                  ? 'text-red-800 dark:text-red-300'
-                  : alert.type === 'success'
-                  ? 'text-green-800 dark:text-green-300'
-                  : 'text-yellow-800 dark:text-yellow-300'
-              }`}>
-                {alert.message}
-              </p>
+        <div className="flex-1 overflow-x-auto">
+          {loading ? (
+            <div className="flex items-center justify-center h-40 text-muted-foreground">Loading...</div>
+          ) : projects.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-64 text-muted-foreground gap-3">
+              <FolderOpen className="w-10 h-10 opacity-50" />
+              <p>No projects saved yet.</p>
+              <Link href="/cms/calculator">
+                <Button variant="outline" className="rounded-sm mt-2">Create One</Button>
+              </Link>
             </div>
-          </motion.div>
-        )}
-
-        {/* Stats Grid */}
-        {!loading && articles.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
-          >
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Articles</p>
-              <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{articles.length}</p>
-            </div>
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Published</p>
-              <p className="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">{publishedCount}</p>
-            </div>
-            <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Drafts</p>
-              <p className="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-2">{draftCount}</p>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Loading State */}
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-16">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200 dark:border-blue-900 border-t-blue-600 dark:border-t-blue-400"></div>
-            <p className="mt-6 text-gray-600 dark:text-gray-400 font-medium">Loading articles...</p>
-          </div>
-        ) : articles.length === 0 ? (
-          /* Empty State */
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center py-16 bg-white dark:bg-slate-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600"
-          >
-            <div className="text-5xl mb-4">📝</div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              No articles yet
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Create your first article to get started
-            </p>
-            <Button onClick={() => router.push('/cms/editor')} className="gap-2">
-              <Plus size={18} />
-              Create Article
-            </Button>
-          </motion.div>
-        ) : (
-          /* Articles Grid */
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="grid gap-6"
-          >
-            {articles.map((article, idx) => (
-              <motion.div
-                key={article.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition p-6"
-              >
-                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                  {/* Article Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start gap-3 mb-2">
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white truncate">
-                        {article.title}
-                      </h3>
-                    </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3">
-                      {article.description}
-                    </p>
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-gray-600 dark:text-gray-400">
-                      <span className="flex items-center gap-1">
-                        {article.category || 'General'}
-                      </span>
-                      <span>•</span>
-                      <span>{new Date(article.created_at).toLocaleDateString('id-ID')}</span>
-                      <span>•</span>
-                      <span
-                        className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold ${
-                          article.published
-                            ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400'
-                            : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-400'
-                        }`}
-                      >
-                        {article.published ? (
-                          <>
-                            <Eye size={12} />
-                            Published
-                          </>
-                        ) : (
-                          <>
-                            <EyeOff size={12} />
-                            Draft
-                          </>
-                        )}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex flex-wrap md:flex-col gap-2 md:gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => router.push(`/cms/editor/${article.id}`)}
-                      disabled={actionInProgress === article.id}
-                      className="gap-1 flex-1 md:flex-none"
-                    >
-                      <Edit2 size={16} />
-                      <span className="hidden sm:inline">Edit</span>
-                    </Button>
-
-                    {article.published ? (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleTakedown(article.id, article.title)}
-                        disabled={actionInProgress === article.id}
-                        className="gap-1 flex-1 md:flex-none text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20"
-                        title="Unpublish this article"
-                      >
-                        <EyeOff size={16} />
-                        <span className="hidden sm:inline">Takedown</span>
+          ) : (
+            <table className="w-full text-sm text-left">
+              <thead className="bg-muted/50 text-xs uppercase font-semibold text-muted-foreground border-b border-border">
+                <tr>
+                  <th className="px-5 py-3 font-medium">Date</th>
+                  <th className="px-5 py-3 font-medium">Client</th>
+                  <th className="px-5 py-3 font-medium">Project</th>
+                  <th className="px-5 py-3 font-medium text-right">Grand Total</th>
+                  <th className="px-5 py-3 font-medium text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {filtered.map(p => (
+                  <tr key={p.id} className="hover:bg-muted/10 transition-colors">
+                    <td className="px-5 py-3 whitespace-nowrap text-muted-foreground">
+                      {new Date(p.created_at).toLocaleDateString('id-ID')}
+                    </td>
+                    <td className="px-5 py-3 font-medium">{p.client_name}</td>
+                    <td className="px-5 py-3 text-muted-foreground">{p.project_name}</td>
+                    <td className="px-5 py-3 text-right font-semibold tabular-nums">{fmt(p.total_cost)}</td>
+                    <td className="px-5 py-3 text-right flex justify-end gap-1">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-sm text-muted-foreground hover:bg-muted" onClick={() => router.push(`/cms/calculator?id=${p.id}`)} title="Edit Project">
+                        <Pencil className="w-3.5 h-3.5" />
                       </Button>
-                    ) : null}
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-sm text-primary hover:bg-primary/10" onClick={() => router.push(`/cms/report/${p.id}`)} title="View Report">
+                        <FileText className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-sm text-primary hover:bg-primary/10" onClick={() => handleExportPDF(p.data)} title="Export PDF">
+                        <Printer className="w-4 h-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-sm text-destructive hover:bg-destructive/10" onClick={() => handleDelete(p.id, p.project_name)} title="Delete">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+                {filtered.length === 0 && projects.length > 0 && (
+                  <tr><td colSpan={5} className="px-5 py-8 text-center text-muted-foreground">No matches found.</td></tr>
+                )}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </motion.div>
 
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleDelete(article.id, article.title, article.published)}
-                      disabled={actionInProgress === article.id || article.published}
-                      className={`gap-1 flex-1 md:flex-none text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 ${
-                        article.published ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
-                      title={article.published ? 'Cannot delete published articles' : 'Delete article'}
-                    >
-                      <Trash2 size={16} />
-                      <span className="hidden sm:inline">Delete</span>
-                    </Button>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-      </main>
-    </div>
+    </main>
   );
 }

@@ -21,14 +21,6 @@ export async function POST(request: NextRequest) {
       .eq('email', email)
       .single();
 
-    // Log for debugging
-    if (userError) {
-      console.error('Database error fetching user:', userError);
-    }
-    if (!user) {
-      console.warn('User not found for email:', email);
-    }
-
     if (userError || !user) {
       return NextResponse.json(
         { error: 'Invalid credentials' },
@@ -39,7 +31,6 @@ export async function POST(request: NextRequest) {
     // Check password
     const passwordValid = await bcrypt.compare(password, user.password_hash);
     if (!passwordValid) {
-      console.warn('Invalid password for user:', email);
       return NextResponse.json(
         { error: 'Invalid credentials' },
         { status: 401 }
@@ -70,8 +61,7 @@ export async function POST(request: NextRequest) {
     });
 
     return response;
-  } catch (error) {
-    console.error('Login error:', error);
+  } catch {
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
