@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,14 @@ interface DevRole { id: string; role: string; qty: number; days: number; dailyRa
 interface InfraItem { id: string; name: string; type: 'monthly' | 'yearly' | 'one-time'; price: number; ppnPercent: number; }
 interface AdditionalFee { id: string; name: string; price: number; }
 interface AIService { id: string; name: string; pricingModel: string; price: number; }
+
+interface MasterDataConfig {
+  devRoles: DevRole[];
+  infraItems: InfraItem[];
+  additionalFees: AdditionalFee[];
+  aiServices: AIService[];
+  licensePercent: number;
+}
 
 interface ProjectData {
   clientName: string;
@@ -30,11 +38,11 @@ interface ProjectData {
 const genId = () => crypto.randomUUID();
 const fmt = (n: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
 
-function ComboboxInput({
+function ComboboxInput<T>({
   value, onChange, onSelect, options, placeholder
 }: {
-  value: string; onChange: (val: string) => void; onSelect: (item: any) => void;
-  options: { label: string; data: any }[]; placeholder?: string;
+  value: string; onChange: (val: string) => void; onSelect: (item: T) => void;
+  options: { label: string; data: T }[]; placeholder?: string;
 }) {
   const [open, setOpen] = useState(false);
   const filtered = options.filter(o => o.label.toLowerCase().includes(value.toLowerCase()));
@@ -85,7 +93,7 @@ export default function CalculatorPage() {
     notes: '',
   });
 
-  const [masterData, setMasterData] = useState<any>(null);
+  const [masterData, setMasterData] = useState<MasterDataConfig | null>(null);
 
   useEffect(() => {
     const loadMasterData = async () => {
@@ -127,10 +135,10 @@ export default function CalculatorPage() {
 
   const toggleSection = (id: string) => setOpenSection(prev => prev === id ? null : id);
 
-  const updateDevRole = (id: string, field: keyof DevRole, value: any) => setProject(p => ({ ...p, devRoles: p.devRoles.map(i => i.id === id ? { ...i, [field]: value } : i) }));
-  const updateInfra = (id: string, field: keyof InfraItem, value: any) => setProject(p => ({ ...p, infraItems: p.infraItems.map(i => i.id === id ? { ...i, [field]: value } : i) }));
-  const updateFee = (id: string, field: keyof AdditionalFee, value: any) => setProject(p => ({ ...p, additionalFees: p.additionalFees.map(i => i.id === id ? { ...i, [field]: value } : i) }));
-  const updateAI = (id: string, field: keyof AIService, value: any) => setProject(p => ({ ...p, aiServices: p.aiServices.map(i => i.id === id ? { ...i, [field]: value } : i) }));
+  const updateDevRole = <K extends keyof DevRole>(id: string, field: K, value: DevRole[K]) => setProject(p => ({ ...p, devRoles: p.devRoles.map(i => i.id === id ? { ...i, [field]: value } : i) }));
+  const updateInfra = <K extends keyof InfraItem>(id: string, field: K, value: InfraItem[K]) => setProject(p => ({ ...p, infraItems: p.infraItems.map(i => i.id === id ? { ...i, [field]: value } : i) }));
+  const updateFee = <K extends keyof AdditionalFee>(id: string, field: K, value: AdditionalFee[K]) => setProject(p => ({ ...p, additionalFees: p.additionalFees.map(i => i.id === id ? { ...i, [field]: value } : i) }));
+  const updateAI = <K extends keyof AIService>(id: string, field: K, value: AIService[K]) => setProject(p => ({ ...p, aiServices: p.aiServices.map(i => i.id === id ? { ...i, [field]: value } : i) }));
 
   const totalDevCost = project.devRoles.reduce((sum, role) => sum + (role.qty * role.days * (role.dailyRate + role.dailyAllowance)), 0);
   const totalInfraCost = project.infraItems.reduce((sum, item) => sum + ((item.type === 'monthly' ? item.price * 12 : item.price) * (1 + item.ppnPercent / 100)), 0);
@@ -151,7 +159,7 @@ export default function CalculatorPage() {
       );
       if (res.ok) { alert(isEditMode ? 'Project updated!' : 'Project saved!'); router.push('/cms/dashboard'); }
       else alert('Failed to save project.');
-    } catch (err) { alert('Error saving project.'); }
+    } catch { alert('Error saving project.'); }
     finally { setSaving(false); }
   };
 
@@ -226,7 +234,7 @@ export default function CalculatorPage() {
                             value={role.role} 
                             onChange={val => updateDevRole(role.id, 'role', val)}
                             onSelect={match => setProject(p => ({ ...p, devRoles: p.devRoles.map(i => i.id === role.id ? { ...i, role: match.role, dailyRate: match.dailyRate, dailyAllowance: match.dailyAllowance } : i) }))}
-                            options={masterData?.devRoles?.map((r: any) => ({ label: r.role, data: r })) || []}
+                            options={masterData?.devRoles?.map((r: DevRole) => ({ label: r.role, data: r })) || []}
                             placeholder="Pilih atau ketik role..."
                           />
                         </div>
@@ -284,11 +292,11 @@ export default function CalculatorPage() {
                             value={item.name} 
                             onChange={val => updateInfra(item.id, 'name', val)}
                             onSelect={match => setProject(p => ({ ...p, infraItems: p.infraItems.map(i => i.id === item.id ? { ...i, name: match.name, type: match.type, price: match.price, ppnPercent: match.ppnPercent } : i) }))}
-                            options={masterData?.infraItems?.map((r: any) => ({ label: r.name, data: r })) || []}
+                            options={masterData?.infraItems?.map((r: InfraItem) => ({ label: r.name, data: r })) || []}
                             placeholder="Pilih atau ketik infrastruktur..."
                           />
                         </div>
-                        <div className="md:col-span-3"><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Billing</label><select value={item.type} onChange={e => updateInfra(item.id, 'type', e.target.value)} className="h-9 w-full px-3 text-sm rounded-sm border border-input bg-background"><option value="monthly">Monthly</option><option value="yearly">Yearly</option><option value="one-time">One-Time</option></select></div>
+                        <div className="md:col-span-3"><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Billing</label><select value={item.type} onChange={e => updateInfra(item.id, 'type', e.target.value as InfraItem['type'])} className="h-9 w-full px-3 text-sm rounded-sm border border-input bg-background"><option value="monthly">Monthly</option><option value="yearly">Yearly</option><option value="one-time">One-Time</option></select></div>
                         <div className="md:col-span-2">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Price (Rp)</label>
                           <Input 
@@ -325,7 +333,7 @@ export default function CalculatorPage() {
                       value={ai.name} 
                       onChange={val => updateAI(ai.id, 'name', val)}
                       onSelect={match => setProject(p => ({ ...p, aiServices: p.aiServices.map(i => i.id === ai.id ? { ...i, name: match.name, pricingModel: match.pricingModel, price: match.price } : i) }))}
-                      options={masterData?.aiServices?.map((r: any) => ({ label: r.name, data: r })) || []}
+                      options={masterData?.aiServices?.map((r: AIService) => ({ label: r.name, data: r })) || []}
                       placeholder="Pilih atau ketik AI service..."
                     />
                   </div>
@@ -374,7 +382,7 @@ export default function CalculatorPage() {
                       value={fee.name} 
                       onChange={val => updateFee(fee.id, 'name', val)}
                       onSelect={match => setProject(p => ({ ...p, additionalFees: p.additionalFees.map(i => i.id === fee.id ? { ...i, name: match.name, price: match.price } : i) }))}
-                      options={masterData?.additionalFees?.map((r: any) => ({ label: r.name, data: r })) || []}
+                      options={masterData?.additionalFees?.map((r: AdditionalFee) => ({ label: r.name, data: r })) || []}
                       placeholder="Pilih atau ketik fee..."
                     />
                   </div>

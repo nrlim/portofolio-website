@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Trash2, Settings2, Save, Database, Server, Users, Cpu, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Trash2, Settings2, Save, Server, Users, Cpu, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface DevRole { id: string; role: string; qty: number; days: number; dailyRate: number; dailyAllowance: number; }
 interface InfraItem { id: string; name: string; type: 'monthly' | 'yearly' | 'one-time'; price: number; ppnPercent: number; }
@@ -20,7 +20,6 @@ interface MasterDataConfig {
 }
 
 const genId = () => crypto.randomUUID();
-const fmt = (n: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
 
 export default function MasterDataPage() {
   const [loading, setLoading] = useState(true);
@@ -117,7 +116,7 @@ export default function MasterDataPage() {
             {openSection === 'dev' && (
               <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden border-t border-border">
                 <div className="p-6 space-y-6">
-                  {config.devRoles.map((role, idx) => (
+                  {config.devRoles.map((role) => (
                     <div key={role.id} className="relative p-5 bg-muted/5 border border-border rounded-sm group">
                       <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button variant="ghost" size="icon" onClick={() => setConfig(p => ({ ...p, devRoles: p.devRoles.filter(r => r.id !== role.id) }))} className="text-destructive h-8 w-8 hover:bg-destructive/10">
@@ -190,7 +189,7 @@ export default function MasterDataPage() {
                         </div>
                         <div className="md:col-span-3">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Billing Type</label>
-                          <select value={item.type} onChange={e => setConfig(p => ({ ...p, infraItems: p.infraItems.map(r => r.id === item.id ? { ...r, type: e.target.value as any } : r) }))} className="h-9 w-full px-3 text-sm rounded-sm border border-input bg-background shadow-sm">
+                          <select value={item.type} onChange={e => setConfig(p => ({ ...p, infraItems: p.infraItems.map(r => r.id === item.id ? { ...r, type: e.target.value as InfraItem['type'] } : r) }))} className="h-9 w-full px-3 text-sm rounded-sm border border-input bg-background shadow-sm">
                             <option value="monthly">Monthly</option>
                             <option value="yearly">Yearly</option>
                             <option value="one-time">One-Time</option>

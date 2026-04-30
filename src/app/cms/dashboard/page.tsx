@@ -13,8 +13,28 @@ interface ProjectRecord {
   client_name: string;
   project_name: string;
   total_cost: number;
-  data: any;
+  data: ProjectData;
   created_at: string;
+}
+
+interface DevRole { id: string; role: string; qty: number; days: number; dailyRate: number; dailyAllowance: number; }
+interface InfraItem { id: string; name: string; type: 'monthly' | 'yearly' | 'one-time'; price: number; ppnPercent: number; }
+interface AdditionalFee { id: string; name: string; price: number; }
+interface AIService { id: string; name: string; pricingModel: string; price: number; }
+
+interface ProjectData {
+  clientName: string;
+  projectName: string;
+  projectDate: string;
+  validUntil: string;
+  timelineStr: string;
+  totalFeatures: number;
+  devRoles: DevRole[];
+  infraItems: InfraItem[];
+  additionalFees: AdditionalFee[];
+  aiServices: AIService[];
+  licensePercent: number;
+  notes: string;
 }
 
 const fmt = (n: number) =>
@@ -62,7 +82,7 @@ export default function DashboardPage() {
     p.project_name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleExportPDF = (projectData: any) => {
+  const handleExportPDF = (projectData: ProjectData) => {
     const project = projectData || {};
     const win = window.open('', '_blank');
     if (!win) return;
@@ -76,17 +96,17 @@ export default function DashboardPage() {
     const notes = project.notes || '';
 
     // Recalculate totals for PDF
-    const totalDevCost = devRoles.reduce((sum: number, role: any) => sum + ((role.qty || 0) * (role.days || 0) * ((role.dailyRate || 0) + (role.dailyAllowance || 0))), 0);
-    const totalInfraCost = infraItems.reduce((sum: number, item: any) => sum + (((item.type === 'monthly' ? (item.price || 0) * 12 : (item.price || 0))) * (1 + (item.ppnPercent || 0) / 100)), 0);
-    const totalAdditionalCost = additionalFees.reduce((sum: number, fee: any) => sum + (fee.price || 0), 0);
-    const totalAICost = aiServices.reduce((sum: number, ai: any) => sum + (ai.price || 0), 0);
+    const totalDevCost = devRoles.reduce((sum: number, role: DevRole) => sum + ((role.qty || 0) * (role.days || 0) * ((role.dailyRate || 0) + (role.dailyAllowance || 0))), 0);
+    const totalInfraCost = infraItems.reduce((sum: number, item: InfraItem) => sum + (((item.type === 'monthly' ? (item.price || 0) * 12 : (item.price || 0))) * (1 + (item.ppnPercent || 0) / 100)), 0);
+    const totalAdditionalCost = additionalFees.reduce((sum: number, fee: AdditionalFee) => sum + (fee.price || 0), 0);
+    const totalAICost = aiServices.reduce((sum: number, ai: AIService) => sum + (ai.price || 0), 0);
     const subTotalCost = totalDevCost + totalInfraCost + totalAdditionalCost + totalAICost;
     const licenseCost = subTotalCost * (licensePercent / 100);
     const grandTotal = subTotalCost + licenseCost;
 
-    const devRows = devRoles.map((item: any) => `<tr><td style="padding:8px;border-bottom:1px solid #e5e7eb">${item.role || '-'}</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:center">${item.qty || 0} Org</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:center">${item.days || 0} Hr</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:right">${fmt((item.qty || 0) * (item.days || 0) * ((item.dailyRate || 0) + (item.dailyAllowance || 0)))}</td></tr>`).join('');
-    const infraRows = infraItems.map((item: any) => `<tr><td style="padding:8px;border-bottom:1px solid #e5e7eb">${item.name || '-'}</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:center">${item.type === 'monthly' ? 'Bulanan' : 'Tahunan'}</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:right">${item.ppnPercent || 0}%</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:right">${fmt(((item.type === 'monthly' ? (item.price || 0) * 12 : (item.price || 0))) * (1 + (item.ppnPercent || 0) / 100))}</td></tr>`).join('');
-    const aiRows = aiServices.map((item: any) => `<tr><td style="padding:8px;border-bottom:1px solid #e5e7eb">${item.name || '-'}</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:center">${item.pricingModel || '-'}</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:right">${fmt(item.price || 0)}</td></tr>`).join('');
+    const devRows = devRoles.map((item: DevRole) => `<tr><td style="padding:8px;border-bottom:1px solid #e5e7eb">${item.role || '-'}</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:center">${item.qty || 0} Org</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:center">${item.days || 0} Hr</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:right">${fmt((item.qty || 0) * (item.days || 0) * ((item.dailyRate || 0) + (item.dailyAllowance || 0)))}</td></tr>`).join('');
+    const infraRows = infraItems.map((item: InfraItem) => `<tr><td style="padding:8px;border-bottom:1px solid #e5e7eb">${item.name || '-'}</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:center">${item.type === 'monthly' ? 'Bulanan' : 'Tahunan'}</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:right">${item.ppnPercent || 0}%</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:right">${fmt(((item.type === 'monthly' ? (item.price || 0) * 12 : (item.price || 0))) * (1 + (item.ppnPercent || 0) / 100))}</td></tr>`).join('');
+    const aiRows = aiServices.map((item: AIService) => `<tr><td style="padding:8px;border-bottom:1px solid #e5e7eb">${item.name || '-'}</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:center">${item.pricingModel || '-'}</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:right">${fmt(item.price || 0)}</td></tr>`).join('');
 
     win.document.write(`<!DOCTYPE html><html lang="id"><head>
 <meta charset="UTF-8"><title>Estimasi Biaya Proyek - ${project.projectName || 'Tanpa Nama'}</title>
@@ -116,7 +136,7 @@ export default function DashboardPage() {
 </div>
 <h2 class="section-title">1. Jasa Pembuatan Aplikasi (Development)</h2><table><thead><tr><th>Peran (Role)</th><th style="text-align:center">Qty</th><th style="text-align:center">Durasi</th><th style="text-align:right">Total Biaya</th></tr></thead><tbody>${devRows}</tbody></table>
 <h2 class="section-title">2. Infrastruktur (Server & Domain 1 Tahun Pertama)</h2><table><thead><tr><th>Item</th><th style="text-align:center">Tipe</th><th style="text-align:right">PPN</th><th style="text-align:right">Total Biaya</th></tr></thead><tbody>${infraRows}</tbody></table>
-${additionalFees.length > 0 ? `<h2 class="section-title">3. Biaya Tambahan (Lain-lain)</h2><table><thead><tr><th>Deskripsi</th><th style="text-align:right">Biaya</th></tr></thead><tbody>${additionalFees.map((fee: any) => `<tr><td style="padding:8px;border-bottom:1px solid #e5e7eb">${fee.name || '-'}</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:right">${fmt(fee.price || 0)}</td></tr>`).join('')}</tbody></table>` : ''}
+${additionalFees.length > 0 ? `<h2 class="section-title">3. Biaya Tambahan (Lain-lain)</h2><table><thead><tr><th>Deskripsi</th><th style="text-align:right">Biaya</th></tr></thead><tbody>${additionalFees.map((fee: AdditionalFee) => `<tr><td style="padding:8px;border-bottom:1px solid #e5e7eb">${fee.name || '-'}</td><td style="padding:8px;border-bottom:1px solid #e5e7eb;text-align:right">${fmt(fee.price || 0)}</td></tr>`).join('')}</tbody></table>` : ''}
 ${aiServices.length > 0 ? `<h2 class="section-title">4. AI Models / API Services</h2><table><thead><tr><th>Deskripsi Layanan AI</th><th style="text-align:center">Model Pricing</th><th style="text-align:right">Biaya (Est)</th></tr></thead><tbody>${aiRows}</tbody></table>` : ''}
 <div class="clearfix"><div class="summary-box">
   <div class="sum-row"><span>Total Jasa Development</span><span>${fmt(totalDevCost)}</span></div>

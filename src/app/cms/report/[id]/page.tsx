@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, ComponentType } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Printer, Users, Server, Settings2, Cpu, DollarSign } from 'lucide-react';
+import { ArrowLeft, Printer, Users, Server, Settings2, Cpu, DollarSign, LucideProps } from 'lucide-react';
 
 const fmt = (n: number) =>
   new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
@@ -12,8 +12,28 @@ const fmt = (n: number) =>
 export default function ReportPage() {
   const { id } = useParams();
   const router = useRouter();
-  const [project, setProject] = useState<any>(null);
+  const [project, setProject] = useState<ProjectData | null>(null);
   const [loading, setLoading] = useState(true);
+
+  interface DevRole { id: string; role: string; qty: number; days: number; dailyRate: number; dailyAllowance: number; }
+  interface InfraItem { id: string; name: string; type: 'monthly' | 'yearly' | 'one-time'; price: number; ppnPercent: number; }
+  interface AdditionalFee { id: string; name: string; price: number; }
+  interface AIService { id: string; name: string; pricingModel: string; price: number; }
+
+  interface ProjectData {
+    clientName: string;
+    projectName: string;
+    projectDate: string;
+    validUntil: string;
+    timelineStr: string;
+    totalFeatures: number;
+    devRoles: DevRole[];
+    infraItems: InfraItem[];
+    additionalFees: AdditionalFee[];
+    aiServices: AIService[];
+    licensePercent: number;
+    notes: string;
+  }
 
   useEffect(() => {
     const load = async () => {
@@ -45,17 +65,23 @@ export default function ReportPage() {
   const aiServices = Array.isArray(project.aiServices) ? project.aiServices : [];
   const licensePercent = typeof project.licensePercent === 'number' ? project.licensePercent : 10;
 
-  const totalDevCost = devRoles.reduce((s: number, r: any) => s + ((r.qty || 0) * (r.days || 0) * ((r.dailyRate || 0) + (r.dailyAllowance || 0))), 0);
-  const totalInfraCost = infraItems.reduce((s: number, i: any) => s + ((i.type === 'monthly' ? (i.price || 0) * 12 : (i.price || 0)) * (1 + (i.ppnPercent || 0) / 100)), 0);
-  const totalAdditionalCost = additionalFees.reduce((s: number, f: any) => s + (f.price || 0), 0);
-  const totalAICost = aiServices.reduce((s: number, a: any) => s + (a.price || 0), 0);
+  const totalDevCost = devRoles.reduce((s: number, r: DevRole) => s + ((r.qty || 0) * (r.days || 0) * ((r.dailyRate || 0) + (r.dailyAllowance || 0))), 0);
+  const totalInfraCost = infraItems.reduce((s: number, i: InfraItem) => s + ((i.type === 'monthly' ? (i.price || 0) * 12 : (i.price || 0)) * (1 + (i.ppnPercent || 0) / 100)), 0);
+  const totalAdditionalCost = additionalFees.reduce((s: number, f: AdditionalFee) => s + (f.price || 0), 0);
+  const totalAICost = aiServices.reduce((s: number, a: AIService) => s + (a.price || 0), 0);
   const subTotal = totalDevCost + totalInfraCost + totalAdditionalCost + totalAICost;
   const licenseCost = subTotal * (licensePercent / 100);
   const grandTotal = subTotal + licenseCost;
 
   const handlePrint = () => window.print();
 
-  const SectionHeader = ({ icon: Icon, title, subtitle, cost }: any) => (
+  interface SectionHeaderProps {
+    icon: ComponentType<LucideProps>;
+    title: string;
+    subtitle?: string;
+    cost?: number;
+  }
+  const SectionHeader = ({ icon: Icon, title, subtitle, cost }: SectionHeaderProps) => (
     <div className="flex items-center gap-3 px-6 py-4 bg-muted/10 border-b border-border">
       <div className="p-2 bg-primary/10 rounded-sm text-primary"><Icon className="w-4 h-4" /></div>
       <div className="flex-1">
@@ -130,7 +156,7 @@ export default function ReportPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {devRoles.map((r: any) => (
+                  {devRoles.map((r: DevRole) => (
                     <tr key={r.id} className="hover:bg-muted/5 transition-colors">
                       <td className="px-5 py-3 font-medium">{r.role || '-'}</td>
                       <td className="px-5 py-3 text-center text-muted-foreground">{r.qty} org</td>
@@ -161,7 +187,7 @@ export default function ReportPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {infraItems.map((i: any) => {
+                  {infraItems.map((i: InfraItem) => {
                     const base = i.type === 'monthly' ? (i.price || 0) * 12 : (i.price || 0);
                     return (
                       <tr key={i.id} className="hover:bg-muted/5 transition-colors">
@@ -197,7 +223,7 @@ export default function ReportPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {aiServices.map((a: any) => (
+                  {aiServices.map((a: AIService) => (
                     <tr key={a.id} className="hover:bg-muted/5 transition-colors">
                       <td className="px-5 py-3 font-medium">{a.name || '-'}</td>
                       <td className="px-5 py-3 text-center">
@@ -225,7 +251,7 @@ export default function ReportPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {additionalFees.map((f: any) => (
+                  {additionalFees.map((f: AdditionalFee) => (
                     <tr key={f.id} className="hover:bg-muted/5 transition-colors">
                       <td className="px-5 py-3 font-medium">{f.name || '-'}</td>
                       <td className="px-5 py-3 text-right font-semibold tabular-nums">{fmt(f.price || 0)}</td>

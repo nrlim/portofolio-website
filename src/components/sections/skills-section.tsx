@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { skills } from "@/data/portfolio";
-import { Code2, Database, Layout, Boxes, Terminal, Shield, Workflow, Users, Target, MonitorSmartphone, BrainCircuit, Rocket, Briefcase } from "lucide-react";
+import { Code2, Database, Terminal, Shield, Workflow, Users, MonitorSmartphone, BrainCircuit, Rocket, Briefcase } from "lucide-react";
 
 const techStackCategories = [
   {

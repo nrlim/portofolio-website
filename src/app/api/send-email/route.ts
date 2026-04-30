@@ -130,7 +130,7 @@ Email ini dikirim melalui form kontak di portfolio website.`.trim();
         `;
 
         // Option 2: Using Resend (Professional)
-        const { data: _data, error: resendError } = await resend.emails.send({
+        const { error: resendError } = await resend.emails.send({
             from: 'System <system@nuralim.dev>',
             to: [personalInfo.email],
             subject: emailSubject,
