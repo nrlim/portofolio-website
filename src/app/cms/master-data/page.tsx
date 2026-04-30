@@ -9,7 +9,7 @@ import { Plus, Trash2, Settings2, Save, Server, Users, Cpu, ChevronDown, Chevron
 interface DevRole { id: string; role: string; qty: number; days: number; dailyRate: number; dailyAllowance: number; }
 interface InfraItem { id: string; name: string; type: 'monthly' | 'yearly' | 'one-time'; price: number; ppnPercent: number; }
 interface AdditionalFee { id: string; name: string; price: number; }
-interface AIService { id: string; name: string; pricingModel: string; price: number; }
+interface AIService { id: string; name: string; aiModel?: string; pricingModel: string; billingType?: 'monthly' | 'yearly' | 'one-time'; price: number; qty?: number; }
 
 interface MasterDataConfig {
   devRoles: DevRole[];
@@ -24,7 +24,7 @@ const genId = () => crypto.randomUUID();
 export default function MasterDataPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  
+
   // Accordion states
   const [openSection, setOpenSection] = useState<string | null>('dev');
 
@@ -84,7 +84,7 @@ export default function MasterDataPage() {
 
   return (
     <main className="p-4 md:p-8 w-full space-y-8">
-      
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border pb-6">
         <div>
@@ -98,7 +98,7 @@ export default function MasterDataPage() {
       </div>
 
       <div className="space-y-4">
-        
+
         {/* Developers */}
         <div className="bg-card rounded-sm border border-border shadow-sm overflow-hidden">
           <button onClick={() => toggleSection('dev')} className="w-full px-6 py-4 flex items-center justify-between bg-muted/10 hover:bg-muted/20 transition-colors">
@@ -111,7 +111,7 @@ export default function MasterDataPage() {
             </div>
             {openSection === 'dev' ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
           </button>
-          
+
           <AnimatePresence>
             {openSection === 'dev' && (
               <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden border-t border-border">
@@ -130,20 +130,20 @@ export default function MasterDataPage() {
                         </div>
                         <div className="md:col-span-3">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Daily Rate (Rp)</label>
-                          <Input 
-                            type="text" 
-                            value={role.dailyRate === 0 ? '' : new Intl.NumberFormat('id-ID').format(role.dailyRate)} 
-                            onChange={e => setConfig(p => ({ ...p, devRoles: p.devRoles.map(r => r.id === role.id ? { ...r, dailyRate: Number(e.target.value.replace(/\D/g, '')) } : r) }))} 
-                            className="rounded-sm bg-background" 
+                          <Input
+                            type="text"
+                            value={role.dailyRate === 0 ? '' : new Intl.NumberFormat('id-ID').format(role.dailyRate)}
+                            onChange={e => setConfig(p => ({ ...p, devRoles: p.devRoles.map(r => r.id === role.id ? { ...r, dailyRate: Number(e.target.value.replace(/\D/g, '')) } : r) }))}
+                            className="rounded-sm bg-background"
                           />
                         </div>
                         <div className="md:col-span-3">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Daily Allowance (Rp)</label>
-                          <Input 
-                            type="text" 
-                            value={role.dailyAllowance === 0 ? '' : new Intl.NumberFormat('id-ID').format(role.dailyAllowance)} 
-                            onChange={e => setConfig(p => ({ ...p, devRoles: p.devRoles.map(r => r.id === role.id ? { ...r, dailyAllowance: Number(e.target.value.replace(/\D/g, '')) } : r) }))} 
-                            className="rounded-sm bg-background" 
+                          <Input
+                            type="text"
+                            value={role.dailyAllowance === 0 ? '' : new Intl.NumberFormat('id-ID').format(role.dailyAllowance)}
+                            onChange={e => setConfig(p => ({ ...p, devRoles: p.devRoles.map(r => r.id === role.id ? { ...r, dailyAllowance: Number(e.target.value.replace(/\D/g, '')) } : r) }))}
+                            className="rounded-sm bg-background"
                           />
                         </div>
                       </div>
@@ -170,7 +170,7 @@ export default function MasterDataPage() {
             </div>
             {openSection === 'infra' ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
           </button>
-          
+
           <AnimatePresence>
             {openSection === 'infra' && (
               <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden border-t border-border">
@@ -197,11 +197,11 @@ export default function MasterDataPage() {
                         </div>
                         <div className="md:col-span-2">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Price (Rp)</label>
-                          <Input 
-                            type="text" 
-                            value={item.price === 0 ? '' : new Intl.NumberFormat('id-ID').format(item.price)} 
-                            onChange={e => setConfig(p => ({ ...p, infraItems: p.infraItems.map(r => r.id === item.id ? { ...r, price: Number(e.target.value.replace(/\D/g, '')) } : r) }))} 
-                            className="rounded-sm bg-background" 
+                          <Input
+                            type="text"
+                            value={item.price === 0 ? '' : new Intl.NumberFormat('id-ID').format(item.price)}
+                            onChange={e => setConfig(p => ({ ...p, infraItems: p.infraItems.map(r => r.id === item.id ? { ...r, price: Number(e.target.value.replace(/\D/g, '')) } : r) }))}
+                            className="rounded-sm bg-background"
                           />
                         </div>
                         <div className="md:col-span-2">
@@ -232,7 +232,7 @@ export default function MasterDataPage() {
             </div>
             {openSection === 'ai' ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
           </button>
-          
+
           <AnimatePresence>
             {openSection === 'ai' && (
               <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden border-t border-border">
@@ -245,39 +245,59 @@ export default function MasterDataPage() {
                         </Button>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-                        <div className="md:col-span-5">
+                        <div className="md:col-span-3">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Service Name</label>
-                          <Input value={ai.name} onChange={e => setConfig(p => ({ ...p, aiServices: p.aiServices.map(r => r.id === ai.id ? { ...r, name: e.target.value } : r) }))} className="rounded-sm bg-background" />
+                          <Input value={ai.name} onChange={e => setConfig(p => ({ ...p, aiServices: p.aiServices.map(r => r.id === ai.id ? { ...r, name: e.target.value } : r) }))} className="rounded-sm bg-background" placeholder="e.g. OCR, LLM" />
                         </div>
-                        <div className="md:col-span-4">
+                        <div className="md:col-span-2">
+                          <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">AI Model</label>
+                          <Input value={ai.aiModel || ''} onChange={e => setConfig(p => ({ ...p, aiServices: p.aiServices.map(r => r.id === ai.id ? { ...r, aiModel: e.target.value } : r) }))} className="rounded-sm bg-background" placeholder="GPT-4o" />
+                        </div>
+                        <div className="md:col-span-2">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Pricing Model</label>
-                          <select 
-                            value={ai.pricingModel} 
-                            onChange={e => setConfig(p => ({ ...p, aiServices: p.aiServices.map(r => r.id === ai.id ? { ...r, pricingModel: e.target.value } : r) }))} 
+                          <select
+                            value={ai.pricingModel}
+                            onChange={e => setConfig(p => ({ ...p, aiServices: p.aiServices.map(r => r.id === ai.id ? { ...r, pricingModel: e.target.value } : r) }))}
                             className="h-9 w-full px-3 text-sm rounded-sm border border-input bg-background shadow-sm"
                           >
                             <option value="per_1k_tokens">Per 1k Tokens</option>
                             <option value="per_1m_tokens">Per 1M Tokens</option>
-                            <option value="per_1k_requests">Per 1k Requests</option>
+                            <option value="per_1k_requests">Per Requests</option>
                             <option value="per_page">Per Page</option>
                             <option value="monthly">Monthly</option>
                             <option value="yearly">Yearly</option>
                             <option value="one-time">One-Time</option>
                           </select>
                         </div>
-                        <div className="md:col-span-3">
-                          <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Estimated Price (Rp)</label>
-                          <Input 
-                            type="text" 
-                            value={ai.price === 0 ? '' : new Intl.NumberFormat('id-ID').format(ai.price)} 
-                            onChange={e => setConfig(p => ({ ...p, aiServices: p.aiServices.map(r => r.id === ai.id ? { ...r, price: Number(e.target.value.replace(/\D/g, '')) } : r) }))} 
-                            className="rounded-sm bg-background" 
+                        <div className="md:col-span-2">
+                          <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Billing Type</label>
+                          <select
+                            value={ai.billingType || 'one-time'}
+                            onChange={e => setConfig(p => ({ ...p, aiServices: p.aiServices.map(r => r.id === ai.id ? { ...r, billingType: e.target.value as any } : r) }))}
+                            className="h-9 w-full px-3 text-sm rounded-sm border border-input bg-background shadow-sm"
+                          >
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                            <option value="one-time">One-Time</option>
+                          </select>
+                        </div>
+                        <div className="md:col-span-1">
+                          <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Default Qty</label>
+                          <Input type="number" min="1" value={ai.qty || 1} onChange={e => setConfig(p => ({ ...p, aiServices: p.aiServices.map(r => r.id === ai.id ? { ...r, qty: parseInt(e.target.value) || 1 } : r) }))} className="rounded-sm bg-background" />
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Unit Price (Rp)</label>
+                          <Input
+                            type="text"
+                            value={ai.price === 0 ? '' : new Intl.NumberFormat('id-ID').format(ai.price)}
+                            onChange={e => setConfig(p => ({ ...p, aiServices: p.aiServices.map(r => r.id === ai.id ? { ...r, price: Number(e.target.value.replace(/\D/g, '')) } : r) }))}
+                            className="rounded-sm bg-background"
                           />
                         </div>
                       </div>
                     </div>
                   ))}
-                  <Button variant="outline" onClick={() => setConfig(p => ({ ...p, aiServices: [...p.aiServices, { id: genId(), name: 'New AI Service', pricingModel: 'monthly', price: 0 }] }))} className="w-full gap-2 border-dashed">
+                  <Button variant="outline" onClick={() => setConfig(p => ({ ...p, aiServices: [...p.aiServices, { id: genId(), name: 'New AI Service', aiModel: '', pricingModel: 'monthly', billingType: 'monthly', price: 0, qty: 1 }] }))} className="w-full gap-2 border-dashed">
                     <Plus className="w-4 h-4" /> Add AI Service
                   </Button>
                 </div>
@@ -298,12 +318,12 @@ export default function MasterDataPage() {
             </div>
             {openSection === 'other' ? <ChevronUp className="w-5 h-5 text-muted-foreground" /> : <ChevronDown className="w-5 h-5 text-muted-foreground" />}
           </button>
-          
+
           <AnimatePresence>
             {openSection === 'other' && (
               <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden border-t border-border">
                 <div className="p-6 space-y-8">
-                  
+
                   <div>
                     <h3 className="text-sm font-bold border-b border-border pb-2 mb-4">License Margin</h3>
                     <div className="w-48">
@@ -323,11 +343,11 @@ export default function MasterDataPage() {
                           </div>
                           <div className="w-full sm:w-48">
                             <label className="text-xs font-semibold text-muted-foreground mb-1.5 block sm:hidden">Price (Rp)</label>
-                            <Input 
-                              type="text" 
-                              value={fee.price === 0 ? '' : new Intl.NumberFormat('id-ID').format(fee.price)} 
-                              onChange={e => setConfig(p => ({ ...p, additionalFees: p.additionalFees.map(r => r.id === fee.id ? { ...r, price: Number(e.target.value.replace(/\D/g, '')) } : r) }))} 
-                              className="rounded-sm bg-background" 
+                            <Input
+                              type="text"
+                              value={fee.price === 0 ? '' : new Intl.NumberFormat('id-ID').format(fee.price)}
+                              onChange={e => setConfig(p => ({ ...p, additionalFees: p.additionalFees.map(r => r.id === fee.id ? { ...r, price: Number(e.target.value.replace(/\D/g, '')) } : r) }))}
+                              className="rounded-sm bg-background"
                             />
                           </div>
                           <Button variant="ghost" size="icon" onClick={() => setConfig(p => ({ ...p, additionalFees: p.additionalFees.filter(r => r.id !== fee.id) }))} className="text-destructive h-9 w-9 hover:bg-destructive/10 shrink-0">

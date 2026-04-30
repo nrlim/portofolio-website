@@ -10,7 +10,7 @@ import { Plus, Trash2, FileText, ChevronDown, ChevronUp, Server, Users, Settings
 interface DevRole { id: string; role: string; qty: number; days: number; dailyRate: number; dailyAllowance: number; }
 interface InfraItem { id: string; name: string; type: 'monthly' | 'yearly' | 'one-time'; price: number; ppnPercent: number; }
 interface AdditionalFee { id: string; name: string; price: number; }
-interface AIService { id: string; name: string; pricingModel: string; price: number; }
+interface AIService { id: string; name: string; aiModel?: string; pricingModel: string; billingType?: 'monthly' | 'yearly' | 'one-time'; price: number; qty?: number; }
 
 interface MasterDataConfig {
   devRoles: DevRole[];
@@ -61,8 +61,8 @@ function ComboboxInput<T>({
         {open && filtered.length > 0 && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="absolute z-50 w-full bg-popover text-popover-foreground border border-t-0 border-border rounded-b-sm shadow-md max-h-48 overflow-y-auto">
             {filtered.map((opt, i) => (
-              <div 
-                key={i} 
+              <div
+                key={i}
                 className="px-3 py-2 text-sm hover:bg-muted cursor-pointer transition-colors"
                 onClick={() => { onSelect(opt.data); setOpen(false); }}
               >
@@ -81,7 +81,7 @@ export default function CalculatorPage() {
   const searchParams = useSearchParams();
   const editId = searchParams.get('id');
   const isEditMode = !!editId;
-  
+
   // Accordion states
   const [openSection, setOpenSection] = useState<string | null>('info');
   const [saving, setSaving] = useState(false);
@@ -143,7 +143,10 @@ export default function CalculatorPage() {
   const totalDevCost = project.devRoles.reduce((sum, role) => sum + (role.qty * role.days * (role.dailyRate + role.dailyAllowance)), 0);
   const totalInfraCost = project.infraItems.reduce((sum, item) => sum + ((item.type === 'monthly' ? item.price * 12 : item.price) * (1 + item.ppnPercent / 100)), 0);
   const totalAdditionalCost = project.additionalFees.reduce((sum, fee) => sum + fee.price, 0);
-  const totalAICost = project.aiServices.reduce((sum, ai) => sum + ai.price, 0);
+  const totalAICost = project.aiServices.reduce((sum, ai) => {
+    const basePrice = (ai.price || 0) * (ai.qty || 1);
+    return sum + (ai.billingType === 'monthly' ? basePrice * 12 : basePrice);
+  }, 0);
   const subTotalCost = totalDevCost + totalInfraCost + totalAdditionalCost + totalAICost;
   const licenseCost = subTotalCost * (project.licensePercent / 100);
   const grandTotal = subTotalCost + licenseCost;
@@ -166,7 +169,7 @@ export default function CalculatorPage() {
 
   return (
     <main className="p-4 md:p-8 w-full space-y-8">
-      
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-border pb-6">
         <div>
@@ -185,7 +188,7 @@ export default function CalculatorPage() {
       </div>
 
       <div className="space-y-4">
-        
+
         {/* Section 1: Info */}
         <div className="bg-card rounded-sm border border-border shadow-sm overflow-hidden">
           <button onClick={() => toggleSection('info')} className="w-full px-6 py-4 flex items-center justify-between bg-muted/10 hover:bg-muted/20 transition-colors">
@@ -230,8 +233,8 @@ export default function CalculatorPage() {
                       <div className="grid grid-cols-1 md:grid-cols-12 gap-5 mb-4 pr-10">
                         <div className="md:col-span-4">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Role</label>
-                          <ComboboxInput 
-                            value={role.role} 
+                          <ComboboxInput
+                            value={role.role}
                             onChange={val => updateDevRole(role.id, 'role', val)}
                             onSelect={match => setProject(p => ({ ...p, devRoles: p.devRoles.map(i => i.id === role.id ? { ...i, role: match.role, dailyRate: match.dailyRate, dailyAllowance: match.dailyAllowance } : i) }))}
                             options={masterData?.devRoles?.map((r: DevRole) => ({ label: r.role, data: r })) || []}
@@ -242,20 +245,20 @@ export default function CalculatorPage() {
                         <div className="md:col-span-2"><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Days</label><Input type="number" value={role.days} onChange={e => updateDevRole(role.id, 'days', Number(e.target.value))} className="rounded-sm bg-background" /></div>
                         <div className="md:col-span-2">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Daily Rate</label>
-                          <Input 
-                            type="text" 
-                            value={role.dailyRate === 0 ? '' : new Intl.NumberFormat('id-ID').format(role.dailyRate)} 
-                            onChange={e => updateDevRole(role.id, 'dailyRate', Number(e.target.value.replace(/\D/g, '')))} 
-                            className="rounded-sm bg-background" 
+                          <Input
+                            type="text"
+                            value={role.dailyRate === 0 ? '' : new Intl.NumberFormat('id-ID').format(role.dailyRate)}
+                            onChange={e => updateDevRole(role.id, 'dailyRate', Number(e.target.value.replace(/\D/g, '')))}
+                            className="rounded-sm bg-background"
                           />
                         </div>
                         <div className="md:col-span-2">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Daily Allow.</label>
-                          <Input 
-                            type="text" 
-                            value={role.dailyAllowance === 0 ? '' : new Intl.NumberFormat('id-ID').format(role.dailyAllowance)} 
-                            onChange={e => updateDevRole(role.id, 'dailyAllowance', Number(e.target.value.replace(/\D/g, '')))} 
-                            className="rounded-sm bg-background" 
+                          <Input
+                            type="text"
+                            value={role.dailyAllowance === 0 ? '' : new Intl.NumberFormat('id-ID').format(role.dailyAllowance)}
+                            onChange={e => updateDevRole(role.id, 'dailyAllowance', Number(e.target.value.replace(/\D/g, '')))}
+                            className="rounded-sm bg-background"
                           />
                         </div>
                       </div>
@@ -288,8 +291,8 @@ export default function CalculatorPage() {
                       <div className="grid grid-cols-1 md:grid-cols-12 gap-5 mb-4 pr-10">
                         <div className="md:col-span-5">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Item</label>
-                          <ComboboxInput 
-                            value={item.name} 
+                          <ComboboxInput
+                            value={item.name}
                             onChange={val => updateInfra(item.id, 'name', val)}
                             onSelect={match => setProject(p => ({ ...p, infraItems: p.infraItems.map(i => i.id === item.id ? { ...i, name: match.name, type: match.type, price: match.price, ppnPercent: match.ppnPercent } : i) }))}
                             options={masterData?.infraItems?.map((r: InfraItem) => ({ label: r.name, data: r })) || []}
@@ -299,11 +302,11 @@ export default function CalculatorPage() {
                         <div className="md:col-span-3"><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Billing</label><select value={item.type} onChange={e => updateInfra(item.id, 'type', e.target.value as InfraItem['type'])} className="h-9 w-full px-3 text-sm rounded-sm border border-input bg-background"><option value="monthly">Monthly</option><option value="yearly">Yearly</option><option value="one-time">One-Time</option></select></div>
                         <div className="md:col-span-2">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Price (Rp)</label>
-                          <Input 
-                            type="text" 
-                            value={item.price === 0 ? '' : new Intl.NumberFormat('id-ID').format(item.price)} 
-                            onChange={e => updateInfra(item.id, 'price', Number(e.target.value.replace(/\D/g, '')))} 
-                            className="rounded-sm bg-background" 
+                          <Input
+                            type="text"
+                            value={item.price === 0 ? '' : new Intl.NumberFormat('id-ID').format(item.price)}
+                            onChange={e => updateInfra(item.id, 'price', Number(e.target.value.replace(/\D/g, '')))}
+                            className="rounded-sm bg-background"
                           />
                         </div>
                         <div className="md:col-span-2"><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">PPN (%)</label><Input type="number" value={item.ppnPercent} onChange={e => updateInfra(item.id, 'ppnPercent', Number(e.target.value))} className="rounded-sm bg-background" /></div>
@@ -320,53 +323,86 @@ export default function CalculatorPage() {
 
         {/* Section 4: AI & Other */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4">
-          
+
           <div className="bg-card rounded-sm border border-border shadow-sm flex flex-col">
             <div className="px-6 py-4 border-b border-border bg-muted/10"><h2 className="font-semibold text-sm flex items-center gap-2"><Cpu className="w-4 h-4 text-muted-foreground" /> AI Models & APIs</h2></div>
             <div className="p-6 flex-1 space-y-4">
               {project.aiServices.map(ai => (
                 <div key={ai.id} className="flex flex-col gap-3 p-4 border border-border rounded-sm bg-muted/5 relative">
                   <Button variant="ghost" size="icon" onClick={() => setProject(p => ({ ...p, aiServices: p.aiServices.filter(r => r.id !== ai.id) }))} className="absolute top-2 right-2 text-destructive h-8 w-8 hover:bg-destructive/10"><Trash2 className="w-4 h-4" /></Button>
-                  <div className="pr-10">
-                    <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Service</label>
-                    <ComboboxInput 
-                      value={ai.name} 
-                      onChange={val => updateAI(ai.id, 'name', val)}
-                      onSelect={match => setProject(p => ({ ...p, aiServices: p.aiServices.map(i => i.id === ai.id ? { ...i, name: match.name, pricingModel: match.pricingModel, price: match.price } : i) }))}
-                      options={masterData?.aiServices?.map((r: AIService) => ({ label: r.name, data: r })) || []}
-                      placeholder="Pilih atau ketik AI service..."
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-3 pr-8">
                     <div>
+                      <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Service Name</label>
+                      <ComboboxInput
+                        value={ai.name}
+                        onChange={val => updateAI(ai.id, 'name', val)}
+                        onSelect={match => setProject(p => ({ ...p, aiServices: p.aiServices.map(i => i.id === ai.id ? { ...i, name: match.name, aiModel: match.aiModel, pricingModel: match.pricingModel, billingType: match.billingType, price: match.price } : i) }))}
+                        options={masterData?.aiServices?.map((r: AIService) => ({ label: r.name, data: r })) || []}
+                        placeholder="Pilih AI service..."
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">AI Model</label>
+                      <Input
+                        value={ai.aiModel || ''}
+                        onChange={e => updateAI(ai.id, 'aiModel', e.target.value)}
+                        placeholder="e.g. GPT-4o, Claude 3"
+                        className="rounded-sm bg-background h-9"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-12 gap-3">
+                    <div className="col-span-4">
                       <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Pricing Model</label>
-                      <select 
-                        value={ai.pricingModel} 
-                        onChange={e => updateAI(ai.id, 'pricingModel', e.target.value)} 
+                      <select
+                        value={ai.pricingModel}
+                        onChange={e => updateAI(ai.id, 'pricingModel', e.target.value)}
                         className="h-9 w-full px-3 text-sm rounded-sm border border-input bg-background shadow-sm"
                       >
                         <option value="per_1k_tokens">Per 1k Tokens</option>
                         <option value="per_1m_tokens">Per 1M Tokens</option>
-                        <option value="per_1k_requests">Per 1k Requests</option>
+                        <option value="per_1k_requests">Per Requests</option>
                         <option value="per_page">Per Page</option>
                         <option value="monthly">Monthly</option>
                         <option value="yearly">Yearly</option>
                         <option value="one-time">One-Time</option>
                       </select>
                     </div>
-                    <div>
-                      <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Price (Rp)</label>
-                      <Input 
-                        type="text" 
-                        value={ai.price === 0 ? '' : new Intl.NumberFormat('id-ID').format(ai.price)} 
-                        onChange={e => updateAI(ai.id, 'price', Number(e.target.value.replace(/\D/g, '')))} 
-                        className="rounded-sm h-9 bg-background" 
+                    <div className="col-span-3">
+                      <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Billing Type</label>
+                      <select
+                        value={ai.billingType || 'one-time'}
+                        onChange={e => updateAI(ai.id, 'billingType', e.target.value as any)}
+                        className="h-9 w-full px-3 text-sm rounded-sm border border-input bg-background shadow-sm"
+                      >
+                        <option value="monthly">Monthly</option>
+                        <option value="yearly">Yearly</option>
+                        <option value="one-time">One-Time</option>
+                      </select>
+                    </div>
+                    <div className="col-span-2">
+                      <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Qty</label>
+                      <Input
+                        type="number"
+                        min="1"
+                        value={ai.qty || 1}
+                        onChange={e => updateAI(ai.id, 'qty', parseInt(e.target.value) || 1)}
+                        className="rounded-sm h-9 bg-background"
+                      />
+                    </div>
+                    <div className="col-span-3">
+                      <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Unit Price (Rp)</label>
+                      <Input
+                        type="text"
+                        value={ai.price === 0 ? '' : new Intl.NumberFormat('id-ID').format(ai.price)}
+                        onChange={e => updateAI(ai.id, 'price', Number(e.target.value.replace(/\D/g, '')))}
+                        className="rounded-sm h-9 bg-background"
                       />
                     </div>
                   </div>
                 </div>
               ))}
-              <Button variant="outline" onClick={() => setProject(p => ({ ...p, aiServices: [...p.aiServices, { id: genId(), name: '', pricingModel: 'monthly', price: 0 }] }))} className="w-full gap-2 border-dashed"><Plus className="w-4 h-4" /> Add AI Service</Button>
+              <Button variant="outline" onClick={() => setProject(p => ({ ...p, aiServices: [...p.aiServices, { id: genId(), name: '', aiModel: '', pricingModel: 'monthly', billingType: 'monthly', price: 0, qty: 1 }] }))} className="w-full gap-2 border-dashed"><Plus className="w-4 h-4" /> Add AI Service</Button>
             </div>
             <div className="px-6 py-4 border-t border-border bg-muted/5 flex justify-between"><span className="text-sm text-muted-foreground">Subtotal AI</span><span className="text-sm font-semibold">{fmt(totalAICost)}</span></div>
           </div>
@@ -378,8 +414,8 @@ export default function CalculatorPage() {
                 <div key={fee.id} className="flex gap-3 items-end">
                   <div className="flex-1">
                     <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Description</label>
-                    <ComboboxInput 
-                      value={fee.name} 
+                    <ComboboxInput
+                      value={fee.name}
                       onChange={val => updateFee(fee.id, 'name', val)}
                       onSelect={match => setProject(p => ({ ...p, additionalFees: p.additionalFees.map(i => i.id === fee.id ? { ...i, name: match.name, price: match.price } : i) }))}
                       options={masterData?.additionalFees?.map((r: AdditionalFee) => ({ label: r.name, data: r })) || []}
@@ -388,11 +424,11 @@ export default function CalculatorPage() {
                   </div>
                   <div className="w-32">
                     <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Price</label>
-                    <Input 
-                      type="text" 
-                      value={fee.price === 0 ? '' : new Intl.NumberFormat('id-ID').format(fee.price)} 
-                      onChange={e => updateFee(fee.id, 'price', Number(e.target.value.replace(/\D/g, '')))} 
-                      className="rounded-sm h-9" 
+                    <Input
+                      type="text"
+                      value={fee.price === 0 ? '' : new Intl.NumberFormat('id-ID').format(fee.price)}
+                      onChange={e => updateFee(fee.id, 'price', Number(e.target.value.replace(/\D/g, '')))}
+                      className="rounded-sm h-9"
                     />
                   </div>
                   <Button variant="ghost" size="icon" onClick={() => setProject(p => ({ ...p, additionalFees: p.additionalFees.filter(r => r.id !== fee.id) }))} className="text-destructive h-9 w-9 mb-[1px] hover:bg-destructive/10"><Trash2 className="w-4 h-4" /></Button>
