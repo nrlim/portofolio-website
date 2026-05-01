@@ -312,16 +312,13 @@ export default function ReportPage() {
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <TableHead>
-                          <Th w="40%">Service</Th>
+                          <Th w="45%">Service</Th>
                           <Th align="center" w="30%">Pricing Model</Th>
-                          <Th align="right" w="15%">Price / Period</Th>
-                          <Th align="right" w="15%">Total</Th>
+                          <Th align="right" w="25%">Price / Period</Th>
                         </TableHead>
                         <tbody className="divide-y divide-border">
                           {aiServices.map((a) => {
                             const qty = a.qty || 1;
-                            const base = a.billingType === 'yearly' ? (a.price || 0) * 12 : (a.price || 0);
-                            const total = base * qty;
                             // Pricing models that are usage-based and may grow into recurring costs
                             const isUsageBased = ['per_page','per_1k_requests','per_1k_tokens','per_1m_tokens'].includes(a.pricingModel);
                             return (
@@ -349,21 +346,14 @@ export default function ReportPage() {
                                   </span>
                                 </Td>
 
-                                <Td align="right">
-                                  {isUsageBased ? (
-                                    <div className="flex flex-col justify-end items-end">
-                                      <span>{fmt(a.price || 0)}</span>
-                                      <span className="text-[10px] text-muted-foreground whitespace-nowrap">x {qty} qty</span>
-                                    </div>
-                                  ) : (
-                                    fmt(a.price || 0)
-                                  )}
-                                </Td>
                                 <Td align="right" bold>
-                                  {fmt(total)}
-                                  <span className="block text-[10px] font-normal text-muted-foreground">
-                                    /{a.billingType === 'yearly' ? 'Year' : a.billingType === 'monthly' ? 'Month' : 'One-time'}
-                                  </span>
+                                  <div className="flex flex-col justify-end items-end">
+                                    <span>{fmt(a.price || 0)}</span>
+                                    <span className="text-[10px] font-normal text-muted-foreground whitespace-nowrap">
+                                      {isUsageBased && `x ${qty} qty • `}
+                                      /{a.billingType === 'yearly' ? 'Year' : a.billingType === 'monthly' ? 'Month' : 'One-time'}
+                                    </span>
+                                  </div>
                                 </Td>
                               </tr>
                             );
