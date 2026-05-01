@@ -20,7 +20,7 @@ interface ProjectRecord {
 interface DevRole { id: string; role: string; qty: number; days: number; dailyRate: number; dailyAllowance: number; }
 interface InfraItem { id: string; name: string; type: 'monthly' | 'yearly' | 'one-time'; price: number; ppnPercent: number; }
 interface AdditionalFee { id: string; name: string; price: number; }
-interface AIService { id: string; name: string; aiModel?: string; pricingModel: string; billingType?: 'monthly' | 'yearly' | 'one-time'; price: number; qty?: number; }
+interface AIService { id: string; name: string; aiModel?: string; pricingModel: string; billingType?: 'monthly' | 'yearly' | 'one-time' | 'quota-based'; price: number; qty?: number; isIncludedInTotal?: boolean; }
 
 interface ProjectData {
   clientName: string;
@@ -86,10 +86,30 @@ export default function DashboardPage() {
     const licensePercent = typeof project.licensePercent === 'number' ? project.licensePercent : 10;
     const notes = project.notes || '';
 
-    const totalDevCost = devRoles.reduce((s: number, r: DevRole) => s + (r.qty || 0) * (r.days || 0) * ((r.dailyRate || 0) + (r.dailyAllowance || 0)), 0);
-    const totalInfraCost = infraItems.reduce((s: number, i: InfraItem) => s + ((i.type === 'monthly' ? (i.price || 0) * 12 : (i.price || 0)) * (1 + (i.ppnPercent || 0) / 100)), 0);
+    const parseTimelineDays = (str: string) => {
+      if (!str) return 30;
+      const num = parseFloat(str.match(/\d+(\.\d+)?/)?.[0] || '1');
+      const lower = str.toLowerCase();
+      if (lower.includes('tahun') || lower.includes('year')) return num * 365;
+      if (lower.includes('bulan') || lower.includes('month')) return num * 30;
+      if (lower.includes('minggu') || lower.includes('week')) return num * 7;
+      return num;
+    };
+
+    const baseDevCost = devRoles.reduce((s: number, r: DevRole) => s + (r.qty || 0) * (r.days || 0) * ((r.dailyRate || 0) + (r.dailyAllowance || 0)), 0);
+    const featureFactor = 1 + ((project.totalFeatures || 0) * 0.02);
+    const standardDays = Math.max(1, (project.totalFeatures || 0) * 3);
+    const timelineDays = parseTimelineDays(project.timelineStr);
+    let urgencyFactor = 1;
+    if (timelineDays < standardDays && timelineDays > 0) {
+      urgencyFactor = Math.min(3, standardDays / timelineDays);
+    }
+    const totalDevCost = baseDevCost * featureFactor * urgencyFactor;
+    const devCostAdjustment = totalDevCost - baseDevCost;
+    const totalInfraCost = infraItems.reduce((s: number, i: InfraItem) => s + ((i.type === 'yearly' ? (i.price || 0) * 12 : (i.price || 0)) * (1 + (i.ppnPercent || 0) / 100)), 0);
     const totalAdditionalCost = additionalFees.reduce((s: number, f: AdditionalFee) => s + (f.price || 0), 0);
-    const subTotal = totalDevCost + totalInfraCost + totalAdditionalCost;
+    const totalAIIncludedCost = aiServices.filter((ai: AIService) => ai.isIncludedInTotal).reduce((sum: number, ai: AIService) => sum + ((ai.price || 0) * (ai.qty || 1)), 0);
+    const subTotal = totalDevCost + totalInfraCost + totalAdditionalCost + totalAIIncludedCost;
     const licenseCost = subTotal * (licensePercent / 100);
     const grandTotal = subTotal + licenseCost;
 
@@ -105,12 +125,16 @@ export default function DashboardPage() {
     const sec = (n: string, t: string) =>
       `<div style="margin:18px 0 8px;padding-bottom:5px;border-bottom:1.5px solid #e2e8f0"><span style="font-size:13px;font-weight:700;color:#1e40af;text-transform:uppercase">${n}. ${t}</span></div>`;
 
-    const devRows = devRoles.map((r: DevRole) =>
+    let devRows = devRoles.map((r: DevRole) =>
       `<tr>${td(r.role || '-')}${td(`${r.qty || 0} pax`, 'center')}${td(`${r.days || 0} days`, 'right')}${td(fmt((r.dailyRate || 0) + (r.dailyAllowance || 0)), 'right')}${td(fmt((r.qty || 0) * (r.days || 0) * ((r.dailyRate || 0) + (r.dailyAllowance || 0))), 'right', true)}</tr>`
     ).join('');
 
+    if (devCostAdjustment > 0) {
+      devRows += `<tr style="background-color:#fffbeb"><td style="padding:7px 10px;border-bottom:1px solid #e5e7eb;font-weight:600;color:#b45309">Complexity & Timeline Adjustment</td><td colspan="3" style="padding:7px 10px;border-bottom:1px solid #e5e7eb;text-align:right;font-size:10px;color:#d97706">${project.totalFeatures} Features &bull; ${timelineDays} Days Timeline</td><td style="padding:7px 10px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:600;color:#b45309">+${fmt(devCostAdjustment)}</td></tr>`;
+    }
+
     const infraRows = infraItems.map((i: InfraItem) => {
-      const base = i.type === 'monthly' ? (i.price || 0) * 12 : (i.price || 0);
+      const base = i.type !== 'one-time' ? (i.price || 0) * 12 : (i.price || 0);
       const tipe = i.type === 'monthly' ? 'Monthly' : i.type === 'yearly' ? 'Yearly' : 'One-time';
       return `<tr>${td(i.name || '-')}${td(tipe, 'center')}${td(fmt(i.price || 0), 'right')}${td(`${i.ppnPercent || 0}%`, 'right')}${td(fmt(base * (1 + (i.ppnPercent || 0) / 100)), 'right', true)}</tr>`;
     }).join('');
@@ -120,13 +144,10 @@ export default function DashboardPage() {
     ).join('');
 
     const aiRows = aiServices.map((a: AIService) => {
-      const isUsageBased = ['per_page', 'per_1k_requests', 'per_1k_tokens', 'per_1m_tokens'].includes(a.pricingModel);
-      const qtyText = isUsageBased ? `(${a.qty || 1} x ${fmt(a.price || 0)})` : fmt(a.price || 0);
-      const base = a.billingType === 'yearly' ? (a.price || 0) * 12 : (a.price || 0);
-      const total = base * (a.qty || 1);
-      const periodLabel = a.billingType === 'yearly' ? '/ Year' : a.billingType === 'monthly' ? '/ Month' : '/ One-time';
-      const formattedTotal = `${fmt(total)}<div style="font-size:8px;color:#64748b;font-weight:400">${periodLabel}</div>`;
-      return `<tr>${td(a.name || '-')}${td(a.pricingModel || '-', 'center')}${td(qtyText, 'right')}<td style="padding:7px 10px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:600">${formattedTotal}</td></tr>`;
+      const periodLabel = a.billingType === 'monthly' ? 'Monthly' : a.billingType === 'yearly' ? 'Yearly' : a.billingType === 'quota-based' ? 'Quota Based' : 'One-time';
+      const selectedBadge = a.isIncludedInTotal ? `<span style="font-size:10px;padding:2px 6px;border-radius:2px;background:#eff6ff;color:#2563eb;font-weight:600;border:1px solid #bfdbfe;margin-left:8px;">✓ Selected</span>` : '';
+      const serviceNameHtml = `<div style="display:flex;align-items:center;">${a.name || '-'}${selectedBadge}</div>`;
+      return `<tr>${td(serviceNameHtml)}${td(a.pricingModel || '-', 'center')}${td(periodLabel, 'center')}${td((a.qty || 1).toString(), 'right')}${td(fmt(a.price || 0), 'right')}${td(fmt((a.price || 0) * (a.qty || 1)), 'right', true)}</tr>`;
     }).join('');
 
     const sumRow = (label: string, val: string, cls = '') =>
@@ -216,7 +237,7 @@ export default function DashboardPage() {
 
         if (aiServices.length > 0) {
           contentHtml += `${sec(sectionIndex.toString(), 'AI Models & API Services')}
-          <table style="margin-bottom:24px"><thead><tr>${th('Service', 'left', '40%')}${th('Pricing Model', 'center', '30%')}${th('Price / Period', 'right', '15%')}${th('Total', 'right', '15%')}</tr></thead>
+          <table style="margin-bottom:24px"><thead><tr>${th('Service', 'left', '30%')}${th('Pricing Model', 'center', '15%')}${th('Billing', 'center', '20%')}${th('Qty', 'right', '5%')}${th('Unit Price', 'right', '15%')}${th('Total', 'right', '15%')}</tr></thead>
           <tbody>${aiRows}</tbody></table>`;
           sectionIndex++;
         }
@@ -240,6 +261,7 @@ export default function DashboardPage() {
           ${totalDevCost > 0 ? sumRow('<span>Development Cost</span>', fmt(totalDevCost)) : ''}
           ${totalInfraCost > 0 ? sumRow('<span>Infrastructure Cost</span>', fmt(totalInfraCost)) : ''}
           ${totalAdditionalCost > 0 ? sumRow('<span>Additional Fees</span>', fmt(totalAdditionalCost)) : ''}
+          ${totalAIIncludedCost > 0 ? sumRow('<span>Selected AI Services</span>', fmt(totalAIIncludedCost)) : ''}
           ${sumRow('<span style="font-weight:600">Subtotal</span>', fmt(subTotal), 'background:#f8fafc;font-weight:600')}
           ${sumRow(`<span style="color:#475569">License / Margin (${licensePercent}%)</span>`, fmt(licenseCost))}
           <div style="display:flex;justify-content:space-between;padding:10px 12px;background:#1e293b;color:#fff;font-size:14px;font-weight:800">

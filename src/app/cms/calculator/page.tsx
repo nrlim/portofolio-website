@@ -10,7 +10,7 @@ import { Plus, Trash2, FileText, ChevronDown, ChevronUp, Server, Users, Settings
 interface DevRole { id: string; role: string; qty: number; days: number; dailyRate: number; dailyAllowance: number; }
 interface InfraItem { id: string; name: string; type: 'monthly' | 'yearly' | 'one-time'; price: number; ppnPercent: number; }
 interface AdditionalFee { id: string; name: string; price: number; }
-interface AIService { id: string; name: string; aiModel?: string; pricingModel: string; billingType?: 'monthly' | 'yearly' | 'one-time'; price: number; qty?: number; }
+interface AIService { id: string; name: string; aiModel?: string; pricingModel: string; billingType?: 'monthly' | 'yearly' | 'one-time' | 'quota-based'; price: number; qty?: number; isIncludedInTotal?: boolean; }
 
 interface MasterDataConfig {
   devRoles: DevRole[];
@@ -140,14 +140,35 @@ export default function CalculatorPage() {
   const updateFee = <K extends keyof AdditionalFee>(id: string, field: K, value: AdditionalFee[K]) => setProject(p => ({ ...p, additionalFees: p.additionalFees.map(i => i.id === id ? { ...i, [field]: value } : i) }));
   const updateAI = <K extends keyof AIService>(id: string, field: K, value: AIService[K]) => setProject(p => ({ ...p, aiServices: p.aiServices.map(i => i.id === id ? { ...i, [field]: value } : i) }));
 
-  const totalDevCost = project.devRoles.reduce((sum, role) => sum + (role.qty * role.days * (role.dailyRate + role.dailyAllowance)), 0);
-  const totalInfraCost = project.infraItems.reduce((sum, item) => sum + ((item.type === 'monthly' ? item.price * 12 : item.price) * (1 + item.ppnPercent / 100)), 0);
+  const parseTimelineDays = (str: string) => {
+    if (!str) return 30;
+    const num = parseFloat(str.match(/\d+(\.\d+)?/)?.[0] || '1');
+    const lower = str.toLowerCase();
+    if (lower.includes('tahun') || lower.includes('year')) return num * 365;
+    if (lower.includes('bulan') || lower.includes('month')) return num * 30;
+    if (lower.includes('minggu') || lower.includes('week')) return num * 7;
+    return num;
+  };
+
+  const baseDevCost = project.devRoles.reduce((sum, role) => sum + (role.qty * role.days * (role.dailyRate + role.dailyAllowance)), 0);
+  const featureFactor = 1 + ((project.totalFeatures || 0) * 0.02);
+  const standardDays = Math.max(1, (project.totalFeatures || 0) * 3);
+  const timelineDays = parseTimelineDays(project.timelineStr);
+  let urgencyFactor = 1;
+  if (timelineDays < standardDays && timelineDays > 0) {
+    urgencyFactor = Math.min(3, standardDays / timelineDays);
+  }
+  const totalDevCost = baseDevCost * featureFactor * urgencyFactor;
+  const devCostAdjustment = totalDevCost - baseDevCost;
+  const totalInfraCost = project.infraItems.reduce((sum, item) => sum + ((item.type === 'yearly' ? item.price * 12 : item.price) * (1 + item.ppnPercent / 100)), 0);
   const totalAdditionalCost = project.additionalFees.reduce((sum, fee) => sum + fee.price, 0);
   const totalAICost = project.aiServices.reduce((sum, ai) => {
-    const basePrice = (ai.price || 0) * (ai.qty || 1);
-    return sum + (ai.billingType === 'monthly' ? basePrice * 12 : basePrice);
+    return sum + ((ai.price || 0) * (ai.qty || 1));
   }, 0);
-  const subTotalCost = totalDevCost + totalInfraCost + totalAdditionalCost + totalAICost;
+  const totalAIIncludedCost = project.aiServices
+    .filter(ai => ai.isIncludedInTotal)
+    .reduce((sum, ai) => sum + ((ai.price || 0) * (ai.qty || 1)), 0);
+  const subTotalCost = totalDevCost + totalInfraCost + totalAdditionalCost + totalAIIncludedCost;
   const licenseCost = subTotalCost * (project.licensePercent / 100);
   const grandTotal = subTotalCost + licenseCost;
 
@@ -266,6 +287,16 @@ export default function CalculatorPage() {
                     </div>
                   ))}
                   <Button variant="outline" onClick={() => setProject(p => ({ ...p, devRoles: [...p.devRoles, { id: genId(), role: '', qty: 1, days: 22, dailyRate: 0, dailyAllowance: 0 }] }))} className="w-full gap-2 border-dashed"><Plus className="w-4 h-4" /> Add Role</Button>
+                  
+                  {devCostAdjustment > 0 && (
+                    <div className="bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 px-4 py-3 rounded-sm flex items-center justify-between text-sm">
+                      <div>
+                        <span className="font-semibold text-amber-700 dark:text-amber-400 block mb-0.5">Complexity & Timeline Adjustment</span>
+                        <span className="text-[11px] text-amber-600/80 dark:text-amber-500/80">{project.totalFeatures} Features &bull; {timelineDays} Days Timeline</span>
+                      </div>
+                      <span className="font-semibold text-amber-700 dark:text-amber-400 tabular-nums">+{fmt(devCostAdjustment)}</span>
+                    </div>
+                  )}
                 </div>
               </motion.div>
             )}
@@ -311,7 +342,7 @@ export default function CalculatorPage() {
                         </div>
                         <div className="md:col-span-2"><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">PPN (%)</label><Input type="number" value={item.ppnPercent} onChange={e => updateInfra(item.id, 'ppnPercent', Number(e.target.value))} className="rounded-sm bg-background" /></div>
                       </div>
-                      <div className="bg-background border border-border px-4 py-2 rounded-sm text-right text-sm"><span className="text-muted-foreground mr-2">Total Item Cost:</span><span className="font-semibold tabular-nums">{fmt((item.type === 'monthly' ? item.price * 12 : item.price) * (1 + item.ppnPercent / 100))}</span></div>
+                      <div className="bg-background border border-border px-4 py-2 rounded-sm text-right text-sm"><span className="text-muted-foreground mr-2">Total Item Cost:</span><span className="font-semibold tabular-nums">{fmt((item.type === 'yearly' ? item.price * 12 : item.price) * (1 + item.ppnPercent / 100))}</span></div>
                     </div>
                   ))}
                   <Button variant="outline" onClick={() => setProject(p => ({ ...p, infraItems: [...p.infraItems, { id: genId(), name: '', type: 'monthly', price: 0, ppnPercent: 11 }] }))} className="w-full gap-2 border-dashed"><Plus className="w-4 h-4" /> Add Infrastructure</Button>
@@ -372,12 +403,13 @@ export default function CalculatorPage() {
                       <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Billing Type</label>
                       <select
                         value={ai.billingType || 'one-time'}
-                        onChange={e => updateAI(ai.id, 'billingType', e.target.value as "monthly" | "yearly" | "one-time")}
+                        onChange={e => updateAI(ai.id, 'billingType', e.target.value as "monthly" | "yearly" | "one-time" | "quota-based")}
                         className="h-9 w-full px-3 text-sm rounded-sm border border-input bg-background shadow-sm"
                       >
                         <option value="monthly">Monthly</option>
                         <option value="yearly">Yearly</option>
                         <option value="one-time">One-Time</option>
+                        <option value="quota-based">Quota Based</option>
                       </select>
                     </div>
                     <div className="col-span-2">
@@ -398,6 +430,16 @@ export default function CalculatorPage() {
                         onChange={e => updateAI(ai.id, 'price', Number(e.target.value.replace(/\D/g, '')))}
                         className="rounded-sm h-9 bg-background"
                       />
+                    </div>
+                  </div>
+                  <div className="bg-background border border-border px-4 py-2 rounded-sm flex flex-col sm:flex-row sm:items-center justify-between text-sm mt-1 gap-3">
+                    <label className="flex items-center gap-2 cursor-pointer font-medium text-muted-foreground hover:text-foreground transition-colors">
+                      <input type="checkbox" checked={ai.isIncludedInTotal || false} onChange={e => updateAI(ai.id, 'isIncludedInTotal', e.target.checked)} className="rounded-sm border-input accent-primary h-4 w-4" />
+                      Include in Grand Total
+                    </label>
+                    <div className="text-right">
+                      <span className="text-muted-foreground mr-2">Total Service Cost:</span>
+                      <span className="font-semibold tabular-nums">{fmt((ai.price || 0) * (ai.qty || 1))}</span>
                     </div>
                   </div>
                 </div>
@@ -454,7 +496,7 @@ export default function CalculatorPage() {
               <div className="flex justify-between px-6 py-4 text-sm"><span className="text-muted-foreground">Development Cost</span><span className="font-medium tabular-nums">{fmt(totalDevCost)}</span></div>
               <div className="flex justify-between px-6 py-4 text-sm"><span className="text-muted-foreground">Infrastructure Cost</span><span className="font-medium tabular-nums">{fmt(totalInfraCost)}</span></div>
               <div className="flex justify-between px-6 py-4 text-sm"><span className="text-muted-foreground">Additional Fees</span><span className="font-medium tabular-nums">{fmt(totalAdditionalCost)}</span></div>
-              {project.aiServices.length > 0 && <div className="flex justify-between px-6 py-4 text-sm"><span className="text-muted-foreground">AI Services</span><span className="font-medium tabular-nums">{fmt(totalAICost)}</span></div>}
+              {totalAIIncludedCost > 0 && <div className="flex justify-between px-6 py-4 text-sm"><span className="text-muted-foreground">Selected AI Services</span><span className="font-medium tabular-nums">{fmt(totalAIIncludedCost)}</span></div>}
               <div className="flex justify-between px-6 py-4 text-sm bg-muted/30 font-semibold"><span>Subtotal Cost</span><span className="tabular-nums">{fmt(subTotalCost)}</span></div>
               <div className="flex justify-between px-6 py-4 text-sm"><span className="text-muted-foreground">License Cost ({project.licensePercent}%)</span><span className="font-medium text-emerald-600 dark:text-emerald-400 tabular-nums">{fmt(licenseCost)}</span></div>
             </div>

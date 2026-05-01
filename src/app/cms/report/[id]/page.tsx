@@ -20,7 +20,7 @@ export default function ReportPage() {
   interface DevRole { id: string; role: string; qty: number; days: number; dailyRate: number; dailyAllowance: number; }
   interface InfraItem { id: string; name: string; type: 'monthly' | 'yearly' | 'one-time'; price: number; ppnPercent: number; }
   interface AdditionalFee { id: string; name: string; price: number; }
-  interface AIService { id: string; name: string; aiModel?: string; pricingModel: string; billingType?: 'monthly' | 'yearly' | 'one-time'; price: number; qty?: number; }
+  interface AIService { id: string; name: string; aiModel?: string; pricingModel: string; billingType?: 'monthly' | 'yearly' | 'one-time' | 'quota-based'; price: number; qty?: number; isIncludedInTotal?: boolean; }
 
   interface ProjectData {
     clientName: string;
@@ -70,10 +70,34 @@ export default function ReportPage() {
   const aiServices    = Array.isArray(project.aiServices)     ? project.aiServices     : [];
   const licensePercent= typeof project.licensePercent === 'number' ? project.licensePercent : 10;
 
-  const totalDevCost       = devRoles.reduce((s, r) => s + (r.qty||0)*(r.days||0)*((r.dailyRate||0)+(r.dailyAllowance||0)), 0);
-  const totalInfraCost     = infraItems.reduce((s, i) => s + ((i.type==='monthly'?(i.price||0)*12:(i.price||0))*(1+(i.ppnPercent||0)/100)), 0);
+  const parseTimelineDays = (str: string) => {
+    if (!str) return 30;
+    const num = parseFloat(str.match(/\d+(\.\d+)?/)?.[0] || '1');
+    const lower = str.toLowerCase();
+    if (lower.includes('tahun') || lower.includes('year')) return num * 365;
+    if (lower.includes('bulan') || lower.includes('month')) return num * 30;
+    if (lower.includes('minggu') || lower.includes('week')) return num * 7;
+    return num;
+  };
+
+  const baseDevCost = devRoles.reduce((s, r) => s + (r.qty||0)*(r.days||0)*((r.dailyRate||0)+(r.dailyAllowance||0)), 0);
+  const featureFactor = 1 + ((project.totalFeatures || 0) * 0.02);
+  const standardDays = Math.max(1, (project.totalFeatures || 0) * 3);
+  const timelineDays = parseTimelineDays(project.timelineStr);
+  let urgencyFactor = 1;
+  if (timelineDays < standardDays && timelineDays > 0) {
+    urgencyFactor = Math.min(3, standardDays / timelineDays);
+  }
+  const totalDevCost = baseDevCost * featureFactor * urgencyFactor;
+  const devCostAdjustment = totalDevCost - baseDevCost;
+
+  const totalInfraCost     = infraItems.reduce((s, i) => s + ((i.type==='yearly'?(i.price||0)*12:(i.price||0))*(1+(i.ppnPercent||0)/100)), 0);
   const totalAdditionalCost= additionalFees.reduce((s, f) => s + (f.price||0), 0);
-  const subTotal    = totalDevCost + totalInfraCost + totalAdditionalCost;
+  const totalAIIncludedCost = aiServices
+    .filter(ai => ai.isIncludedInTotal)
+    .reduce((sum, ai) => sum + ((ai.price || 0) * (ai.qty || 1)), 0);
+
+  const subTotal    = totalDevCost + totalInfraCost + totalAdditionalCost + totalAIIncludedCost;
   const licenseCost = subTotal * (licensePercent / 100);
   const grandTotal  = subTotal + licenseCost;
 
@@ -124,10 +148,10 @@ export default function ReportPage() {
     </th>
   );
 
-  const Td = ({ children, align = 'left', muted = false, bold = false, mono = false, className = '' }: {
-    children: React.ReactNode; align?: string; muted?: boolean; bold?: boolean; mono?: boolean; className?: string;
+  const Td = ({ children, align = 'left', muted = false, bold = false, mono = false, className = '', colSpan }: {
+    children: React.ReactNode; align?: string; muted?: boolean; bold?: boolean; mono?: boolean; className?: string; colSpan?: number;
   }) => (
-    <td className={`px-5 py-3 print:px-4 print:py-2 text-sm text-${align} ${muted ? 'text-muted-foreground' : ''} ${bold ? 'font-semibold' : ''} ${mono ? 'tabular-nums' : ''} ${className}`}>
+    <td colSpan={colSpan} className={`px-5 py-3 print:px-4 print:py-2 text-sm text-${align} ${muted ? 'text-muted-foreground' : ''} ${bold ? 'font-semibold' : ''} ${mono ? 'tabular-nums' : ''} ${className}`}>
       {children}
     </td>
   );
@@ -263,6 +287,25 @@ export default function ReportPage() {
                               <Td align="right" bold mono>{fmt((r.qty||0)*(r.days||0)*((r.dailyRate||0)+(r.dailyAllowance||0)))}</Td>
                             </tr>
                           ))}
+                          {devCostAdjustment > 0 && (
+                            <tr className="bg-amber-50/50 dark:bg-amber-950/20 print:bg-amber-50/50">
+                              <Td bold className="text-amber-700 dark:text-amber-400">
+                                <div className="flex items-center gap-2">
+                                  Complexity & Timeline Adjustment
+                                  <span
+                                    title="Biaya tambahan karena jumlah fitur atau timeline yang lebih cepat dari standar"
+                                    className="hidden sm:inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-200 dark:bg-amber-800 text-amber-800 dark:text-amber-200 text-[10px] cursor-help print:hidden"
+                                  >?</span>
+                                </div>
+                              </Td>
+                              <Td colSpan={3} align="right" muted className="text-[10px] text-amber-600/80 dark:text-amber-500/80">
+                                {project.totalFeatures} Features • {timelineDays} Days Timeline
+                              </Td>
+                              <Td align="right" bold mono className="text-amber-700 dark:text-amber-400">
+                                +{fmt(devCostAdjustment)}
+                              </Td>
+                            </tr>
+                          )}
                         </tbody>
                       </table>
                     </div>
@@ -285,7 +328,7 @@ export default function ReportPage() {
                         </TableHead>
                         <tbody className="divide-y divide-border">
                           {infraItems.map((i) => {
-                            const base = i.type === 'monthly' ? (i.price||0)*12 : (i.price||0);
+                            const base = i.type !== 'one-time' ? (i.price||0)*12 : (i.price||0);
                             return (
                               <tr key={i.id} className="hover:bg-muted/5 transition-colors">
                                 <Td bold>{i.name || '-'}</Td>
@@ -312,9 +355,12 @@ export default function ReportPage() {
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <TableHead>
-                          <Th w="45%">Service</Th>
-                          <Th align="center" w="30%">Pricing Model</Th>
-                          <Th align="right" w="25%">Price / Period</Th>
+                          <Th w="30%">Service</Th>
+                          <Th align="center" w="15%">Pricing Model</Th>
+                          <Th align="center" w="15%">Billing</Th>
+                          <Th align="center" w="10%">Qty</Th>
+                          <Th align="right" w="15%">Unit Price</Th>
+                          <Th align="right" w="15%">Total</Th>
                         </TableHead>
                         <tbody className="divide-y divide-border">
                           {aiServices.map((a) => {
@@ -324,12 +370,19 @@ export default function ReportPage() {
                             return (
                               <tr key={a.id} className="hover:bg-muted/5 transition-colors">
                                 <Td bold>
-                                  <span className="flex items-center gap-2">
-                                    {a.name || '-'}
+                                  <span className="flex flex-col gap-1 items-start">
+                                    <span className="flex items-center gap-2">
+                                      {a.name || '-'}
+                                      {a.isIncludedInTotal && (
+                                        <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-primary/10 text-primary font-semibold border border-primary/20 print:border-primary/50">
+                                          ✓ Selected
+                                        </span>
+                                      )}
+                                    </span>
                                     {isUsageBased && (
                                       <span
                                         title="Usage-based pricing — potentially recurring cost depending on volume"
-                                        className="hidden sm:inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-sm bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 font-semibold border border-amber-200 dark:border-amber-800 print:hidden cursor-help"
+                                        className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-sm bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 font-semibold border border-amber-200 dark:border-amber-800 print:hidden cursor-help"
                                       >
                                         <span>⚠</span> Usage-based
                                       </span>
@@ -345,16 +398,12 @@ export default function ReportPage() {
                                     {a.pricingModel||'-'}
                                   </span>
                                 </Td>
-
-                                <Td align="right" bold>
-                                  <div className="flex flex-col justify-end items-end">
-                                    <span>{fmt(a.price || 0)}</span>
-                                    <span className="text-[10px] font-normal text-muted-foreground whitespace-nowrap">
-                                      {isUsageBased && `x ${qty} qty • `}
-                                      /{a.billingType === 'yearly' ? 'Year' : a.billingType === 'monthly' ? 'Month' : 'One-time'}
-                                    </span>
-                                  </div>
+                                <Td align="center">
+                                  <Badge>{a.billingType==='monthly'?'Monthly':a.billingType==='yearly'?'Yearly':a.billingType==='quota-based'?'Quota Based':'One-time'}</Badge>
                                 </Td>
+                                <Td align="center" muted>{qty}</Td>
+                                <Td align="right" muted mono>{fmt(a.price||0)}</Td>
+                                <Td align="right" bold mono>{fmt((a.price||0) * qty)}</Td>
                               </tr>
                             );
                           })}
@@ -456,6 +505,7 @@ export default function ReportPage() {
                         { label: 'Development Cost',   value: totalDevCost,        show: totalDevCost > 0 },
                         { label: 'Infrastructure Cost', value: totalInfraCost,      show: totalInfraCost > 0 },
                         { label: 'Additional Fees',     value: totalAdditionalCost, show: totalAdditionalCost > 0 },
+                        { label: 'Selected AI Services',value: totalAIIncludedCost, show: totalAIIncludedCost > 0 },
                       ].filter(r => r.show).map(row => (
                         <div key={row.label} className="flex justify-between items-center px-5 py-3 print:px-4 print:py-2 text-sm">
                           <span className="text-muted-foreground">{row.label}</span>
