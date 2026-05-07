@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, FileText, Search, FolderOpen, Printer, Pencil } from 'lucide-react';
+import { Plus, Trash2, FileText, Search, FolderOpen, Printer, Pencil, CreditCard } from 'lucide-react';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 
@@ -76,8 +76,14 @@ export default function DashboardPage() {
     p.project_name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleExportPDF = (projectData: ProjectData) => {
+  const handleExportPDF = (projectData: ProjectData, type: 'QUOTATION' | 'INVOICE' = 'QUOTATION', pId?: string) => {
     const project = projectData || {};
+    const projectDateStr = project.projectDate || new Date().toISOString().split('T')[0];
+    const projectDateObj = new Date(projectDateStr);
+    const dueDateObj = new Date(projectDateObj);
+    dueDateObj.setDate(dueDateObj.getDate() + 14);
+    const dueDateStr = dueDateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    const invoiceNo = `INV-${projectDateObj.getFullYear()}${(projectDateObj.getMonth() + 1).toString().padStart(2, '0')}-${(pId || 'TEMP').slice(0, 8).toUpperCase()}`;
 
     const devRoles = Array.isArray(project.devRoles) ? project.devRoles : [];
     const infraItems = Array.isArray(project.infraItems) ? project.infraItems : [];
@@ -155,7 +161,7 @@ export default function DashboardPage() {
 
     const html = `<!DOCTYPE html><html lang="en"><head>
 <meta charset="UTF-8">
-<title>Project Quotation - ${project.projectName || 'Unnamed'}</title>
+<title>${type === 'INVOICE' ? 'Invoice' : 'Project Quotation'} - ${project.projectName || 'Unnamed'}</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
   @page { size: A4 portrait; margin: 0; }
@@ -166,7 +172,7 @@ export default function DashboardPage() {
 </style></head><body>
 <div class="page-footer">
   <div style="width:100%;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #e2e8f0;padding-top:3mm;margin-bottom:4px">
-    <span style="font-size:8px;color:#94a3b8;font-style:italic">This document is strictly confidential and intended only for the addressed party.</span>
+    <span style="font-size:8px;color:#94a3b8;font-style:italic">${type === 'INVOICE' ? 'This document is an official billing from NuralimDev.' : 'This document is strictly confidential and intended only for the addressed party.'}</span>
   </div>
 </div>
 <table>
@@ -181,15 +187,21 @@ export default function DashboardPage() {
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
           <div style="text-align:right;margin-bottom:4px">
-            <div style="display:inline-block;background-color:#1e3a8a;color:#ffffff;padding:5px 12px;border-radius:4px;font-size:15px;font-weight:900;letter-spacing:0.2em;line-height:1">QUOTATION</div>
+            <div style="display:inline-block;background-color:#1e3a8a;color:#ffffff;padding:5px 12px;border-radius:4px;font-size:15px;font-weight:900;letter-spacing:0.2em;line-height:1">${type}</div>
           </div>
-          <div style="display:flex;align-items:center;gap:6px">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg" alt="BCA" style="height:10px;" />
-            <div style="text-align:right">
-              <div style="font-size:12px;color:#374151;font-weight:700;font-family:monospace;letter-spacing:0.5px;line-height:1">5485087858</div>
-              <div style="font-size:9px;color:#6b7280;line-height:1;margin-top:2px">a.n Nuralim</div>
-            </div>
-          </div>
+          ${type === 'INVOICE' 
+            ? `<div style="text-align:right">
+                <div style="font-size:9px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:0.05em">Due Date</div>
+                <div style="font-size:13px;font-weight:800;color:#2563eb;margin-top:2px">${dueDateStr}</div>
+               </div>`
+            : `<div style="display:flex;align-items:center;gap:6px">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg" alt="BCA" style="height:10px;" />
+                <div style="text-align:right">
+                  <div style="font-size:12px;color:#374151;font-weight:700;font-family:monospace;letter-spacing:0.5px;line-height:1">5485087858</div>
+                  <div style="font-size:9px;color:#6b7280;line-height:1;margin-top:2px">a.n Nuralim</div>
+                </div>
+               </div>`
+          }
         </div>
       </div>
     </td></tr>
@@ -201,12 +213,16 @@ export default function DashboardPage() {
       <!-- Project Meta -->
       <div style="display:flex;justify-content:space-between;padding:12px 16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:3px;margin-bottom:24px">
         <div style="display:flex;flex-direction:column;gap:6px">
-          <div style="font-size:12px;display:grid;grid-template-columns:60px 1fr;gap:8px"><span style="color:#64748b;font-weight:600">Client</span> <span style="font-weight:600">${project.clientName || '-'}</span></div>
+          <div style="font-size:12px;display:grid;grid-template-columns:60px 1fr;gap:8px"><span style="color:#64748b;font-weight:600">${type === 'INVOICE' ? 'Bill To' : 'Client'}</span> <span style="font-weight:700;${type === 'INVOICE' ? 'font-size:14px;' : ''}">${project.clientName || '-'}</span></div>
           <div style="font-size:12px;display:grid;grid-template-columns:60px 1fr;gap:8px"><span style="color:#64748b;font-weight:600">Project</span> <span style="font-weight:600">${project.projectName || '-'}</span></div>
         </div>
         <div style="display:flex;flex-direction:column;gap:6px;text-align:right">
+          ${type === 'INVOICE' ? `<div style="font-size:12px"><span style="color:#64748b;font-weight:600">Invoice No</span> &nbsp;&nbsp;<span style="font-weight:700;font-family:monospace">${invoiceNo}</span></div>` : ''}
           <div style="font-size:12px"><span style="color:#64748b;font-weight:600">Date</span> &nbsp;&nbsp;<span style="font-weight:600">${project.projectDate || '-'}</span></div>
-          <div style="font-size:12px"><span style="color:#64748b;font-weight:600">Timeline</span> &nbsp;&nbsp;<span style="font-weight:600">${project.timelineStr || '-'}</span> &nbsp;&nbsp;<span style="color:#cbd5e1">|</span>&nbsp;&nbsp; <span style="color:#64748b;font-weight:600">Total Features</span> &nbsp;&nbsp;<span style="font-weight:600">${project.totalFeatures || 0}</span></div>
+          ${type === 'INVOICE' 
+            ? '' 
+            : `<div style="font-size:12px"><span style="color:#64748b;font-weight:600">Timeline</span> &nbsp;&nbsp;<span style="font-weight:600">${project.timelineStr || '-'}</span> &nbsp;&nbsp;<span style="color:#cbd5e1">|</span>&nbsp;&nbsp; <span style="color:#64748b;font-weight:600">Total Features</span> &nbsp;&nbsp;<span style="font-weight:600">${project.totalFeatures || 0}</span></div>`
+          }
         </div>
       </div>
 
@@ -249,9 +265,22 @@ export default function DashboardPage() {
         
         <!-- Notes (Left Side) -->
         <div style="flex:1">
+          ${type === 'INVOICE' ? `
+            <div style="padding:12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:3px;margin-bottom:12px">
+              <div style="font-size:10px;font-weight:700;color:#0369a1;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Payment Instructions</div>
+              <div style="display:flex;align-items:flex-start;gap:10px">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg" alt="BCA" style="height:12px;margin-top:2px" />
+                <div>
+                  <div style="font-size:13px;font-weight:800;color:#1e293b;font-family:monospace">5485087858</div>
+                  <div style="font-size:10px;color:#64748b">a.n Nuralim</div>
+                  <div style="font-size:10px;color:#0369a1;font-weight:600;margin-top:4px">Ref: ${invoiceNo}</div>
+                </div>
+              </div>
+            </div>
+          ` : ''}
           ${notes ? `
           <div style="padding:10px 14px;background:#eff6ff;border-left:3px solid #2563eb;border-radius:2px">
-            <div style="font-size:10px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Notes / Terms &amp; Conditions</div>
+            <div style="font-size:10px;font-weight:700;color:#1e40af;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">${type === 'INVOICE' ? 'Additional Notes' : 'Notes / Terms &amp; Conditions'}</div>
             <div style="font-size:12px;color:#475569;white-space:pre-line;line-height:1.6">${notes.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br/>')}</div>
           </div>` : ''}
         </div>
@@ -263,9 +292,9 @@ export default function DashboardPage() {
           ${totalAdditionalCost > 0 ? sumRow('<span>Additional Fees</span>', fmt(totalAdditionalCost)) : ''}
           ${totalAIIncludedCost > 0 ? sumRow('<span>Selected AI Services</span>', fmt(totalAIIncludedCost)) : ''}
           ${sumRow('<span style="font-weight:600">Subtotal</span>', fmt(subTotal), 'background:#f8fafc;font-weight:600')}
-          ${sumRow(`<span style="color:#475569">License / Margin (${licensePercent}%)</span>`, fmt(licenseCost))}
+          ${sumRow(`<span style="color:#475569">${type === 'INVOICE' ? 'Management Fee' : 'License / Margin'} (${licensePercent}%)</span>`, fmt(licenseCost))}
           <div style="display:flex;justify-content:space-between;padding:10px 12px;background:#1e293b;color:#fff;font-size:14px;font-weight:800">
-            <span>GRAND TOTAL</span><span>${fmt(grandTotal)}</span>
+            <span>${type === 'INVOICE' ? 'TOTAL DUE' : 'GRAND TOTAL'}</span><span>${fmt(grandTotal)}</span>
           </div>
         </div>
       </div>
@@ -349,13 +378,21 @@ export default function DashboardPage() {
                       <Button variant="ghost" size="icon" className="h-8 w-8 rounded-sm text-muted-foreground hover:bg-muted" onClick={() => router.push(`/cms/calculator?id=${p.id}`)} title="Edit Project">
                         <Pencil className="w-3.5 h-3.5" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-sm text-primary hover:bg-primary/10" onClick={() => router.push(`/cms/report/${p.id}`)} title="View Report">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-sm text-primary hover:bg-primary/10" onClick={() => router.push(`/cms/report/${p.id}`)} title="View Quotation">
                         <FileText className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-sm text-primary hover:bg-primary/10" onClick={() => handleExportPDF(p.data)} title="Export PDF">
-                        <Printer className="w-4 h-4" />
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-sm text-blue-600 hover:bg-blue-50" onClick={() => router.push(`/cms/invoice/${p.id}`)} title="View Invoice">
+                        <CreditCard className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-sm text-destructive hover:bg-destructive/10" onClick={() => handleDelete(p.id, p.project_name)} title="Delete">
+                      <div className="flex border-l border-border ml-1 pl-1">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-sm text-muted-foreground hover:bg-muted" onClick={() => handleExportPDF(p.data, 'QUOTATION', p.id)} title="Export Quotation PDF">
+                          <Printer className="w-3.5 h-3.5" />
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-sm text-muted-foreground hover:bg-muted" onClick={() => handleExportPDF(p.data, 'INVOICE', p.id)} title="Export Invoice PDF">
+                          <CreditCard className="w-3.5 h-3.5" />
+                        </Button>
+                      </div>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-sm text-destructive hover:bg-destructive/10 ml-1" onClick={() => handleDelete(p.id, p.project_name)} title="Delete">
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </td>
