@@ -4,7 +4,8 @@ import { useEffect, useState, ComponentType } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Printer, Users, Server, Settings2, Cpu, DollarSign, LucideProps, AlertCircle, CreditCard, CheckCircle2, Clock } from 'lucide-react';
+import { ArrowLeft, Printer, Users, Server, Settings2, Cpu, DollarSign, LucideProps, CreditCard, CheckCircle2 } from 'lucide-react';
+import Image from 'next/image';
 
 const fmt = (n: number) =>
   new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
@@ -101,9 +102,8 @@ export default function InvoicePage() {
   const licenseCost = subTotal * (licensePercent / 100);
   const grandTotal  = subTotal + licenseCost;
 
-  const recurringInfra = infraItems.filter(i => i.type === 'monthly' || i.type === 'yearly');
-  const recurringAI    = aiServices.filter(a => a.billingType === 'monthly' || a.billingType === 'yearly');
-  const hasRecurring   = recurringInfra.length > 0 || recurringAI.length > 0;
+
+
 
   // Invoice Specifics
   const invoiceId = typeof id === 'string' ? id.slice(0, 8).toUpperCase() : 'INV-TEMP';
@@ -209,7 +209,7 @@ export default function InvoicePage() {
             <td style={{ padding: 0 }}>
               <div style={{ padding: '6mm 14mm 4mm' }} className="flex justify-between items-start border-b-2 border-black">
                 <div className="flex items-center gap-3">
-                  <img src="/personal-logo.png" alt="Logo" style={{ width: '36px', height: '36px', objectFit: 'contain' }} />
+                  <Image src="/personal-logo.png" alt="Logo" width={36} height={36} style={{ objectFit: 'contain' }} />
                   <div className="flex flex-col justify-center">
                     <div style={{ fontSize: '18px', fontWeight: 900, letterSpacing: '-0.5px', lineHeight: 1 }}>Nuralim<span style={{ color: '#2563eb' }}>.Dev</span></div>
                     <div style={{ fontSize: '9px', color: '#9ca3af', marginTop: '2px' }}>nuralimdev.com</div>
@@ -442,11 +442,11 @@ export default function InvoicePage() {
                         </div>
                         <div className="space-y-4">
                           <div className="flex items-start gap-3">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg" alt="BCA" className="h-5 mt-1" />
+                            <Image src="https://upload.wikimedia.org/wikipedia/commons/5/5c/Bank_Central_Asia.svg" alt="BCA" width={60} height={20} className="h-5 mt-1 w-auto" />
                             <div>
                               <p className="text-sm font-bold text-foreground tabular-nums">5485087858</p>
                               <p className="text-xs text-muted-foreground">a.n Nuralim</p>
-                              <p className="text-xs text-blue-600/80 mt-1 font-medium italic">Please include "{invoiceNo}" in the transfer description.</p>
+                              <p className="text-xs text-blue-600/80 mt-1 font-medium italic">Please include &quot;{invoiceNo}&quot; in the transfer description.</p>
                             </div>
                           </div>
                           
