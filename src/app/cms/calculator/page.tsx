@@ -151,7 +151,7 @@ export default function CalculatorPage() {
   };
 
   const baseDevCost = project.devRoles.reduce((sum, role) => sum + (role.qty * role.days * (role.dailyRate + role.dailyAllowance)), 0);
-  const featureFactor = 1 + ((project.totalFeatures || 0) * 0.015);
+  const featureFactor = 1 + ((project.totalFeatures || 0) * 0.01);
   const standardDays = Math.max(1, (project.totalFeatures || 0) * 3);
   const timelineDays = parseTimelineDays(project.timelineStr);
   let urgencyFactor = 1;
