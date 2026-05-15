@@ -82,7 +82,7 @@ export default function InvoicePage() {
   };
 
   const baseDevCost = devRoles.reduce((s, r) => s + (r.qty||0)*(r.days||0)*((r.dailyRate||0)+(r.dailyAllowance||0)), 0);
-  const featureFactor = 1 + ((project.totalFeatures || 0) * 0.02);
+  const featureFactor = 1 + ((project.totalFeatures || 0) * 0.015);
   const standardDays = Math.max(1, (project.totalFeatures || 0) * 3);
   const timelineDays = parseTimelineDays(project.timelineStr);
   let urgencyFactor = 1;
