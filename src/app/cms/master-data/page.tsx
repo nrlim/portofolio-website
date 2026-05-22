@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -69,10 +70,10 @@ export default function MasterDataPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ config })
       });
-      if (res.ok) alert("Master Data saved successfully!");
-      else alert("Failed to save Master Data.");
+      if (res.ok) toast.success("Master Data saved successfully!");
+      else toast.error("Failed to save Master Data.");
     } catch {
-      alert("Error saving master data.");
+      toast.error("Error saving master data.");
     } finally {
       setSaving(false);
     }

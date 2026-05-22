@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { toast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
@@ -34,6 +35,7 @@ interface ProjectData {
   additionalFees: AdditionalFee[];
   aiServices: AIService[];
   licensePercent: number;
+  complexityPercent?: number;
   notes: string;
 }
 
@@ -103,7 +105,8 @@ export default function DashboardPage() {
     };
 
     const baseDevCost = devRoles.reduce((s: number, r: DevRole) => s + (r.qty || 0) * (r.days || 0) * ((r.dailyRate || 0) + (r.dailyAllowance || 0)), 0);
-    const featureFactor = 1 + ((project.totalFeatures || 0) * 0.01);
+    const complexityMultiplier = (project.complexityPercent ?? 1) / 100;
+    const featureFactor = 1 + ((project.totalFeatures || 0) * complexityMultiplier);
     const standardDays = Math.max(1, (project.totalFeatures || 0) * 3);
     const timelineDays = parseTimelineDays(project.timelineStr);
     let urgencyFactor = 1;
@@ -313,7 +316,7 @@ export default function DashboardPage() {
     setTimeout(() => URL.revokeObjectURL(url), 60_000);
     if (!win) {
       URL.revokeObjectURL(url);
-      alert('Popup diblokir browser. Izinkan popup untuk halaman ini dan coba lagi.');
+      toast.error('Popup diblokir browser. Izinkan popup untuk halaman ini dan coba lagi.');
     }
   };
 

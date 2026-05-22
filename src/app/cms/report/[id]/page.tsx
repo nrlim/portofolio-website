@@ -34,6 +34,7 @@ export default function ReportPage() {
     additionalFees: AdditionalFee[];
     aiServices: AIService[];
     licensePercent: number;
+    complexityPercent?: number;
     notes: string;
   }
 
@@ -81,7 +82,8 @@ export default function ReportPage() {
   };
 
   const baseDevCost = devRoles.reduce((s, r) => s + (r.qty||0)*(r.days||0)*((r.dailyRate||0)+(r.dailyAllowance||0)), 0);
-  const featureFactor = 1 + ((project.totalFeatures || 0) * 0.01);
+  const complexityMultiplier = (project.complexityPercent ?? 1) / 100;
+  const featureFactor = 1 + ((project.totalFeatures || 0) * complexityMultiplier);
   const standardDays = Math.max(1, (project.totalFeatures || 0) * 3);
   const timelineDays = parseTimelineDays(project.timelineStr);
   let urgencyFactor = 1;

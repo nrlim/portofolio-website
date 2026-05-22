@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { toast } from '@/hooks/use-toast';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,6 +33,7 @@ interface ProjectData {
   additionalFees: AdditionalFee[];
   aiServices: AIService[];
   licensePercent: number;
+  complexityPercent?: number;
   notes: string;
 }
 
@@ -88,7 +90,7 @@ export default function CalculatorPage() {
 
   const [project, setProject] = useState<ProjectData>({
     clientName: '', projectName: '', projectDate: new Date().toISOString().split('T')[0],
-    validUntil: '', timelineStr: '', totalFeatures: 0,
+    validUntil: '', timelineStr: '', totalFeatures: 0, complexityPercent: 1,
     devRoles: [], infraItems: [], additionalFees: [], aiServices: [], licensePercent: 10,
     notes: '',
   });
@@ -151,7 +153,8 @@ export default function CalculatorPage() {
   };
 
   const baseDevCost = project.devRoles.reduce((sum, role) => sum + (role.qty * role.days * (role.dailyRate + role.dailyAllowance)), 0);
-  const featureFactor = 1 + ((project.totalFeatures || 0) * 0.01);
+  const complexityMultiplier = (project.complexityPercent ?? 1) / 100;
+  const featureFactor = 1 + ((project.totalFeatures || 0) * complexityMultiplier);
   const standardDays = Math.max(1, (project.totalFeatures || 0) * 3);
   const timelineDays = parseTimelineDays(project.timelineStr);
   let urgencyFactor = 1;
@@ -173,7 +176,7 @@ export default function CalculatorPage() {
   const grandTotal = subTotalCost + licenseCost;
 
   const handleSaveProject = async () => {
-    if (!project.clientName || !project.projectName) return alert("Client Name dan Project Name wajib diisi.");
+    if (!project.clientName || !project.projectName) return toast.error("Client Name dan Project Name wajib diisi.");
     setSaving(true);
     try {
       const payload = { client_name: project.clientName, project_name: project.projectName, total_cost: grandTotal, data: project };
@@ -181,9 +184,9 @@ export default function CalculatorPage() {
         isEditMode ? `/api/cms/projects?id=${editId}` : '/api/cms/projects',
         { method: isEditMode ? 'PATCH' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
       );
-      if (res.ok) { alert(isEditMode ? 'Project updated!' : 'Project saved!'); router.push('/cms/dashboard'); }
-      else alert('Failed to save project.');
-    } catch { alert('Error saving project.'); }
+      if (res.ok) { toast.success(isEditMode ? 'Project updated!' : 'Project saved!'); router.push('/cms/dashboard'); }
+      else toast.error('Failed to save project.');
+    } catch { toast.error('Error saving project.'); }
     finally { setSaving(false); }
   };
 
@@ -228,6 +231,7 @@ export default function CalculatorPage() {
                   <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Date</label><Input type="date" value={project.projectDate} onChange={e => setProject(p => ({ ...p, projectDate: e.target.value }))} className="rounded-sm bg-background" /></div>
                   <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Timeline Str</label><Input value={project.timelineStr} onChange={e => setProject(p => ({ ...p, timelineStr: e.target.value }))} className="rounded-sm bg-background" /></div>
                   <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Total Features</label><Input type="number" value={project.totalFeatures} onChange={e => setProject(p => ({ ...p, totalFeatures: Number(e.target.value) }))} className="rounded-sm bg-background" /></div>
+                  <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Complexity per Feature (%)</label><Input type="number" step="0.1" value={project.complexityPercent ?? 1} onChange={e => setProject(p => ({ ...p, complexityPercent: Number(e.target.value) }))} className="rounded-sm bg-background" /></div>
                   <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">License Margin (%)</label><Input type="number" step="0.1" value={project.licensePercent} onChange={e => setProject(p => ({ ...p, licensePercent: Number(e.target.value) }))} className="rounded-sm bg-background" /></div>
                 </div>
               </motion.div>

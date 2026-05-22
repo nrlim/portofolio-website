@@ -11,6 +11,7 @@ import Image from 'next/image';
 import jsPDF from 'jspdf';
 import JSZip from 'jszip';
 import { useState, useEffect, useRef } from 'react';
+import { toast } from '@/hooks/use-toast';
 
 export function CertificationsSection() {
   const [apiKeyDialogOpen, setApiKeyDialogOpen] = useState(false);
@@ -144,7 +145,7 @@ export function CertificationsSection() {
       img.src = URL.createObjectURL(blob);
     } catch (error) {
       console.error('Failed to download PDF:', error);
-      alert('Failed to download certificate as PDF. Please try again.');
+      toast.error('Failed to download certificate as PDF. Please try again.');
     }
   };
 
