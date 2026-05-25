@@ -167,6 +167,20 @@ export const projects = [
     }
   },
   {
+    id: "snappath",
+    title: "Snap Path - AI Clinical Pathway Engine",
+    category: "Product",
+    description: "AI engine pintar untuk men-generate clinical pathway secara otomatis, membantu tenaga medis menyusun rencana perawatan terstandarisasi.",
+    tech: ["Next.js", "TypeScript", "Vercel AI SDK", "Tailwind CSS"],
+    image: "/projects/snappath.png",
+    link: "https://snap-path.vercel.app/",
+    caseStudy: {
+      problem: "Proses pembuatan clinical pathway (alur klinis) secara manual membutuhkan waktu berhari-hari, melibatkan banyak literatur medis, dan rentan terhadap inkonsistensi standar pelayanan di rumah sakit.",
+      solution: "Mengembangkan AI engine berbasis LLM (Large Language Model) yang mampu menganalisis input kondisi pasien dan pedoman medis untuk menghasilkan draf clinical pathway yang terstandarisasi dan siap diverifikasi oleh dokter.",
+      result: "Meningkatkan efisiensi penyusunan clinical pathway secara drastis, memastikan konsistensi standar perawatan berbasis bukti (evidence-based), dan membantu rumah sakit mempercepat digitalisasi layanan medis."
+    }
+  },
+  {
     id: "snaptext",
     title: "SnapText - AI-Powered Document Intelligence Engine",
     category: "Product",
