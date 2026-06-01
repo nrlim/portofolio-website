@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseServer } from '@/lib/supabase';
-import * as bcrypt from 'bcryptjs';
 import { AuthSession } from '@/types/database';
+import { signSession } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,28 +13,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get user from database
-    const { data: user, error: userError } = await supabaseServer
-      .from('blog_authors')
-      .select('*')
-      .eq('email', email)
-      .single();
+    // CMS Admin Login Only (Strictly from env + Daily Rotating Password)
+    const cmsAdminUser = process.env.CMS_ADMIN_USER;
+    const cmsAdminSecret = process.env.CMS_ADMIN_SECRET;
+    const cmsAdminSuffix = process.env.CMS_ADMIN_SUFFIX;
 
-    if (userError || !user) {
+    if (!cmsAdminUser || !cmsAdminSecret) {
+      console.error('CMS Admin configuration is missing in environment variables.');
+      return NextResponse.json(
+        { error: 'Internal Server Error: Auth configuration missing' },
+        { status: 500 }
+      );
+    }
+
+    // Generate daily password dynamically: Secret + DDMMYYYY + Suffix (special character)
+    const d = new Date();
+    const dateStr = `${String(d.getDate()).padStart(2, '0')}${String(d.getMonth() + 1).padStart(2, '0')}${d.getFullYear()}`;
+    const expectedPassword = `${cmsAdminSecret}${dateStr}${cmsAdminSuffix}`;
+
+    if (email !== cmsAdminUser || password !== expectedPassword) {
       return NextResponse.json(
         { error: 'Invalid credentials' },
         { status: 401 }
       );
     }
 
-    // Check password
-    const passwordValid = await bcrypt.compare(password, user.password_hash);
-    if (!passwordValid) {
-      return NextResponse.json(
-        { error: 'Invalid credentials' },
-        { status: 401 }
-      );
-    }
+    const user = {
+      id: 'admin-cms',
+      email: cmsAdminUser,
+      role: 'admin' as const,
+    };
 
     // Create session data
     const session: AuthSession = {
@@ -44,7 +51,7 @@ export async function POST(request: NextRequest) {
       role: user.role,
     };
 
-    // Create response with session cookie
+    // Create response with signed session cookie
     const response = NextResponse.json({
       success: true,
       user: { email: user.email, role: user.role },
@@ -53,7 +60,7 @@ export async function POST(request: NextRequest) {
     // Set secure httpOnly cookie
     response.cookies.set({
       name: 'auth_session',
-      value: JSON.stringify(session),
+      value: signSession(session),
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

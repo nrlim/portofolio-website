@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { verifySession } from '@/lib/auth';
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -12,8 +13,17 @@ function sanitizeString(value: unknown, maxLen = 255): string {
   return value.trim().slice(0, maxLen);
 }
 
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   try {
+    const sessionCookie = req.cookies.get('auth_session')?.value;
+    const session = sessionCookie ? verifySession(sessionCookie) : null;
+    
+    if (!session || session.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
 
@@ -44,8 +54,18 @@ export async function GET(req: Request) {
   }
 }
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    const sessionCookie = req.cookies.get('auth_session')?.value;
+    const session = sessionCookie ? verifySession(sessionCookie) : null;
+    
+    if (!session || session.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const body = await req.json();
 
     const client_name = sanitizeString(body.client_name, 255);
@@ -71,8 +91,18 @@ export async function POST(req: Request) {
   }
 }
 
-export async function PATCH(req: Request) {
+export async function PATCH(req: NextRequest) {
   try {
+    const sessionCookie = req.cookies.get('auth_session')?.value;
+    const session = sessionCookie ? verifySession(sessionCookie) : null;
+    
+    if (!session || session.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
     if (!id || !isValidUUID(id)) {
@@ -105,8 +135,18 @@ export async function PATCH(req: Request) {
   }
 }
 
-export async function DELETE(req: Request) {
+export async function DELETE(req: NextRequest) {
   try {
+    const sessionCookie = req.cookies.get('auth_session')?.value;
+    const session = sessionCookie ? verifySession(sessionCookie) : null;
+    
+    if (!session || session.role !== 'admin') {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
     if (!id || !isValidUUID(id)) {

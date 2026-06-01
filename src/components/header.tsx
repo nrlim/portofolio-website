@@ -21,7 +21,6 @@ const navigation = [
   { name: "Projects", href: "#projects" },
   { name: "Education", href: "#education" },
   { name: "Certifications", href: "#certifications" },
-  // { name: "Articles", href: "/articles" },
   { name: "Contact", href: "#contact" },
 ];
 

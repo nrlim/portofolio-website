@@ -1,31 +1,34 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
+import { checkRateLimit, CERT_RATE_LIMIT_CONFIG } from '@/lib/rate-limit';
 
-const API_KEY = process.env.CERTIFICATE_API_KEY;
-
-if (!API_KEY) {
-  console.warn(
-    "CERTIFICATE_API_KEY not set in environment variables. Certificate downloads will not be protected."
-  );
-}
-
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json();
-    const { apiKey, certificateId } = body;
+    const { apiKey, id } = await req.json();
 
-    // Validate API key
-    if (!API_KEY || apiKey !== API_KEY) {
+    // Check rate limit
+    const ip = req.headers.get('x-forwarded-for') || 'unknown';
+    const rateLimit = checkRateLimit(`cert_${ip}`, CERT_RATE_LIMIT_CONFIG);
+    
+    if (!rateLimit.allowed) {
       return NextResponse.json(
-        { error: "Invalid API key" },
-        { status: 401 }
+        { error: rateLimit.message || 'Rate limit exceeded' },
+        { status: 429 }
       );
     }
 
-    // Validate certificateId is provided
-    if (!certificateId) {
+    if (!apiKey || !id) {
       return NextResponse.json(
-        { error: "Certificate ID is required" },
+        { error: 'Missing required parameters' },
         { status: 400 }
+      );
+    }
+
+    // Verify API key (timing-safe comparison is better, but simple is okay for now as long as it's not client-exposed)
+    const expectedKey = process.env.CERTIFICATE_API_KEY;
+    if (!expectedKey || apiKey !== expectedKey) {
+      return NextResponse.json(
+        { error: 'Invalid API key' },
+        { status: 401 }
       );
     }
 
@@ -41,7 +44,8 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Download certificate error:", error);
+    const err = error as Error;
+    console.error('Download certificate error:', err.message || 'Unknown error');
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -28,22 +28,25 @@ export function LoginDialog({ children }: { children?: React.ReactNode }) {
     setError('');
     setLoading(true);
 
-    // Simulate loading delay
-    await new Promise((r) => setTimeout(r, 700));
-
-    // Build expected password: "nuralim" + DDMMYYYY + "!"
-    const now = new Date();
-    const dd = String(now.getDate()).padStart(2, '0');
-    const mm = String(now.getMonth() + 1).padStart(2, '0');
-    const yyyy = String(now.getFullYear());
-    const expectedPassword = `nuralim${dd}${mm}${yyyy}!`;
-
-    if (username.trim() === 'nuralim' && password === expectedPassword) {
-      sessionStorage.setItem('cms_auth', 'true');
-      setOpen(false);
-      router.push('/cms/dashboard');
-    } else {
-      setError('Username atau password salah. Silakan coba lagi.');
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: username, password }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        sessionStorage.setItem('cms_auth', 'true');
+        setOpen(false);
+        router.push('/cms/dashboard');
+      } else {
+        setError(data.error || 'Username atau password salah. Silakan coba lagi.');
+      }
+    } catch {
+      setError('Terjadi kesalahan. Silakan coba lagi.');
+    } finally {
       setLoading(false);
     }
   };

@@ -13,30 +13,47 @@ interface RateLimitEntry {
 // Note: This resets on cold starts, but provides basic protection
 const rateLimitStore = new Map<string, RateLimitEntry>();
 
-// Configuration
-const RATE_LIMIT_CONFIG = {
-  // Maximum requests allowed in the time window
+// Configuration Types
+export interface RateLimitConfig {
+  maxRequests: number;
+  windowMs: number;
+  blockDurationMs: number;
+  maxRequestsPerDay: number;
+  dayMs: number;
+}
+
+// Default Configuration (Email Form)
+const DEFAULT_RATE_LIMIT_CONFIG: RateLimitConfig = {
   maxRequests: 1,
-  
-  // Time window in milliseconds (5 minutes)
   windowMs: 5 * 60 * 1000,
-  
-  // Block duration after exceeding limit (15 minutes)
   blockDurationMs: 15 * 60 * 1000,
-  
-  // Maximum requests per day from same IP
   maxRequestsPerDay: 5,
-  
-  // 24 hours in milliseconds
+  dayMs: 24 * 60 * 60 * 1000,
+};
+
+export const CHAT_RATE_LIMIT_CONFIG: RateLimitConfig = {
+  maxRequests: 10,
+  windowMs: 60 * 1000, // 1 minute
+  blockDurationMs: 5 * 60 * 1000, // 5 minutes block
+  maxRequestsPerDay: 50,
+  dayMs: 24 * 60 * 60 * 1000,
+};
+
+export const CERT_RATE_LIMIT_CONFIG: RateLimitConfig = {
+  maxRequests: 5,
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  blockDurationMs: 60 * 60 * 1000, // 1 hour block
+  maxRequestsPerDay: 20,
   dayMs: 24 * 60 * 60 * 1000,
 };
 
 /**
  * Check if IP is rate limited
  * @param identifier - IP address or unique identifier
+ * @param config - Rate limit configuration
  * @returns {object} - { allowed: boolean, resetTime?: number }
  */
-export function checkRateLimit(identifier: string): {
+export function checkRateLimit(identifier: string, config: RateLimitConfig = DEFAULT_RATE_LIMIT_CONFIG): {
   allowed: boolean;
   resetTime?: number;
   remainingAttempts?: number;
@@ -46,23 +63,23 @@ export function checkRateLimit(identifier: string): {
   const entry = rateLimitStore.get(identifier);
 
   // Clean up old entries (garbage collection)
-  cleanupOldEntries(now);
+  cleanupOldEntries(now, config);
 
   // No previous attempts
   if (!entry) {
     rateLimitStore.set(identifier, {
       count: 1,
-      resetTime: now + RATE_LIMIT_CONFIG.windowMs,
+      resetTime: now + config.windowMs,
       firstAttempt: now,
     });
     return {
       allowed: true,
-      remainingAttempts: RATE_LIMIT_CONFIG.maxRequests - 1,
+      remainingAttempts: config.maxRequests - 1,
     };
   }
 
   // Check if currently blocked
-  if (entry.count > RATE_LIMIT_CONFIG.maxRequests && now < entry.resetTime) {
+  if (entry.count > config.maxRequests && now < entry.resetTime) {
     const remainingTime = Math.ceil((entry.resetTime - now) / 1000 / 60);
     return {
       allowed: false,
@@ -73,11 +90,11 @@ export function checkRateLimit(identifier: string): {
 
   // Check daily limit
   const timeSinceFirst = now - entry.firstAttempt;
-  if (timeSinceFirst < RATE_LIMIT_CONFIG.dayMs) {
-    if (entry.count >= RATE_LIMIT_CONFIG.maxRequestsPerDay) {
+  if (timeSinceFirst < config.dayMs) {
+    if (entry.count >= config.maxRequestsPerDay) {
       return {
         allowed: false,
-        resetTime: entry.firstAttempt + RATE_LIMIT_CONFIG.dayMs,
+        resetTime: entry.firstAttempt + config.dayMs,
         message: 'Anda telah mencapai batas pengiriman harian. Silakan coba lagi besok.',
       };
     }
@@ -90,11 +107,11 @@ export function checkRateLimit(identifier: string): {
   // Reset window if expired
   if (now >= entry.resetTime) {
     entry.count = 1;
-    entry.resetTime = now + RATE_LIMIT_CONFIG.windowMs;
+    entry.resetTime = now + config.windowMs;
     rateLimitStore.set(identifier, entry);
     return {
       allowed: true,
-      remainingAttempts: RATE_LIMIT_CONFIG.maxRequests - 1,
+      remainingAttempts: config.maxRequests - 1,
     };
   }
 
@@ -102,12 +119,12 @@ export function checkRateLimit(identifier: string): {
   entry.count += 1;
 
   // Check if limit exceeded
-  if (entry.count > RATE_LIMIT_CONFIG.maxRequests) {
+  if (entry.count > config.maxRequests) {
     // Block for extended period
-    entry.resetTime = now + RATE_LIMIT_CONFIG.blockDurationMs;
+    entry.resetTime = now + config.blockDurationMs;
     rateLimitStore.set(identifier, entry);
     
-    const remainingTime = Math.ceil(RATE_LIMIT_CONFIG.blockDurationMs / 1000 / 60);
+    const remainingTime = Math.ceil(config.blockDurationMs / 1000 / 60);
     return {
       allowed: false,
       resetTime: entry.resetTime,
@@ -119,7 +136,7 @@ export function checkRateLimit(identifier: string): {
   rateLimitStore.set(identifier, entry);
   return {
     allowed: true,
-    remainingAttempts: RATE_LIMIT_CONFIG.maxRequests - entry.count,
+    remainingAttempts: config.maxRequests - entry.count,
   };
 }
 
@@ -155,12 +172,12 @@ export function getClientIdentifier(request: Request): string {
  * Clean up expired entries from rate limit store
  * @param now - Current timestamp
  */
-function cleanupOldEntries(now: number): void {
+function cleanupOldEntries(now: number, config: RateLimitConfig): void {
   const entriesToDelete: string[] = [];
   
   rateLimitStore.forEach((entry, key) => {
     // Remove entries older than 24 hours
-    if (now - entry.firstAttempt > RATE_LIMIT_CONFIG.dayMs) {
+    if (now - entry.firstAttempt > config.dayMs) {
       entriesToDelete.push(key);
     }
   });

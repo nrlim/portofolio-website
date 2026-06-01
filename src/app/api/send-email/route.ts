@@ -140,7 +140,7 @@ Email ini dikirim melalui form kontak di portfolio website.`.trim();
         });
 
         if (resendError) {
-            console.error('Resend error:', resendError);
+            console.error('Resend error:', resendError?.message || resendError);
             // Fallback: Create mailto link as response
             const mailtoLink = `mailto:${personalInfo.email}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailText)}`;
 
@@ -157,9 +157,7 @@ Email ini dikirim melalui form kontak di portfolio website.`.trim();
             message: 'Pesan berhasil terkirim! Terima kasih.',
         });
 
-    } catch (error) {
-        console.error('Error sending email:', error);
-
+    } catch {
         // Fallback response
         const mailtoLink = `mailto:${personalInfo.email}?subject=Pesan dari Portfolio&body=`;
 
