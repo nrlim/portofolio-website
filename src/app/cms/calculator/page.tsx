@@ -305,7 +305,7 @@ export default function CalculatorPage() {
                       <div>
                         <span className="font-semibold text-amber-700 dark:text-amber-400 block mb-0.5">Complexity & Timeline Adjustment</span>
                         <span className="text-[11px] text-amber-600/80 dark:text-amber-500/80">
-                          {project.manualGrandTotal !== undefined ? 'Adjusted to match Manual Grand Total' : `${project.totalFeatures} Features \u2022 ${timelineDays} Days Timeline`}
+                          {project.totalFeatures} Features &bull; {timelineDays} Days Timeline
                         </span>
                       </div>
                       <span className="font-semibold text-amber-700 dark:text-amber-400 tabular-nums">

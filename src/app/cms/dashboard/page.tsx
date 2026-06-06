@@ -151,7 +151,7 @@ export default function DashboardPage() {
     ).join('');
 
     if (devCostAdjustment !== 0) {
-      devRows += `<tr style="background-color:#fffbeb"><td style="padding:7px 10px;border-bottom:1px solid #e5e7eb;font-weight:600;color:#b45309">Complexity & Timeline Adjustment</td><td colspan="3" style="padding:7px 10px;border-bottom:1px solid #e5e7eb;text-align:right;font-size:10px;color:#d97706">${project.manualGrandTotal !== undefined ? 'Adjusted by Manual Grand Total' : `${project.totalFeatures} Features &bull; ${timelineDays} Days Timeline`}</td><td style="padding:7px 10px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:600;color:#b45309">${devCostAdjustment > 0 ? '+' : '-'}${fmt(Math.abs(devCostAdjustment))}</td></tr>`;
+      devRows += `<tr style="background-color:#fffbeb"><td style="padding:7px 10px;border-bottom:1px solid #e5e7eb;font-weight:600;color:#b45309">Complexity & Timeline Adjustment</td><td colspan="3" style="padding:7px 10px;border-bottom:1px solid #e5e7eb;text-align:right;font-size:10px;color:#d97706">${project.totalFeatures} Features &bull; ${timelineDays} Days Timeline</td><td style="padding:7px 10px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:600;color:#b45309">${devCostAdjustment > 0 ? '+' : '-'}${fmt(Math.abs(devCostAdjustment))}</td></tr>`;
     }
 
     const infraRows = infraItems.map((i: InfraItem) => {

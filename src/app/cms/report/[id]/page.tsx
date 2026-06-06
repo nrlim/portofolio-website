@@ -310,7 +310,7 @@ export default function ReportPage() {
                                 </div>
                               </Td>
                               <Td colSpan={3} align="right" muted className="text-[10px] text-amber-600/80 dark:text-amber-500/80">
-                                {project.manualGrandTotal !== undefined ? 'Adjusted by Manual Grand Total' : `${project.totalFeatures} Features • ${timelineDays} Days Timeline`}
+                                {project.totalFeatures} Features • {timelineDays} Days Timeline
                               </Td>
                               <Td align="right" bold mono className="text-amber-700 dark:text-amber-400">
                                 {devCostAdjustment > 0 ? '+' : '-'}{fmt(Math.abs(devCostAdjustment))}
