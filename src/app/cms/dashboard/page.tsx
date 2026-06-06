@@ -37,6 +37,7 @@ interface ProjectData {
   licensePercent: number;
   complexityPercent?: number;
   notes: string;
+  manualGrandTotal?: number;
 }
 
 const fmt = (n: number) =>
@@ -104,6 +105,10 @@ export default function DashboardPage() {
       return num;
     };
 
+    const totalInfraCost = infraItems.reduce((s: number, i: InfraItem) => s + ((i.type === 'yearly' ? (i.price || 0) * 12 : (i.price || 0)) * (1 + (i.ppnPercent || 0) / 100)), 0);
+    const totalAdditionalCost = additionalFees.reduce((s: number, f: AdditionalFee) => s + (f.price || 0), 0);
+    const totalAIIncludedCost = aiServices.filter((ai: AIService) => ai.isIncludedInTotal).reduce((sum: number, ai: AIService) => sum + ((ai.price || 0) * (ai.qty || 1)), 0);
+
     const baseDevCost = devRoles.reduce((s: number, r: DevRole) => s + (r.qty || 0) * (r.days || 0) * ((r.dailyRate || 0) + (r.dailyAllowance || 0)), 0);
     const complexityMultiplier = (project.complexityPercent ?? 1) / 100;
     const featureFactor = 1 + ((project.totalFeatures || 0) * complexityMultiplier);
@@ -113,14 +118,21 @@ export default function DashboardPage() {
     if (timelineDays < standardDays && timelineDays > 0) {
       urgencyFactor = Math.min(3, standardDays / timelineDays);
     }
-    const totalDevCost = baseDevCost * featureFactor * urgencyFactor;
-    const devCostAdjustment = totalDevCost - baseDevCost;
-    const totalInfraCost = infraItems.reduce((s: number, i: InfraItem) => s + ((i.type === 'yearly' ? (i.price || 0) * 12 : (i.price || 0)) * (1 + (i.ppnPercent || 0) / 100)), 0);
-    const totalAdditionalCost = additionalFees.reduce((s: number, f: AdditionalFee) => s + (f.price || 0), 0);
-    const totalAIIncludedCost = aiServices.filter((ai: AIService) => ai.isIncludedInTotal).reduce((sum: number, ai: AIService) => sum + ((ai.price || 0) * (ai.qty || 1)), 0);
+
+    const totalDevCostCalculated = baseDevCost * featureFactor * urgencyFactor;
+    const devCostAdjustmentCalculated = totalDevCostCalculated - baseDevCost;
+    
+    let devCostAdjustment = devCostAdjustmentCalculated;
+    if (project.manualGrandTotal !== undefined) {
+      const targetSubTotal = project.manualGrandTotal / (1 + licensePercent / 100);
+      const targetTotalDevCost = targetSubTotal - totalInfraCost - totalAdditionalCost - totalAIIncludedCost;
+      devCostAdjustment = targetTotalDevCost - baseDevCost;
+    }
+
+    const totalDevCost = baseDevCost + devCostAdjustment;
     const subTotal = totalDevCost + totalInfraCost + totalAdditionalCost + totalAIIncludedCost;
     const licenseCost = subTotal * (licensePercent / 100);
-    const grandTotal = subTotal + licenseCost;
+    const grandTotal = project.manualGrandTotal !== undefined ? project.manualGrandTotal : (subTotal + licenseCost);
 
     // Helper: table cell
     const td = (val: string, align = 'left', bold = false) =>
@@ -138,8 +150,8 @@ export default function DashboardPage() {
       `<tr>${td(r.role || '-')}${td(`${r.qty || 0} pax`, 'center')}${td(`${r.days || 0} days`, 'right')}${td(fmt((r.dailyRate || 0) + (r.dailyAllowance || 0)), 'right')}${td(fmt((r.qty || 0) * (r.days || 0) * ((r.dailyRate || 0) + (r.dailyAllowance || 0))), 'right', true)}</tr>`
     ).join('');
 
-    if (devCostAdjustment > 0) {
-      devRows += `<tr style="background-color:#fffbeb"><td style="padding:7px 10px;border-bottom:1px solid #e5e7eb;font-weight:600;color:#b45309">Complexity & Timeline Adjustment</td><td colspan="3" style="padding:7px 10px;border-bottom:1px solid #e5e7eb;text-align:right;font-size:10px;color:#d97706">${project.totalFeatures} Features &bull; ${timelineDays} Days Timeline</td><td style="padding:7px 10px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:600;color:#b45309">+${fmt(devCostAdjustment)}</td></tr>`;
+    if (devCostAdjustment !== 0) {
+      devRows += `<tr style="background-color:#fffbeb"><td style="padding:7px 10px;border-bottom:1px solid #e5e7eb;font-weight:600;color:#b45309">Complexity & Timeline Adjustment</td><td colspan="3" style="padding:7px 10px;border-bottom:1px solid #e5e7eb;text-align:right;font-size:10px;color:#d97706">${project.manualGrandTotal !== undefined ? 'Adjusted by Manual Grand Total' : `${project.totalFeatures} Features &bull; ${timelineDays} Days Timeline`}</td><td style="padding:7px 10px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:600;color:#b45309">${devCostAdjustment > 0 ? '+' : '-'}${fmt(Math.abs(devCostAdjustment))}</td></tr>`;
     }
 
     const infraRows = infraItems.map((i: InfraItem) => {

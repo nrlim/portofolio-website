@@ -36,6 +36,7 @@ export default function ReportPage() {
     licensePercent: number;
     complexityPercent?: number;
     notes: string;
+    manualGrandTotal?: number;
   }
 
   useEffect(() => {
@@ -81,6 +82,12 @@ export default function ReportPage() {
     return num;
   };
 
+  const totalInfraCost     = infraItems.reduce((s, i) => s + ((i.type==='yearly'?(i.price||0)*12:(i.price||0))*(1+(i.ppnPercent||0)/100)), 0);
+  const totalAdditionalCost= additionalFees.reduce((s, f) => s + (f.price||0), 0);
+  const totalAIIncludedCost = aiServices
+    .filter(ai => ai.isIncludedInTotal)
+    .reduce((sum, ai) => sum + ((ai.price || 0) * (ai.qty || 1)), 0);
+
   const baseDevCost = devRoles.reduce((s, r) => s + (r.qty||0)*(r.days||0)*((r.dailyRate||0)+(r.dailyAllowance||0)), 0);
   const complexityMultiplier = (project.complexityPercent ?? 1) / 100;
   const featureFactor = 1 + ((project.totalFeatures || 0) * complexityMultiplier);
@@ -90,18 +97,20 @@ export default function ReportPage() {
   if (timelineDays < standardDays && timelineDays > 0) {
     urgencyFactor = Math.min(3, standardDays / timelineDays);
   }
-  const totalDevCost = baseDevCost * featureFactor * urgencyFactor;
-  const devCostAdjustment = totalDevCost - baseDevCost;
-
-  const totalInfraCost     = infraItems.reduce((s, i) => s + ((i.type==='yearly'?(i.price||0)*12:(i.price||0))*(1+(i.ppnPercent||0)/100)), 0);
-  const totalAdditionalCost= additionalFees.reduce((s, f) => s + (f.price||0), 0);
-  const totalAIIncludedCost = aiServices
-    .filter(ai => ai.isIncludedInTotal)
-    .reduce((sum, ai) => sum + ((ai.price || 0) * (ai.qty || 1)), 0);
-
+  const totalDevCostCalculated = baseDevCost * featureFactor * urgencyFactor;
+  const devCostAdjustmentCalculated = totalDevCostCalculated - baseDevCost;
+  
+  let devCostAdjustment = devCostAdjustmentCalculated;
+  if (project.manualGrandTotal !== undefined) {
+    const targetSubTotal = project.manualGrandTotal / (1 + licensePercent / 100);
+    const targetTotalDevCost = targetSubTotal - totalInfraCost - totalAdditionalCost - totalAIIncludedCost;
+    devCostAdjustment = targetTotalDevCost - baseDevCost;
+  }
+  
+  const totalDevCost = baseDevCost + devCostAdjustment;
   const subTotal    = totalDevCost + totalInfraCost + totalAdditionalCost + totalAIIncludedCost;
   const licenseCost = subTotal * (licensePercent / 100);
-  const grandTotal  = subTotal + licenseCost;
+  const grandTotal  = project.manualGrandTotal !== undefined ? project.manualGrandTotal : (subTotal + licenseCost);
 
   const recurringInfra = infraItems.filter(i => i.type === 'monthly' || i.type === 'yearly');
   const recurringAI    = aiServices.filter(a => a.billingType === 'monthly' || a.billingType === 'yearly');
@@ -289,7 +298,7 @@ export default function ReportPage() {
                               <Td align="right" bold mono>{fmt((r.qty||0)*(r.days||0)*((r.dailyRate||0)+(r.dailyAllowance||0)))}</Td>
                             </tr>
                           ))}
-                          {devCostAdjustment > 0 && (
+                          {devCostAdjustment !== 0 && (
                             <tr className="bg-amber-50/50 dark:bg-amber-950/20 print:bg-amber-50/50">
                               <Td bold className="text-amber-700 dark:text-amber-400">
                                 <div className="flex items-center gap-2">
@@ -301,10 +310,10 @@ export default function ReportPage() {
                                 </div>
                               </Td>
                               <Td colSpan={3} align="right" muted className="text-[10px] text-amber-600/80 dark:text-amber-500/80">
-                                {project.totalFeatures} Features • {timelineDays} Days Timeline
+                                {project.manualGrandTotal !== undefined ? 'Adjusted by Manual Grand Total' : `${project.totalFeatures} Features • ${timelineDays} Days Timeline`}
                               </Td>
                               <Td align="right" bold mono className="text-amber-700 dark:text-amber-400">
-                                +{fmt(devCostAdjustment)}
+                                {devCostAdjustment > 0 ? '+' : '-'}{fmt(Math.abs(devCostAdjustment))}
                               </Td>
                             </tr>
                           )}

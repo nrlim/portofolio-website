@@ -35,6 +35,7 @@ interface ProjectData {
   licensePercent: number;
   complexityPercent?: number;
   notes: string;
+  manualGrandTotal?: number;
 }
 
 const genId = () => crypto.randomUUID();
@@ -153,6 +154,11 @@ export default function CalculatorPage() {
   };
 
   const baseDevCost = project.devRoles.reduce((sum, role) => sum + (role.qty * role.days * (role.dailyRate + role.dailyAllowance)), 0);
+  const totalInfraCost = project.infraItems.reduce((sum, item) => sum + ((item.type === 'yearly' ? item.price * 12 : item.price) * (1 + item.ppnPercent / 100)), 0);
+  const totalAdditionalCost = project.additionalFees.reduce((sum, fee) => sum + fee.price, 0);
+  const totalAICost = project.aiServices.reduce((sum, ai) => sum + ((ai.price || 0) * (ai.qty || 1)), 0);
+  const totalAIIncludedCost = project.aiServices.filter(ai => ai.isIncludedInTotal).reduce((sum, ai) => sum + ((ai.price || 0) * (ai.qty || 1)), 0);
+
   const complexityMultiplier = (project.complexityPercent ?? 1) / 100;
   const featureFactor = 1 + ((project.totalFeatures || 0) * complexityMultiplier);
   const standardDays = Math.max(1, (project.totalFeatures || 0) * 3);
@@ -161,19 +167,21 @@ export default function CalculatorPage() {
   if (timelineDays < standardDays && timelineDays > 0) {
     urgencyFactor = Math.min(3, standardDays / timelineDays);
   }
-  const totalDevCost = baseDevCost * featureFactor * urgencyFactor;
-  const devCostAdjustment = totalDevCost - baseDevCost;
-  const totalInfraCost = project.infraItems.reduce((sum, item) => sum + ((item.type === 'yearly' ? item.price * 12 : item.price) * (1 + item.ppnPercent / 100)), 0);
-  const totalAdditionalCost = project.additionalFees.reduce((sum, fee) => sum + fee.price, 0);
-  const totalAICost = project.aiServices.reduce((sum, ai) => {
-    return sum + ((ai.price || 0) * (ai.qty || 1));
-  }, 0);
-  const totalAIIncludedCost = project.aiServices
-    .filter(ai => ai.isIncludedInTotal)
-    .reduce((sum, ai) => sum + ((ai.price || 0) * (ai.qty || 1)), 0);
+
+  const totalDevCostCalculated = baseDevCost * featureFactor * urgencyFactor;
+  const devCostAdjustmentCalculated = totalDevCostCalculated - baseDevCost;
+  
+  let devCostAdjustment = devCostAdjustmentCalculated;
+  if (project.manualGrandTotal !== undefined) {
+    const targetSubTotal = project.manualGrandTotal / (1 + project.licensePercent / 100);
+    const targetTotalDevCost = targetSubTotal - totalInfraCost - totalAdditionalCost - totalAIIncludedCost;
+    devCostAdjustment = targetTotalDevCost - baseDevCost;
+  }
+  
+  const totalDevCost = baseDevCost + devCostAdjustment;
   const subTotalCost = totalDevCost + totalInfraCost + totalAdditionalCost + totalAIIncludedCost;
   const licenseCost = subTotalCost * (project.licensePercent / 100);
-  const grandTotal = subTotalCost + licenseCost;
+  const grandTotal = project.manualGrandTotal !== undefined ? project.manualGrandTotal : (subTotalCost + licenseCost);
 
   const handleSaveProject = async () => {
     if (!project.clientName || !project.projectName) return toast.error("Client Name dan Project Name wajib diisi.");
@@ -292,13 +300,17 @@ export default function CalculatorPage() {
                   ))}
                   <Button variant="outline" onClick={() => setProject(p => ({ ...p, devRoles: [...p.devRoles, { id: genId(), role: '', qty: 1, days: 22, dailyRate: 0, dailyAllowance: 0 }] }))} className="w-full gap-2 border-dashed"><Plus className="w-4 h-4" /> Add Role</Button>
                   
-                  {devCostAdjustment > 0 && (
-                    <div className="bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 px-4 py-3 rounded-sm flex items-center justify-between text-sm">
+                  {devCostAdjustment !== 0 && (
+                    <div className="bg-amber-50/50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/50 px-4 py-3 rounded-sm flex flex-col sm:flex-row sm:items-center justify-between text-sm gap-3">
                       <div>
                         <span className="font-semibold text-amber-700 dark:text-amber-400 block mb-0.5">Complexity & Timeline Adjustment</span>
-                        <span className="text-[11px] text-amber-600/80 dark:text-amber-500/80">{project.totalFeatures} Features &bull; {timelineDays} Days Timeline</span>
+                        <span className="text-[11px] text-amber-600/80 dark:text-amber-500/80">
+                          {project.manualGrandTotal !== undefined ? 'Adjusted to match Manual Grand Total' : `${project.totalFeatures} Features \u2022 ${timelineDays} Days Timeline`}
+                        </span>
                       </div>
-                      <span className="font-semibold text-amber-700 dark:text-amber-400 tabular-nums">+{fmt(devCostAdjustment)}</span>
+                      <span className="font-semibold text-amber-700 dark:text-amber-400 tabular-nums">
+                        {devCostAdjustment > 0 ? '+' : '-'}{fmt(Math.abs(devCostAdjustment))}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -504,7 +516,26 @@ export default function CalculatorPage() {
               <div className="flex justify-between px-6 py-4 text-sm bg-muted/30 font-semibold"><span>Subtotal Cost</span><span className="tabular-nums">{fmt(subTotalCost)}</span></div>
               <div className="flex justify-between px-6 py-4 text-sm"><span className="text-muted-foreground">License Cost ({project.licensePercent}%)</span><span className="font-medium text-emerald-600 dark:text-emerald-400 tabular-nums">{fmt(licenseCost)}</span></div>
             </div>
-            <div className="flex justify-between px-6 py-6 bg-primary text-primary-foreground"><span className="font-bold text-lg">GRAND TOTAL</span><span className="font-bold text-2xl tabular-nums">{fmt(grandTotal)}</span></div>
+            <div className="flex justify-between items-center px-6 py-6 bg-primary text-primary-foreground">
+              <span className="font-bold text-lg flex items-center">
+                GRAND TOTAL
+                {project.manualGrandTotal !== undefined && (
+                  <Button variant="ghost" size="icon" onClick={() => setProject(p => ({ ...p, manualGrandTotal: undefined }))} className="ml-2 h-7 w-7 text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/20 rounded-full" title="Reset to auto-calculated"><Trash2 className="w-4 h-4" /></Button>
+                )}
+              </span>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-xl">Rp</span>
+                <Input
+                  type="text"
+                  value={project.manualGrandTotal !== undefined ? new Intl.NumberFormat('id-ID').format(project.manualGrandTotal) : new Intl.NumberFormat('id-ID').format(grandTotal).replace('Rp', '').trim()}
+                  onChange={e => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    setProject(p => ({ ...p, manualGrandTotal: val === '' ? undefined : Number(val) }));
+                  }}
+                  className="w-40 md:w-48 h-10 text-right bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground font-bold text-xl md:text-2xl placeholder:text-primary-foreground/50 focus-visible:ring-primary-foreground"
+                />
+              </div>
+            </div>
           </div>
         </div>
 
