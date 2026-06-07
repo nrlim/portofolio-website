@@ -36,6 +36,7 @@ export default function InvoicePage() {
     aiServices: AIService[];
     licensePercent: number;
     complexityPercent?: number;
+    dueDateDays?: number;
     notes: string;
     manualGrandTotal?: number;
   }
@@ -120,7 +121,7 @@ export default function InvoicePage() {
   const invoiceId = typeof id === 'string' ? id.slice(0, 8).toUpperCase() : 'INV-TEMP';
   const projectDate = project.projectDate ? new Date(project.projectDate) : new Date();
   const dueDate = new Date(projectDate);
-  dueDate.setDate(dueDate.getDate() + 14); // 14 days net
+  dueDate.setDate(dueDate.getDate() + (project.dueDateDays ?? 7));
   const invoiceNo = `INV-${projectDate.getFullYear()}${(projectDate.getMonth()+1).toString().padStart(2, '0')}-${invoiceId}`;
 
   /* ── Sub-components ── */

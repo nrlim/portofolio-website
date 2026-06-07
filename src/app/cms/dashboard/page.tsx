@@ -36,6 +36,7 @@ interface ProjectData {
   aiServices: AIService[];
   licensePercent: number;
   complexityPercent?: number;
+  dueDateDays?: number;
   notes: string;
   manualGrandTotal?: number;
 }
@@ -84,7 +85,7 @@ export default function DashboardPage() {
     const projectDateStr = project.projectDate || new Date().toISOString().split('T')[0];
     const projectDateObj = new Date(projectDateStr);
     const dueDateObj = new Date(projectDateObj);
-    dueDateObj.setDate(dueDateObj.getDate() + 14);
+    dueDateObj.setDate(dueDateObj.getDate() + (project.dueDateDays ?? 7));
     const dueDateStr = dueDateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
     const invoiceNo = `INV-${projectDateObj.getFullYear()}${(projectDateObj.getMonth() + 1).toString().padStart(2, '0')}-${(pId || 'TEMP').slice(0, 8).toUpperCase()}`;
 

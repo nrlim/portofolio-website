@@ -34,6 +34,7 @@ interface ProjectData {
   aiServices: AIService[];
   licensePercent: number;
   complexityPercent?: number;
+  dueDateDays?: number;
   notes: string;
   manualGrandTotal?: number;
 }
@@ -91,7 +92,7 @@ export default function CalculatorPage() {
 
   const [project, setProject] = useState<ProjectData>({
     clientName: '', projectName: '', projectDate: new Date().toISOString().split('T')[0],
-    validUntil: '', timelineStr: '', totalFeatures: 0, complexityPercent: 1,
+    validUntil: '', timelineStr: '', totalFeatures: 0, complexityPercent: 1, dueDateDays: 7,
     devRoles: [], infraItems: [], additionalFees: [], aiServices: [], licensePercent: 10,
     notes: '',
   });
@@ -240,6 +241,7 @@ export default function CalculatorPage() {
                   <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Timeline Str</label><Input value={project.timelineStr} onChange={e => setProject(p => ({ ...p, timelineStr: e.target.value }))} className="rounded-sm bg-background" /></div>
                   <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Total Features</label><Input type="number" value={project.totalFeatures} onChange={e => setProject(p => ({ ...p, totalFeatures: Number(e.target.value) }))} className="rounded-sm bg-background" /></div>
                   <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Complexity per Feature (%)</label><Input type="number" step="0.1" value={project.complexityPercent ?? 1} onChange={e => setProject(p => ({ ...p, complexityPercent: Number(e.target.value) }))} className="rounded-sm bg-background" /></div>
+                  <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Due Date (Days)</label><Input type="number" value={project.dueDateDays ?? 7} onChange={e => setProject(p => ({ ...p, dueDateDays: Number(e.target.value) }))} className="rounded-sm bg-background" /></div>
                   <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">License Margin (%)</label><Input type="number" step="0.1" value={project.licensePercent} onChange={e => setProject(p => ({ ...p, licensePercent: Number(e.target.value) }))} className="rounded-sm bg-background" /></div>
                 </div>
               </motion.div>

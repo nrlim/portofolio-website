@@ -35,6 +35,7 @@ export default function ReportPage() {
     aiServices: AIService[];
     licensePercent: number;
     complexityPercent?: number;
+    dueDateDays?: number;
     notes: string;
     manualGrandTotal?: number;
   }
