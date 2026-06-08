@@ -21,7 +21,7 @@ async function main() {
       { id: genId(), name: 'Maintenance Fee (Free 3 Bulan)', price: 0 }
     ],
     aiServices: [
-      { id: genId(), name: 'AI OCR Service (e.g. Google Doc AI)', pricingModel: 'per_1000_requests', price: 25000 },
+      { id: genId(), name: 'AI OCR Service (e.g. Google Doc AI)', pricingModel: 'per_request', price: 25000 },
       { id: genId(), name: 'LLM API (e.g. OpenAI GPT-4o)', pricingModel: 'monthly_estimation', price: 150000 }
     ],
     licensePercent: 10

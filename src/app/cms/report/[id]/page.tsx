@@ -378,7 +378,7 @@ export default function ReportPage() {
                           {aiServices.map((a) => {
                             const qty = a.qty || 1;
                             // Pricing models that are usage-based and may grow into recurring costs
-                            const isUsageBased = ['per_page','per_1k_requests','per_1k_tokens','per_1m_tokens'].includes(a.pricingModel);
+                            const isUsageBased = ['per_page','per_request','per_1k_tokens','per_1m_tokens'].includes(a.pricingModel);
                             return (
                               <tr key={a.id} className="hover:bg-muted/5 transition-colors">
                                 <Td bold>

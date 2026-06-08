@@ -263,7 +263,7 @@ export default function MasterDataPage() {
                           >
                             <option value="per_1k_tokens">Per 1k Tokens</option>
                             <option value="per_1m_tokens">Per 1M Tokens</option>
-                            <option value="per_1k_requests">Per Requests</option>
+                            <option value="per_request">Per Request</option>
                             <option value="per_page">Per Page</option>
                             <option value="monthly">Monthly</option>
                             <option value="yearly">Yearly</option>
