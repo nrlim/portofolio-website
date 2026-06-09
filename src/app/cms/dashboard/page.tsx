@@ -20,7 +20,7 @@ interface ProjectRecord {
 
 interface DevRole { id: string; role: string; qty: number; days: number; dailyRate: number; dailyAllowance: number; }
 interface InfraItem { id: string; name: string; type: 'monthly' | 'yearly' | 'one-time'; price: number; ppnPercent: number; }
-interface AdditionalFee { id: string; name: string; price: number; }
+interface AdditionalFee { id: string; name: string; type?: 'monthly' | 'yearly' | 'one-time' | 'per-case'; price: number; isIncludedInTotal?: boolean; }
 interface AIService { id: string; name: string; aiModel?: string; pricingModel: string; billingType?: 'monthly' | 'yearly' | 'one-time' | 'quota-based'; price: number; qty?: number; isIncludedInTotal?: boolean; }
 
 interface ProjectData {
@@ -107,7 +107,7 @@ export default function DashboardPage() {
     };
 
     const totalInfraCost = infraItems.reduce((s: number, i: InfraItem) => s + ((i.type === 'yearly' ? (i.price || 0) * 12 : (i.price || 0)) * (1 + (i.ppnPercent || 0) / 100)), 0);
-    const totalAdditionalCost = additionalFees.reduce((s: number, f: AdditionalFee) => s + (f.price || 0), 0);
+    const totalAdditionalCost = additionalFees.filter((f: AdditionalFee) => f.isIncludedInTotal !== false).reduce((s: number, f: AdditionalFee) => s + (f.price || 0), 0);
     const totalAIIncludedCost = aiServices.filter((ai: AIService) => ai.isIncludedInTotal).reduce((sum: number, ai: AIService) => sum + ((ai.price || 0) * (ai.qty || 1)), 0);
 
     const baseDevCost = devRoles.reduce((s: number, r: DevRole) => s + (r.qty || 0) * (r.days || 0) * ((r.dailyRate || 0) + (r.dailyAllowance || 0)), 0);
@@ -161,9 +161,12 @@ export default function DashboardPage() {
       return `<tr>${td(i.name || '-')}${td(tipe, 'center')}${td(fmt(i.price || 0), 'right')}${td(`${i.ppnPercent || 0}%`, 'right')}${td(fmt(base * (1 + (i.ppnPercent || 0) / 100)), 'right', true)}</tr>`;
     }).join('');
 
-    const feeRows = additionalFees.map((f: AdditionalFee) =>
-      `<tr>${td(f.name || '-')}${td(fmt(f.price || 0), 'right', true)}</tr>`
-    ).join('');
+    const feeRows = additionalFees.map((f: AdditionalFee) => {
+      const tipe = f.type === 'monthly' ? 'Monthly' : f.type === 'yearly' ? 'Yearly' : f.type === 'per-case' ? 'Per Case' : 'One-time';
+      const selectedBadge = f.isIncludedInTotal !== false ? `<span style="font-size:10px;padding:2px 6px;border-radius:2px;background:#eff6ff;color:#2563eb;font-weight:600;border:1px solid #bfdbfe;margin-left:8px;">✓ Included</span>` : `<span style="font-size:10px;padding:2px 6px;border-radius:2px;background:#f8fafc;color:#64748b;font-weight:600;border:1px solid #e2e8f0;margin-left:8px;">Info Only</span>`;
+      const nameHtml = `<div style="display:flex;align-items:center;">${f.name || '-'}${selectedBadge}</div>`;
+      return `<tr>${td(nameHtml)}${td(tipe, 'center')}${td(f.isIncludedInTotal !== false ? fmt(f.price || 0) : `<span style="text-decoration:line-through;color:#94a3b8">${fmt(f.price || 0)}</span>`, 'right', f.isIncludedInTotal !== false)}</tr>`;
+    }).join('');
 
     const aiRows = aiServices.map((a: AIService) => {
       const periodLabel = a.billingType === 'monthly' ? 'Monthly' : a.billingType === 'yearly' ? 'Yearly' : a.billingType === 'quota-based' ? 'Quota Based' : 'One-time';
@@ -260,17 +263,17 @@ export default function DashboardPage() {
           sectionIndex++;
         }
 
-        if (additionalFees.length > 0) {
-          contentHtml += `${sec(sectionIndex.toString(), 'Additional Fees (Misc)')}
-          <table style="margin-bottom:24px"><thead><tr>${th('Description', 'left', '85%')}${th('Cost', 'right', '15%')}</tr></thead>
-          <tbody>${feeRows}</tbody></table>`;
-          sectionIndex++;
-        }
-
         if (aiServices.length > 0) {
           contentHtml += `${sec(sectionIndex.toString(), 'AI Models & API Services')}
           <table style="margin-bottom:24px"><thead><tr>${th('Service', 'left', '30%')}${th('Pricing Model', 'center', '15%')}${th('Billing', 'center', '20%')}${th('Qty', 'right', '5%')}${th('Unit Price', 'right', '15%')}${th('Total', 'right', '15%')}</tr></thead>
           <tbody>${aiRows}</tbody></table>`;
+          sectionIndex++;
+        }
+
+        if (additionalFees.length > 0) {
+          contentHtml += `${sec(sectionIndex.toString(), 'Additional Fees (Misc)')}
+          <table style="margin-bottom:24px"><thead><tr>${th('Description', 'left', '70%')}${th('Type', 'center', '15%')}${th('Cost', 'right', '15%')}</tr></thead>
+          <tbody>${feeRows}</tbody></table>`;
           sectionIndex++;
         }
         return contentHtml;
@@ -305,8 +308,8 @@ export default function DashboardPage() {
         <div style="width:340px;flex-shrink:0;border:1px solid #e2e8f0;border-radius:3px;overflow:hidden">
           ${totalDevCost > 0 ? sumRow('<span>Development Cost</span>', fmt(totalDevCost)) : ''}
           ${totalInfraCost > 0 ? sumRow('<span>Infrastructure Cost</span>', fmt(totalInfraCost)) : ''}
-          ${totalAdditionalCost > 0 ? sumRow('<span>Additional Fees</span>', fmt(totalAdditionalCost)) : ''}
           ${totalAIIncludedCost > 0 ? sumRow('<span>Selected AI Services</span>', fmt(totalAIIncludedCost)) : ''}
+          ${totalAdditionalCost > 0 ? sumRow('<span>Additional Fees</span>', fmt(totalAdditionalCost)) : ''}
           ${sumRow('<span style="font-weight:600">Subtotal</span>', fmt(subTotal), 'background:#f8fafc;font-weight:600')}
           ${sumRow(`<span style="color:#475569">${type === 'INVOICE' ? 'Management Fee' : 'License / Margin'} (${licensePercent}%)</span>`, fmt(licenseCost))}
           <div style="display:flex;justify-content:space-between;padding:10px 12px;background:#1e293b;color:#fff;font-size:14px;font-weight:800">

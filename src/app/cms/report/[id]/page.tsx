@@ -19,7 +19,7 @@ export default function ReportPage() {
 
   interface DevRole { id: string; role: string; qty: number; days: number; dailyRate: number; dailyAllowance: number; }
   interface InfraItem { id: string; name: string; type: 'monthly' | 'yearly' | 'one-time'; price: number; ppnPercent: number; }
-  interface AdditionalFee { id: string; name: string; price: number; }
+  interface AdditionalFee { id: string; name: string; type?: 'monthly' | 'yearly' | 'one-time' | 'per-case'; price: number; isIncludedInTotal?: boolean; }
   interface AIService { id: string; name: string; aiModel?: string; pricingModel: string; billingType?: 'monthly' | 'yearly' | 'one-time' | 'quota-based'; price: number; qty?: number; isIncludedInTotal?: boolean; }
 
   interface ProjectData {
@@ -84,7 +84,7 @@ export default function ReportPage() {
   };
 
   const totalInfraCost     = infraItems.reduce((s, i) => s + ((i.type==='yearly'?(i.price||0)*12:(i.price||0))*(1+(i.ppnPercent||0)/100)), 0);
-  const totalAdditionalCost= additionalFees.reduce((s, f) => s + (f.price||0), 0);
+  const totalAdditionalCost= additionalFees.filter((f) => f.isIncludedInTotal !== false).reduce((s, f) => s + (f.price||0), 0);
   const totalAIIncludedCost = aiServices
     .filter(ai => ai.isIncludedInTotal)
     .reduce((sum, ai) => sum + ((ai.price || 0) * (ai.qty || 1)), 0);
@@ -115,7 +115,8 @@ export default function ReportPage() {
 
   const recurringInfra = infraItems.filter(i => i.type === 'monthly' || i.type === 'yearly');
   const recurringAI    = aiServices.filter(a => a.billingType === 'monthly' || a.billingType === 'yearly');
-  const hasRecurring   = recurringInfra.length > 0 || recurringAI.length > 0;
+  const recurringFee   = additionalFees.filter(f => (f.type === 'monthly' || f.type === 'yearly') && f.isIncludedInTotal !== false);
+  const hasRecurring   = recurringInfra.length > 0 || recurringAI.length > 0 || recurringFee.length > 0;
 
   /* ── Sub-components ── */
 
@@ -433,14 +434,31 @@ export default function ReportPage() {
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <TableHead>
-                          <Th w="85%">Description</Th>
+                          <Th w="70%">Description</Th>
+                          <Th align="center" w="15%">Type</Th>
                           <Th align="right" w="15%">Cost</Th>
                         </TableHead>
                         <tbody className="divide-y divide-border">
                           {additionalFees.map((f) => (
                             <tr key={f.id} className="hover:bg-muted/5 transition-colors">
-                              <Td bold>{f.name || '-'}</Td>
-                              <Td align="right" bold mono>{fmt(f.price||0)}</Td>
+                              <Td bold>
+                                <span className="flex items-center gap-2">
+                                  {f.name || '-'}
+                                  {f.isIncludedInTotal !== false ? (
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-primary/10 text-primary font-semibold border border-primary/20 print:border-primary/50">
+                                      ✓ Included
+                                    </span>
+                                  ) : (
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-muted text-muted-foreground font-semibold border border-border print:border-gray-300">
+                                      Info Only
+                                    </span>
+                                  )}
+                                </span>
+                              </Td>
+                              <Td align="center">
+                                <Badge>{f.type==='monthly'?'Monthly':f.type==='yearly'?'Yearly':f.type==='per-case'?'Per Case':'One-time'}</Badge>
+                              </Td>
+                              <Td align="right" bold mono className={f.isIncludedInTotal === false ? "line-through text-muted-foreground font-normal" : ""}>{fmt(f.price||0)}</Td>
                             </tr>
                           ))}
                         </tbody>
@@ -494,6 +512,12 @@ export default function ReportPage() {
                                   {' — '}{fmt(a.price)} / {a.billingType==='monthly'?'Month':'Year'}
                                 </li>
                               ))}
+                              {recurringFee.map(f => (
+                                <li key={f.id} className="text-sm text-orange-800/90 dark:text-orange-300/90 list-disc">
+                                  <span className="font-semibold">{f.name} (Fee)</span>
+                                  {' — '}{fmt(f.price)} / {f.type==='monthly'?'Month':'Year'}
+                                </li>
+                              ))}
                             </ul>
                             <p className="text-[11px] text-orange-700/60 dark:text-orange-400/60 italic pt-1">
                               * The first year&apos;s subscription costs are included in the Grand Total estimate above. Costs for subsequent years will follow their respective billing cycles.
@@ -514,10 +538,10 @@ export default function ReportPage() {
 
                     <div className="divide-y divide-border">
                       {[
-                        { label: 'Development Cost',   value: totalDevCost,        show: totalDevCost > 0 },
-                        { label: 'Infrastructure Cost', value: totalInfraCost,      show: totalInfraCost > 0 },
+                        { label: 'Services Subtotal',   value: totalDevCost,        show: totalDevCost > 0 },
+                        { label: 'Infrastructure',      value: totalInfraCost,      show: totalInfraCost > 0 },
+                        { label: 'AI Services',         value: totalAIIncludedCost, show: totalAIIncludedCost > 0 },
                         { label: 'Additional Fees',     value: totalAdditionalCost, show: totalAdditionalCost > 0 },
-                        { label: 'Selected AI Services',value: totalAIIncludedCost, show: totalAIIncludedCost > 0 },
                       ].filter(r => r.show).map(row => (
                         <div key={row.label} className="flex justify-between items-center px-5 py-3 print:px-4 print:py-2 text-sm">
                           <span className="text-muted-foreground">{row.label}</span>

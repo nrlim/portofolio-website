@@ -20,7 +20,7 @@ export default function InvoicePage() {
 
   interface DevRole { id: string; role: string; qty: number; days: number; dailyRate: number; dailyAllowance: number; }
   interface InfraItem { id: string; name: string; type: 'monthly' | 'yearly' | 'one-time'; price: number; ppnPercent: number; }
-  interface AdditionalFee { id: string; name: string; price: number; }
+  interface AdditionalFee { id: string; name: string; type?: 'monthly' | 'yearly' | 'one-time' | 'per-case'; price: number; isIncludedInTotal?: boolean; }
   interface AIService { id: string; name: string; aiModel?: string; pricingModel: string; billingType?: 'monthly' | 'yearly' | 'one-time' | 'quota-based'; price: number; qty?: number; isIncludedInTotal?: boolean; }
 
   interface ProjectData {
@@ -85,7 +85,7 @@ export default function InvoicePage() {
   };
 
   const totalInfraCost     = infraItems.reduce((s, i) => s + ((i.type==='yearly'?(i.price||0)*12:(i.price||0))*(1+(i.ppnPercent||0)/100)), 0);
-  const totalAdditionalCost= additionalFees.reduce((s, f) => s + (f.price||0), 0);
+  const totalAdditionalCost= additionalFees.filter((f) => f.isIncludedInTotal !== false).reduce((s, f) => s + (f.price||0), 0);
   const totalAIIncludedCost = aiServices
     .filter(ai => ai.isIncludedInTotal)
     .reduce((sum, ai) => sum + ((ai.price || 0) * (ai.qty || 1)), 0);
@@ -424,14 +424,31 @@ export default function InvoicePage() {
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <TableHead>
-                          <Th w="85%">Description</Th>
+                          <Th w="70%">Description</Th>
+                          <Th align="center" w="15%">Type</Th>
                           <Th align="right" w="15%">Cost</Th>
                         </TableHead>
                         <tbody className="divide-y divide-border">
                           {additionalFees.map((f) => (
                             <tr key={f.id} className="hover:bg-muted/5 transition-colors">
-                              <Td bold>{f.name || '-'}</Td>
-                              <Td align="right" bold mono>{fmt(f.price||0)}</Td>
+                              <Td bold>
+                                <span className="flex items-center gap-2">
+                                  {f.name || '-'}
+                                  {f.isIncludedInTotal !== false ? (
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-primary/10 text-primary font-semibold border border-primary/20 print:border-primary/50">
+                                      ✓ Included
+                                    </span>
+                                  ) : (
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded-sm bg-muted text-muted-foreground font-semibold border border-border print:border-gray-300">
+                                      Info Only
+                                    </span>
+                                  )}
+                                </span>
+                              </Td>
+                              <Td align="center">
+                                <Badge>{f.type==='monthly'?'Monthly':f.type==='yearly'?'Yearly':f.type==='per-case'?'Per Case':'One-time'}</Badge>
+                              </Td>
+                              <Td align="right" bold mono className={f.isIncludedInTotal === false ? "line-through text-muted-foreground font-normal" : ""}>{fmt(f.price||0)}</Td>
                             </tr>
                           ))}
                         </tbody>
@@ -498,8 +515,8 @@ export default function InvoicePage() {
                       {[
                         { label: 'Services Subtotal',   value: totalDevCost,        show: totalDevCost > 0 },
                         { label: 'Infrastructure',      value: totalInfraCost,      show: totalInfraCost > 0 },
-                        { label: 'Additional Fees',     value: totalAdditionalCost, show: totalAdditionalCost > 0 },
                         { label: 'AI Services',         value: totalAIIncludedCost, show: totalAIIncludedCost > 0 },
+                        { label: 'Additional Fees',     value: totalAdditionalCost, show: totalAdditionalCost > 0 },
                       ].filter(r => r.show).map(row => (
                         <div key={row.label} className="flex justify-between items-center px-5 py-3 print:px-4 print:py-2 text-sm">
                           <span className="text-muted-foreground">{row.label}</span>

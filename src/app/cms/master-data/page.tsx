@@ -9,7 +9,7 @@ import { Plus, Trash2, Settings2, Save, Server, Users, Cpu, ChevronDown, Chevron
 
 interface DevRole { id: string; role: string; qty: number; days: number; dailyRate: number; dailyAllowance: number; }
 interface InfraItem { id: string; name: string; type: 'monthly' | 'yearly' | 'one-time'; price: number; ppnPercent: number; }
-interface AdditionalFee { id: string; name: string; price: number; }
+interface AdditionalFee { id: string; name: string; type?: 'monthly' | 'yearly' | 'one-time' | 'per-case'; price: number; }
 interface AIService { id: string; name: string; aiModel?: string; pricingModel: string; billingType?: 'monthly' | 'yearly' | 'one-time'; price: number; qty?: number; }
 
 interface MasterDataConfig {
@@ -342,6 +342,19 @@ export default function MasterDataPage() {
                             <label className="text-xs font-semibold text-muted-foreground mb-1.5 block sm:hidden">Fee Description</label>
                             <Input value={fee.name} onChange={e => setConfig(p => ({ ...p, additionalFees: p.additionalFees.map(r => r.id === fee.id ? { ...r, name: e.target.value } : r) }))} className="rounded-sm bg-background" />
                           </div>
+                          <div className="w-full sm:w-32">
+                            <label className="text-xs font-semibold text-muted-foreground mb-1.5 block sm:hidden">Type</label>
+                            <select
+                              value={fee.type || 'one-time'}
+                              onChange={e => setConfig(p => ({ ...p, additionalFees: p.additionalFees.map(r => r.id === fee.id ? { ...r, type: e.target.value as "monthly" | "yearly" | "one-time" | "per-case" } : r) }))}
+                              className="h-9 w-full px-3 text-sm rounded-sm border border-input bg-background shadow-sm"
+                            >
+                              <option value="monthly">Monthly</option>
+                              <option value="yearly">Yearly</option>
+                              <option value="one-time">One-Time</option>
+                              <option value="per-case">Per Case</option>
+                            </select>
+                          </div>
                           <div className="w-full sm:w-48">
                             <label className="text-xs font-semibold text-muted-foreground mb-1.5 block sm:hidden">Price (Rp)</label>
                             <Input
@@ -356,7 +369,7 @@ export default function MasterDataPage() {
                           </Button>
                         </div>
                       ))}
-                      <Button variant="outline" onClick={() => setConfig(p => ({ ...p, additionalFees: [...p.additionalFees, { id: genId(), name: 'New Additional Fee', price: 0 }] }))} className="w-full gap-2 border-dashed mt-2">
+                      <Button variant="outline" onClick={() => setConfig(p => ({ ...p, additionalFees: [...p.additionalFees, { id: genId(), name: 'New Additional Fee', type: 'one-time', price: 0 }] }))} className="w-full gap-2 border-dashed mt-2">
                         <Plus className="w-4 h-4" /> Add Fee
                       </Button>
                     </div>

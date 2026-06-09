@@ -10,7 +10,7 @@ import { Plus, Trash2, FileText, ChevronDown, ChevronUp, Server, Users, Settings
 
 interface DevRole { id: string; role: string; qty: number; days: number; dailyRate: number; dailyAllowance: number; }
 interface InfraItem { id: string; name: string; type: 'monthly' | 'yearly' | 'one-time'; price: number; ppnPercent: number; }
-interface AdditionalFee { id: string; name: string; price: number; }
+interface AdditionalFee { id: string; name: string; type?: 'monthly' | 'yearly' | 'one-time' | 'per-case'; price: number; isIncludedInTotal?: boolean; }
 interface AIService { id: string; name: string; aiModel?: string; pricingModel: string; billingType?: 'monthly' | 'yearly' | 'one-time' | 'quota-based'; price: number; qty?: number; isIncludedInTotal?: boolean; }
 
 interface MasterDataConfig {
@@ -156,7 +156,7 @@ export default function CalculatorPage() {
 
   const baseDevCost = project.devRoles.reduce((sum, role) => sum + (role.qty * role.days * (role.dailyRate + role.dailyAllowance)), 0);
   const totalInfraCost = project.infraItems.reduce((sum, item) => sum + ((item.type === 'yearly' ? item.price * 12 : item.price) * (1 + item.ppnPercent / 100)), 0);
-  const totalAdditionalCost = project.additionalFees.reduce((sum, fee) => sum + fee.price, 0);
+  const totalAdditionalCost = project.additionalFees.filter(fee => fee.isIncludedInTotal !== false).reduce((sum, fee) => sum + fee.price, 0);
   const totalAICost = project.aiServices.reduce((sum, ai) => sum + ((ai.price || 0) * (ai.qty || 1)), 0);
   const totalAIIncludedCost = project.aiServices.filter(ai => ai.isIncludedInTotal).reduce((sum, ai) => sum + ((ai.price || 0) * (ai.qty || 1)), 0);
 
@@ -477,10 +477,23 @@ export default function CalculatorPage() {
                     <ComboboxInput
                       value={fee.name}
                       onChange={val => updateFee(fee.id, 'name', val)}
-                      onSelect={match => setProject(p => ({ ...p, additionalFees: p.additionalFees.map(i => i.id === fee.id ? { ...i, name: match.name, price: match.price } : i) }))}
+                      onSelect={match => setProject(p => ({ ...p, additionalFees: p.additionalFees.map(i => i.id === fee.id ? { ...i, name: match.name, type: match.type || 'one-time', price: match.price } : i) }))}
                       options={masterData?.additionalFees?.map((r: AdditionalFee) => ({ label: r.name, data: r })) || []}
                       placeholder="Pilih atau ketik fee..."
                     />
+                  </div>
+                  <div className="w-32">
+                    <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Type</label>
+                    <select
+                      value={fee.type || 'one-time'}
+                      onChange={e => updateFee(fee.id, 'type', e.target.value as "monthly" | "yearly" | "one-time" | "per-case")}
+                      className="h-9 w-full px-3 text-sm rounded-sm border border-input bg-background shadow-sm"
+                    >
+                      <option value="monthly">Monthly</option>
+                      <option value="yearly">Yearly</option>
+                      <option value="one-time">One-Time</option>
+                      <option value="per-case">Per Case</option>
+                    </select>
                   </div>
                   <div className="w-32">
                     <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Price</label>
@@ -491,10 +504,14 @@ export default function CalculatorPage() {
                       className="rounded-sm h-9"
                     />
                   </div>
-                  <Button variant="ghost" size="icon" onClick={() => setProject(p => ({ ...p, additionalFees: p.additionalFees.filter(r => r.id !== fee.id) }))} className="text-destructive h-9 w-9 mb-[1px] hover:bg-destructive/10"><Trash2 className="w-4 h-4" /></Button>
+                  <div className="flex flex-col items-center justify-center pt-5">
+                    <label className="text-[10px] text-muted-foreground mb-1">Included</label>
+                    <input type="checkbox" checked={fee.isIncludedInTotal !== false} onChange={e => updateFee(fee.id, 'isIncludedInTotal', e.target.checked)} className="rounded-sm border-input accent-primary h-4 w-4" />
+                  </div>
+                  <Button variant="ghost" size="icon" onClick={() => setProject(p => ({ ...p, additionalFees: p.additionalFees.filter(r => r.id !== fee.id) }))} className="text-destructive h-9 w-9 mb-[1px] hover:bg-destructive/10 mt-[20px]"><Trash2 className="w-4 h-4" /></Button>
                 </div>
               ))}
-              <Button variant="outline" onClick={() => setProject(p => ({ ...p, additionalFees: [...p.additionalFees, { id: genId(), name: '', price: 0 }] }))} className="w-full gap-2 border-dashed mt-2"><Plus className="w-4 h-4" /> Add Fee</Button>
+              <Button variant="outline" onClick={() => setProject(p => ({ ...p, additionalFees: [...p.additionalFees, { id: genId(), name: '', type: 'one-time', price: 0 }] }))} className="w-full gap-2 border-dashed mt-2"><Plus className="w-4 h-4" /> Add Fee</Button>
             </div>
             <div className="px-6 py-4 border-t border-border bg-muted/5 flex justify-between"><span className="text-sm text-muted-foreground">Subtotal Fees</span><span className="text-sm font-semibold">{fmt(totalAdditionalCost)}</span></div>
           </div>
