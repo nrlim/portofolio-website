@@ -180,20 +180,20 @@ export const projects = [
       result: "Meningkatkan efisiensi penyusunan clinical pathway secara drastis, memastikan konsistensi standar perawatan berbasis bukti (evidence-based), dan membantu rumah sakit mempercepat digitalisasi layanan medis."
     }
   },
-  {
-    id: "snaptext",
-    title: "SnapText - AI-Powered Document Intelligence Engine",
-    category: "Product",
-    description: "Engine OCR modern yang mentransformasi dokumen tidak terstruktur menjadi data JSON siap pakai, ringkasan akurat, dan konteks cerdas untuk aplikasi AI.",
-    tech: ["Next.js 16", "React 19", "Vercel AI SDK", "Drizzle ORM", "PostgreSQL", "Tailwind CSS 4", "Framer Motion", "Better Auth", "PDF.js"],
-    image: "/projects/snaptext.png",
-    link: "https://snaptextid.vercel.app/",
-    caseStudy: {
-      problem: "Mengolah data dari dokumen fisik, PDF, atau gambar menjadi format terstruktur (JSON) biasanya membutuhkan waktu lama, tidak akurat, dan sulit diotomasi secara massal dengan akurasi tinggi.",
-      solution: "Mengembangkan platform berbasis Vision Models yang mampu memahami struktur dokumen secara visual, mengekstraksi data poin spesifik sesuai skema JSON yang diinginkan, dan melakukan chunking cerdas untuk integrasi RAG (Retrieval-Augmented Generation).",
-      result: "Menghasilkan ekstraksi data dengan akurasi tinggi (>95%), memangkas waktu pemrosesan dokumen dari menit menjadi milidetik, dan menyediakan SDK yang memudahkan developer membangun aplikasi berbasis dokumen."
-    }
-  },
+  // {
+  //   id: "snaptext",
+  //   title: "SnapText - AI-Powered Document Intelligence Engine",
+  //   category: "Product",
+  //   description: "Engine OCR modern yang mentransformasi dokumen tidak terstruktur menjadi data JSON siap pakai, ringkasan akurat, dan konteks cerdas untuk aplikasi AI.",
+  //   tech: ["Next.js 16", "React 19", "Vercel AI SDK", "Drizzle ORM", "PostgreSQL", "Tailwind CSS 4", "Framer Motion", "Better Auth", "PDF.js"],
+  //   image: "/projects/snaptext.png",
+  //   link: "https://snaptextid.vercel.app/",
+  //   caseStudy: {
+  //     problem: "Mengolah data dari dokumen fisik, PDF, atau gambar menjadi format terstruktur (JSON) biasanya membutuhkan waktu lama, tidak akurat, dan sulit diotomasi secara massal dengan akurasi tinggi.",
+  //     solution: "Mengembangkan platform berbasis Vision Models yang mampu memahami struktur dokumen secara visual, mengekstraksi data poin spesifik sesuai skema JSON yang diinginkan, dan melakukan chunking cerdas untuk integrasi RAG (Retrieval-Augmented Generation).",
+  //     result: "Menghasilkan ekstraksi data dengan akurasi tinggi (>95%), memangkas waktu pemrosesan dokumen dari menit menjadi milidetik, dan menyediakan SDK yang memudahkan developer membangun aplikasi berbasis dokumen."
+  //   }
+  // },
   {
     id: "agenthive",
     title: "AgentHive - Multi-Agent Autonomous Engineering Platform",
