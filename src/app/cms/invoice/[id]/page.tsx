@@ -218,7 +218,7 @@ export default function InvoicePage() {
         {/* ── Repeated print header — renders on every page top ── */}
         <thead className="hidden print:table-header-group">
           <tr>
-            <td style={{ padding: 0 }}>
+            <td style={{ padding: 0, paddingBottom: '8mm' }}>
               <div style={{ padding: '6mm 14mm 4mm' }} className="flex justify-between items-start border-b-2 border-black">
                 <div className="flex items-center gap-3">
                   <Image src="/personal-logo.png" alt="Logo" width={36} height={36} style={{ objectFit: 'contain' }} />
@@ -247,7 +247,7 @@ export default function InvoicePage() {
         <tbody>
           <tr>
             <td className="p-0">
-              <main className="p-4 md:p-8 print:px-[14mm] print:py-5 w-full space-y-5 print:space-y-4">
+              <main className="p-4 md:p-8 print:px-[14mm] print:pb-5 print:pt-2 w-full space-y-5 print:space-y-4">
 
                 {/* Screen header — hidden on print */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6 print:hidden">
