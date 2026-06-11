@@ -188,9 +188,8 @@ export default function ReportPage() {
           -webkit-print-color-adjust: exact;
           print-color-adjust: exact;
         }
-        /* Suppress browser-generated header/footer text (URL, date, page no.) */
-        /* This works by using margin:0 so there is no space for browser footer  */
-        /* User must uncheck "Headers and footers" in Chrome print dialog        */
+        thead { display: table-header-group; }
+        tfoot { display: table-footer-group; }
       `}</style>
 
       {/* ── Fixed Print Footer ── */}
@@ -207,12 +206,12 @@ export default function ReportPage() {
         {/* ── Repeated print header — renders on every page top ── */}
         <thead className="hidden print:table-header-group">
           <tr>
-            <td style={{ padding: 0, paddingBottom: '8mm' }}>
-              <div style={{ padding: '6mm 14mm 4mm' }} className="flex justify-between items-start border-b-2 border-black">
-                <div className="flex items-center gap-3">
+            <td style={{ padding: 0 }}>
+              <div style={{ padding: '6mm 14mm 4mm', borderBottom: '2px solid black', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src="/personal-logo.png" alt="Logo" style={{ width: '36px', height: '36px', objectFit: 'contain' }} />
-                  <div className="flex flex-col justify-center">
+                  <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                     <div style={{ fontSize: '18px', fontWeight: 900, letterSpacing: '-0.5px', lineHeight: 1 }}>Nuralim<span style={{ color: '#2563eb' }}>.Dev</span></div>
                     <div style={{ fontSize: '9px', color: '#9ca3af', marginTop: '2px' }}>nuralimdev.com</div>
                   </div>
@@ -234,6 +233,10 @@ export default function ReportPage() {
                 </div>
               </div>
             </td>
+          </tr>
+          {/* Dedicated spacer row repeated on every page */}
+          <tr>
+            <td style={{ height: '10mm', padding: 0, border: 'none' }}></td>
           </tr>
         </thead>
 
