@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkRateLimit, CERT_RATE_LIMIT_CONFIG } from '@/lib/rate-limit';
+import crypto from 'crypto';
 
 export async function POST(req: NextRequest) {
   try {
@@ -16,16 +17,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!apiKey || !id) {
+    if (!apiKey || !id || typeof id !== 'string' || id.length > 100) {
       return NextResponse.json(
-        { error: 'Missing required parameters' },
+        { error: 'Invalid parameters' },
         { status: 400 }
       );
     }
 
-    // Verify API key (timing-safe comparison is better, but simple is okay for now as long as it's not client-exposed)
+    // Verify API key using timing-safe comparison to prevent timing attacks
     const expectedKey = process.env.CERTIFICATE_API_KEY;
-    if (!expectedKey || apiKey !== expectedKey) {
+    
+    if (!expectedKey) {
+       return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
+    }
+
+    const expectedBuffer = Buffer.from(expectedKey);
+    const providedBuffer = Buffer.from(apiKey);
+
+    if (
+      expectedBuffer.length !== providedBuffer.length ||
+      !crypto.timingSafeEqual(expectedBuffer, providedBuffer)
+    ) {
       return NextResponse.json(
         { error: 'Invalid API key' },
         { status: 401 }

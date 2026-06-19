@@ -223,8 +223,8 @@ export default function CalculatorPage() {
       <div className="space-y-4">
 
         {/* Section 1: Info */}
-        <div className="bg-card rounded-sm border border-border shadow-sm overflow-hidden">
-          <button onClick={() => toggleSection('info')} className="w-full px-6 py-4 flex items-center justify-between bg-muted/10 hover:bg-muted/20 transition-colors">
+        <div className="border border-border/40 rounded-sm bg-background overflow-hidden">
+          <button onClick={() => toggleSection('info')} className="w-full px-6 py-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-sm text-primary"><FileText className="w-5 h-5" /></div>
               <div className="text-left"><h2 className="font-semibold text-sm">Project Scope</h2><p className="text-xs text-muted-foreground">Detail klien dan proyek</p></div>
@@ -235,14 +235,14 @@ export default function CalculatorPage() {
             {openSection === 'info' && (
               <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden border-t border-border">
                 <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Client Name</label><Input value={project.clientName} onChange={e => setProject(p => ({ ...p, clientName: e.target.value }))} className="rounded-sm bg-background" /></div>
-                  <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Project Name</label><Input value={project.projectName} onChange={e => setProject(p => ({ ...p, projectName: e.target.value }))} className="rounded-sm bg-background" /></div>
-                  <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Date</label><Input type="date" value={project.projectDate} onChange={e => setProject(p => ({ ...p, projectDate: e.target.value }))} className="rounded-sm bg-background" /></div>
-                  <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Timeline Str</label><Input value={project.timelineStr} onChange={e => setProject(p => ({ ...p, timelineStr: e.target.value }))} className="rounded-sm bg-background" /></div>
-                  <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Total Features</label><Input type="number" value={project.totalFeatures} onChange={e => setProject(p => ({ ...p, totalFeatures: Number(e.target.value) }))} className="rounded-sm bg-background" /></div>
-                  <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Complexity per Feature (%)</label><Input type="number" step="0.1" value={project.complexityPercent ?? 1} onChange={e => setProject(p => ({ ...p, complexityPercent: Number(e.target.value) }))} className="rounded-sm bg-background" /></div>
-                  <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Due Date (Days)</label><Input type="number" value={project.dueDateDays ?? 7} onChange={e => setProject(p => ({ ...p, dueDateDays: Number(e.target.value) }))} className="rounded-sm bg-background" /></div>
-                  <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">License Margin (%)</label><Input type="number" step="0.1" value={project.licensePercent} onChange={e => setProject(p => ({ ...p, licensePercent: Number(e.target.value) }))} className="rounded-sm bg-background" /></div>
+                  <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Client Name</label><Input value={project.clientName} onChange={e => setProject(p => ({ ...p, clientName: e.target.value }))} className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors" /></div>
+                  <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Project Name</label><Input value={project.projectName} onChange={e => setProject(p => ({ ...p, projectName: e.target.value }))} className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors" /></div>
+                  <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Date</label><Input type="date" value={project.projectDate} onChange={e => setProject(p => ({ ...p, projectDate: e.target.value }))} className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors" /></div>
+                  <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Timeline Str</label><Input value={project.timelineStr} onChange={e => setProject(p => ({ ...p, timelineStr: e.target.value }))} className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors" /></div>
+                  <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Total Features</label><Input type="number" value={project.totalFeatures} onChange={e => setProject(p => ({ ...p, totalFeatures: Number(e.target.value) }))} className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors" /></div>
+                  <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Complexity per Feature (%)</label><Input type="number" step="0.1" value={project.complexityPercent ?? 1} onChange={e => setProject(p => ({ ...p, complexityPercent: Number(e.target.value) }))} className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors" /></div>
+                  <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Due Date (Days)</label><Input type="number" value={project.dueDateDays ?? 7} onChange={e => setProject(p => ({ ...p, dueDateDays: Number(e.target.value) }))} className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors" /></div>
+                  <div><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">License Margin (%)</label><Input type="number" step="0.1" value={project.licensePercent} onChange={e => setProject(p => ({ ...p, licensePercent: Number(e.target.value) }))} className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors" /></div>
                 </div>
               </motion.div>
             )}
@@ -250,8 +250,8 @@ export default function CalculatorPage() {
         </div>
 
         {/* Section 2: Developers */}
-        <div className="bg-card rounded-sm border border-border shadow-sm overflow-hidden">
-          <button onClick={() => toggleSection('dev')} className="w-full px-6 py-4 flex items-center justify-between bg-muted/10 hover:bg-muted/20 transition-colors">
+        <div className="border border-border/40 rounded-sm bg-background overflow-hidden">
+          <button onClick={() => toggleSection('dev')} className="w-full px-6 py-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-sm text-primary"><Users className="w-5 h-5" /></div>
               <div className="text-left"><h2 className="font-semibold text-sm">Developer Roles & Timeline</h2><p className="text-xs text-muted-foreground">Kalkulasi: {fmt(totalDevCost)}</p></div>
@@ -263,7 +263,7 @@ export default function CalculatorPage() {
               <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden border-t border-border">
                 <div className="p-6 space-y-4">
                   {project.devRoles.map(role => (
-                    <div key={role.id} className="relative p-5 bg-muted/5 border border-border rounded-sm group">
+                    <div key={role.id} className="relative py-4 border-b border-border/40 group last:border-0">
                       <div className="absolute top-3 right-3"><Button variant="ghost" size="icon" onClick={() => setProject(p => ({ ...p, devRoles: p.devRoles.filter(r => r.id !== role.id) }))} className="text-destructive h-8 w-8 hover:bg-destructive/10"><Trash2 className="w-4 h-4" /></Button></div>
                       <div className="grid grid-cols-1 md:grid-cols-12 gap-5 mb-4 pr-10">
                         <div className="md:col-span-4">
@@ -276,15 +276,15 @@ export default function CalculatorPage() {
                             placeholder="Pilih atau ketik role..."
                           />
                         </div>
-                        <div className="md:col-span-2"><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Qty</label><Input type="number" value={role.qty} onChange={e => updateDevRole(role.id, 'qty', Number(e.target.value))} className="rounded-sm bg-background" /></div>
-                        <div className="md:col-span-2"><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Days</label><Input type="number" value={role.days} onChange={e => updateDevRole(role.id, 'days', Number(e.target.value))} className="rounded-sm bg-background" /></div>
+                        <div className="md:col-span-2"><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Qty</label><Input type="number" value={role.qty} onChange={e => updateDevRole(role.id, 'qty', Number(e.target.value))} className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors" /></div>
+                        <div className="md:col-span-2"><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Days</label><Input type="number" value={role.days} onChange={e => updateDevRole(role.id, 'days', Number(e.target.value))} className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors" /></div>
                         <div className="md:col-span-2">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Daily Rate</label>
                           <Input
                             type="text"
                             value={role.dailyRate === 0 ? '' : new Intl.NumberFormat('id-ID').format(role.dailyRate)}
                             onChange={e => updateDevRole(role.id, 'dailyRate', Number(e.target.value.replace(/\D/g, '')))}
-                            className="rounded-sm bg-background"
+                            className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors"
                           />
                         </div>
                         <div className="md:col-span-2">
@@ -293,7 +293,7 @@ export default function CalculatorPage() {
                             type="text"
                             value={role.dailyAllowance === 0 ? '' : new Intl.NumberFormat('id-ID').format(role.dailyAllowance)}
                             onChange={e => updateDevRole(role.id, 'dailyAllowance', Number(e.target.value.replace(/\D/g, '')))}
-                            className="rounded-sm bg-background"
+                            className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors"
                           />
                         </div>
                       </div>
@@ -322,8 +322,8 @@ export default function CalculatorPage() {
         </div>
 
         {/* Section 3: Infra */}
-        <div className="bg-card rounded-sm border border-border shadow-sm overflow-hidden">
-          <button onClick={() => toggleSection('infra')} className="w-full px-6 py-4 flex items-center justify-between bg-muted/10 hover:bg-muted/20 transition-colors">
+        <div className="border border-border/40 rounded-sm bg-background overflow-hidden">
+          <button onClick={() => toggleSection('infra')} className="w-full px-6 py-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-sm text-primary"><Server className="w-5 h-5" /></div>
               <div className="text-left"><h2 className="font-semibold text-sm">Infrastructure</h2><p className="text-xs text-muted-foreground">Kalkulasi: {fmt(totalInfraCost)}</p></div>
@@ -335,7 +335,7 @@ export default function CalculatorPage() {
               <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden border-t border-border">
                 <div className="p-6 space-y-4">
                   {project.infraItems.map(item => (
-                    <div key={item.id} className="relative p-5 bg-muted/5 border border-border rounded-sm group">
+                    <div key={item.id} className="relative py-4 border-b border-border/40 group last:border-0">
                       <div className="absolute top-3 right-3"><Button variant="ghost" size="icon" onClick={() => setProject(p => ({ ...p, infraItems: p.infraItems.filter(r => r.id !== item.id) }))} className="text-destructive h-8 w-8 hover:bg-destructive/10"><Trash2 className="w-4 h-4" /></Button></div>
                       <div className="grid grid-cols-1 md:grid-cols-12 gap-5 mb-4 pr-10">
                         <div className="md:col-span-5">
@@ -348,17 +348,17 @@ export default function CalculatorPage() {
                             placeholder="Pilih atau ketik infrastruktur..."
                           />
                         </div>
-                        <div className="md:col-span-3"><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Billing</label><select value={item.type} onChange={e => updateInfra(item.id, 'type', e.target.value as InfraItem['type'])} className="h-9 w-full px-3 text-sm rounded-sm border border-input bg-background"><option value="monthly">Monthly</option><option value="yearly">Yearly</option><option value="one-time">One-Time</option></select></div>
+                        <div className="md:col-span-3"><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Billing</label><select value={item.type} onChange={e => updateInfra(item.id, 'type', e.target.value as InfraItem['type'])} className="h-9 w-full px-3 text-sm rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors"><option value="monthly">Monthly</option><option value="yearly">Yearly</option><option value="one-time">One-Time</option></select></div>
                         <div className="md:col-span-2">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Price (Rp)</label>
                           <Input
                             type="text"
                             value={item.price === 0 ? '' : new Intl.NumberFormat('id-ID').format(item.price)}
                             onChange={e => updateInfra(item.id, 'price', Number(e.target.value.replace(/\D/g, '')))}
-                            className="rounded-sm bg-background"
+                            className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors"
                           />
                         </div>
-                        <div className="md:col-span-2"><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">PPN (%)</label><Input type="number" value={item.ppnPercent} onChange={e => updateInfra(item.id, 'ppnPercent', Number(e.target.value))} className="rounded-sm bg-background" /></div>
+                        <div className="md:col-span-2"><label className="text-xs font-semibold text-muted-foreground mb-1.5 block">PPN (%)</label><Input type="number" value={item.ppnPercent} onChange={e => updateInfra(item.id, 'ppnPercent', Number(e.target.value))} className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors" /></div>
                       </div>
                       <div className="bg-background border border-border px-4 py-2 rounded-sm text-right text-sm"><span className="text-muted-foreground mr-2">Total Item Cost:</span><span className="font-semibold tabular-nums">{fmt((item.type === 'yearly' ? item.price * 12 : item.price) * (1 + item.ppnPercent / 100))}</span></div>
                     </div>
@@ -373,8 +373,8 @@ export default function CalculatorPage() {
         {/* Section 4: AI & Other */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4">
 
-          <div className="bg-card rounded-sm border border-border shadow-sm flex flex-col">
-            <div className="px-6 py-4 border-b border-border bg-muted/10"><h2 className="font-semibold text-sm flex items-center gap-2"><Cpu className="w-4 h-4 text-muted-foreground" /> AI Models & APIs</h2></div>
+          <div className="border border-border/40 rounded-sm bg-background flex flex-col">
+            <div className="px-6 py-4 border-b border-border/40"><h2 className="font-semibold text-sm flex items-center gap-2"><Cpu className="w-4 h-4 text-muted-foreground" /> AI Models & APIs</h2></div>
             <div className="p-6 flex-1 space-y-4">
               {project.aiServices.map(ai => (
                 <div key={ai.id} className="flex flex-col gap-3 p-4 border border-border rounded-sm bg-muted/5 relative">
@@ -406,7 +406,7 @@ export default function CalculatorPage() {
                       <select
                         value={ai.pricingModel}
                         onChange={e => updateAI(ai.id, 'pricingModel', e.target.value)}
-                        className="h-9 w-full px-3 text-sm rounded-sm border border-input bg-background shadow-sm"
+                        className="h-9 w-full px-3 text-sm rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors"
                       >
                         <option value="per_1k_tokens">Per 1k Tokens</option>
                         <option value="per_1m_tokens">Per 1M Tokens</option>
@@ -422,7 +422,7 @@ export default function CalculatorPage() {
                       <select
                         value={ai.billingType || 'one-time'}
                         onChange={e => updateAI(ai.id, 'billingType', e.target.value as "monthly" | "yearly" | "one-time" | "quota-based")}
-                        className="h-9 w-full px-3 text-sm rounded-sm border border-input bg-background shadow-sm"
+                        className="h-9 w-full px-3 text-sm rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors"
                       >
                         <option value="monthly">Monthly</option>
                         <option value="yearly">Yearly</option>
@@ -467,8 +467,8 @@ export default function CalculatorPage() {
             <div className="px-6 py-4 border-t border-border bg-muted/5 flex justify-between"><span className="text-sm text-muted-foreground">Subtotal AI</span><span className="text-sm font-semibold">{fmt(totalAICost)}</span></div>
           </div>
 
-          <div className="bg-card rounded-sm border border-border shadow-sm flex flex-col">
-            <div className="px-6 py-4 border-b border-border bg-muted/10"><h2 className="font-semibold text-sm flex items-center gap-2"><Settings2 className="w-4 h-4 text-muted-foreground" /> Additional Fees</h2></div>
+          <div className="border border-border/40 rounded-sm bg-background flex flex-col">
+            <div className="px-6 py-4 border-b border-border/40"><h2 className="font-semibold text-sm flex items-center gap-2"><Settings2 className="w-4 h-4 text-muted-foreground" /> Additional Fees</h2></div>
             <div className="p-6 flex-1 space-y-4">
               {project.additionalFees.map(fee => (
                 <div key={fee.id} className="flex gap-3 items-end">
@@ -487,7 +487,7 @@ export default function CalculatorPage() {
                     <select
                       value={fee.type || 'one-time'}
                       onChange={e => updateFee(fee.id, 'type', e.target.value as "monthly" | "yearly" | "one-time" | "per-case")}
-                      className="h-9 w-full px-3 text-sm rounded-sm border border-input bg-background shadow-sm"
+                      className="h-9 w-full px-3 text-sm rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors"
                     >
                       <option value="monthly">Monthly</option>
                       <option value="yearly">Yearly</option>
@@ -519,13 +519,13 @@ export default function CalculatorPage() {
 
         {/* Notes & Summary block */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4 items-start">
-          <div className="bg-card rounded-sm border border-border shadow-sm p-6">
+          <div className="bg-background rounded-sm border border-border/40 p-6">
             <label className="text-sm font-semibold flex items-center gap-2 mb-3"><FileText className="w-4 h-4 text-muted-foreground" /> Catatan Tambahan (PDF)</label>
             <textarea value={project.notes} onChange={e => setProject(p => ({ ...p, notes: e.target.value }))} rows={8} className="w-full p-4 text-sm rounded-sm border border-input bg-transparent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring resize-none" />
           </div>
 
           {/* Final Summary Card */}
-          <div className="bg-card rounded-sm border border-primary/20 shadow-sm overflow-hidden flex flex-col">
+          <div className="bg-background rounded-sm border border-primary/20 overflow-hidden flex flex-col">
             <div className="px-6 py-4 border-b border-border bg-primary/5 text-primary"><span className="font-semibold text-sm flex items-center gap-2"><DollarSign className="w-4 h-4" /> Grand Total Summary</span></div>
             <div className="divide-y divide-border">
               <div className="flex justify-between px-6 py-4 text-sm"><span className="text-muted-foreground">Development Cost</span><span className="font-medium tabular-nums">{fmt(totalDevCost)}</span></div>

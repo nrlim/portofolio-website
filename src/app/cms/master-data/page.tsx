@@ -101,8 +101,8 @@ export default function MasterDataPage() {
       <div className="space-y-4">
 
         {/* Developers */}
-        <div className="bg-card rounded-sm border border-border shadow-sm overflow-hidden">
-          <button onClick={() => toggleSection('dev')} className="w-full px-6 py-4 flex items-center justify-between bg-muted/10 hover:bg-muted/20 transition-colors">
+        <div className="border border-border/40 rounded-sm bg-background overflow-hidden">
+          <button onClick={() => toggleSection('dev')} className="w-full px-6 py-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-sm text-primary"><Users className="w-5 h-5" /></div>
               <div className="text-left">
@@ -118,7 +118,7 @@ export default function MasterDataPage() {
               <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden border-t border-border">
                 <div className="p-6 space-y-6">
                   {config.devRoles.map((role) => (
-                    <div key={role.id} className="relative p-5 bg-muted/5 border border-border rounded-sm group">
+                    <div key={role.id} className="relative py-4 border-b border-border/40 group last:border-0">
                       <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button variant="ghost" size="icon" onClick={() => setConfig(p => ({ ...p, devRoles: p.devRoles.filter(r => r.id !== role.id) }))} className="text-destructive h-8 w-8 hover:bg-destructive/10">
                           <Trash2 className="w-4 h-4" />
@@ -127,7 +127,7 @@ export default function MasterDataPage() {
                       <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
                         <div className="md:col-span-6">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Role Name</label>
-                          <Input value={role.role} onChange={e => setConfig(p => ({ ...p, devRoles: p.devRoles.map(r => r.id === role.id ? { ...r, role: e.target.value } : r) }))} className="rounded-sm bg-background" />
+                          <Input value={role.role} onChange={e => setConfig(p => ({ ...p, devRoles: p.devRoles.map(r => r.id === role.id ? { ...r, role: e.target.value } : r) }))} className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors" />
                         </div>
                         <div className="md:col-span-3">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Daily Rate (Rp)</label>
@@ -135,7 +135,7 @@ export default function MasterDataPage() {
                             type="text"
                             value={role.dailyRate === 0 ? '' : new Intl.NumberFormat('id-ID').format(role.dailyRate)}
                             onChange={e => setConfig(p => ({ ...p, devRoles: p.devRoles.map(r => r.id === role.id ? { ...r, dailyRate: Number(e.target.value.replace(/\D/g, '')) } : r) }))}
-                            className="rounded-sm bg-background"
+                            className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors"
                           />
                         </div>
                         <div className="md:col-span-3">
@@ -144,7 +144,7 @@ export default function MasterDataPage() {
                             type="text"
                             value={role.dailyAllowance === 0 ? '' : new Intl.NumberFormat('id-ID').format(role.dailyAllowance)}
                             onChange={e => setConfig(p => ({ ...p, devRoles: p.devRoles.map(r => r.id === role.id ? { ...r, dailyAllowance: Number(e.target.value.replace(/\D/g, '')) } : r) }))}
-                            className="rounded-sm bg-background"
+                            className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors"
                           />
                         </div>
                       </div>
@@ -160,8 +160,8 @@ export default function MasterDataPage() {
         </div>
 
         {/* Infrastructure */}
-        <div className="bg-card rounded-sm border border-border shadow-sm overflow-hidden">
-          <button onClick={() => toggleSection('infra')} className="w-full px-6 py-4 flex items-center justify-between bg-muted/10 hover:bg-muted/20 transition-colors">
+        <div className="border border-border/40 rounded-sm bg-background overflow-hidden">
+          <button onClick={() => toggleSection('infra')} className="w-full px-6 py-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-sm text-primary"><Server className="w-5 h-5" /></div>
               <div className="text-left">
@@ -177,7 +177,7 @@ export default function MasterDataPage() {
               <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden border-t border-border">
                 <div className="p-6 space-y-6">
                   {config.infraItems.map(item => (
-                    <div key={item.id} className="relative p-5 bg-muted/5 border border-border rounded-sm group">
+                    <div key={item.id} className="relative py-4 border-b border-border/40 group last:border-0">
                       <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button variant="ghost" size="icon" onClick={() => setConfig(p => ({ ...p, infraItems: p.infraItems.filter(r => r.id !== item.id) }))} className="text-destructive h-8 w-8 hover:bg-destructive/10">
                           <Trash2 className="w-4 h-4" />
@@ -186,11 +186,11 @@ export default function MasterDataPage() {
                       <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
                         <div className="md:col-span-5">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Item Name</label>
-                          <Input value={item.name} onChange={e => setConfig(p => ({ ...p, infraItems: p.infraItems.map(r => r.id === item.id ? { ...r, name: e.target.value } : r) }))} className="rounded-sm bg-background" />
+                          <Input value={item.name} onChange={e => setConfig(p => ({ ...p, infraItems: p.infraItems.map(r => r.id === item.id ? { ...r, name: e.target.value } : r) }))} className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors" />
                         </div>
                         <div className="md:col-span-3">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Billing Type</label>
-                          <select value={item.type} onChange={e => setConfig(p => ({ ...p, infraItems: p.infraItems.map(r => r.id === item.id ? { ...r, type: e.target.value as InfraItem['type'] } : r) }))} className="h-9 w-full px-3 text-sm rounded-sm border border-input bg-background shadow-sm">
+                          <select value={item.type} onChange={e => setConfig(p => ({ ...p, infraItems: p.infraItems.map(r => r.id === item.id ? { ...r, type: e.target.value as InfraItem['type'] } : r) }))} className="h-9 w-full px-3 text-sm rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors">
                             <option value="monthly">Monthly</option>
                             <option value="yearly">Yearly</option>
                             <option value="one-time">One-Time</option>
@@ -202,12 +202,12 @@ export default function MasterDataPage() {
                             type="text"
                             value={item.price === 0 ? '' : new Intl.NumberFormat('id-ID').format(item.price)}
                             onChange={e => setConfig(p => ({ ...p, infraItems: p.infraItems.map(r => r.id === item.id ? { ...r, price: Number(e.target.value.replace(/\D/g, '')) } : r) }))}
-                            className="rounded-sm bg-background"
+                            className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors"
                           />
                         </div>
                         <div className="md:col-span-2">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">PPN (%)</label>
-                          <Input type="number" value={item.ppnPercent} onChange={e => setConfig(p => ({ ...p, infraItems: p.infraItems.map(r => r.id === item.id ? { ...r, ppnPercent: Number(e.target.value) } : r) }))} className="rounded-sm bg-background" />
+                          <Input type="number" value={item.ppnPercent} onChange={e => setConfig(p => ({ ...p, infraItems: p.infraItems.map(r => r.id === item.id ? { ...r, ppnPercent: Number(e.target.value) } : r) }))} className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors" />
                         </div>
                       </div>
                     </div>
@@ -222,8 +222,8 @@ export default function MasterDataPage() {
         </div>
 
         {/* AI Services */}
-        <div className="bg-card rounded-sm border border-border shadow-sm overflow-hidden">
-          <button onClick={() => toggleSection('ai')} className="w-full px-6 py-4 flex items-center justify-between bg-muted/10 hover:bg-muted/20 transition-colors">
+        <div className="border border-border/40 rounded-sm bg-background overflow-hidden">
+          <button onClick={() => toggleSection('ai')} className="w-full px-6 py-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-sm text-primary"><Cpu className="w-5 h-5" /></div>
               <div className="text-left">
@@ -239,7 +239,7 @@ export default function MasterDataPage() {
               <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} className="overflow-hidden border-t border-border">
                 <div className="p-6 space-y-6">
                   {config.aiServices.map(ai => (
-                    <div key={ai.id} className="relative p-5 bg-muted/5 border border-border rounded-sm group">
+                    <div key={ai.id} className="relative py-4 border-b border-border/40 group last:border-0">
                       <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button variant="ghost" size="icon" onClick={() => setConfig(p => ({ ...p, aiServices: p.aiServices.filter(r => r.id !== ai.id) }))} className="text-destructive h-8 w-8 hover:bg-destructive/10">
                           <Trash2 className="w-4 h-4" />
@@ -248,18 +248,18 @@ export default function MasterDataPage() {
                       <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
                         <div className="md:col-span-3">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Service Name</label>
-                          <Input value={ai.name} onChange={e => setConfig(p => ({ ...p, aiServices: p.aiServices.map(r => r.id === ai.id ? { ...r, name: e.target.value } : r) }))} className="rounded-sm bg-background" placeholder="e.g. OCR, LLM" />
+                          <Input value={ai.name} onChange={e => setConfig(p => ({ ...p, aiServices: p.aiServices.map(r => r.id === ai.id ? { ...r, name: e.target.value } : r) }))} className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors" placeholder="e.g. OCR, LLM" />
                         </div>
                         <div className="md:col-span-2">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">AI Model</label>
-                          <Input value={ai.aiModel || ''} onChange={e => setConfig(p => ({ ...p, aiServices: p.aiServices.map(r => r.id === ai.id ? { ...r, aiModel: e.target.value } : r) }))} className="rounded-sm bg-background" placeholder="GPT-4o" />
+                          <Input value={ai.aiModel || ''} onChange={e => setConfig(p => ({ ...p, aiServices: p.aiServices.map(r => r.id === ai.id ? { ...r, aiModel: e.target.value } : r) }))} className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors" placeholder="GPT-4o" />
                         </div>
                         <div className="md:col-span-2">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Pricing Model</label>
                           <select
                             value={ai.pricingModel}
                             onChange={e => setConfig(p => ({ ...p, aiServices: p.aiServices.map(r => r.id === ai.id ? { ...r, pricingModel: e.target.value } : r) }))}
-                            className="h-9 w-full px-3 text-sm rounded-sm border border-input bg-background shadow-sm"
+                            className="h-9 w-full px-3 text-sm rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors"
                           >
                             <option value="per_1k_tokens">Per 1k Tokens</option>
                             <option value="per_1m_tokens">Per 1M Tokens</option>
@@ -275,7 +275,7 @@ export default function MasterDataPage() {
                           <select
                             value={ai.billingType || 'one-time'}
                             onChange={e => setConfig(p => ({ ...p, aiServices: p.aiServices.map(r => r.id === ai.id ? { ...r, billingType: e.target.value as "monthly" | "yearly" | "one-time" } : r) }))}
-                            className="h-9 w-full px-3 text-sm rounded-sm border border-input bg-background shadow-sm"
+                            className="h-9 w-full px-3 text-sm rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors"
                           >
                             <option value="monthly">Monthly</option>
                             <option value="yearly">Yearly</option>
@@ -284,7 +284,7 @@ export default function MasterDataPage() {
                         </div>
                         <div className="md:col-span-1">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Default Qty</label>
-                          <Input type="number" min="1" value={ai.qty || 1} onChange={e => setConfig(p => ({ ...p, aiServices: p.aiServices.map(r => r.id === ai.id ? { ...r, qty: parseInt(e.target.value) || 1 } : r) }))} className="rounded-sm bg-background" />
+                          <Input type="number" min="1" value={ai.qty || 1} onChange={e => setConfig(p => ({ ...p, aiServices: p.aiServices.map(r => r.id === ai.id ? { ...r, qty: parseInt(e.target.value) || 1 } : r) }))} className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors" />
                         </div>
                         <div className="md:col-span-2">
                           <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Unit Price (Rp)</label>
@@ -292,7 +292,7 @@ export default function MasterDataPage() {
                             type="text"
                             value={ai.price === 0 ? '' : new Intl.NumberFormat('id-ID').format(ai.price)}
                             onChange={e => setConfig(p => ({ ...p, aiServices: p.aiServices.map(r => r.id === ai.id ? { ...r, price: Number(e.target.value.replace(/\D/g, '')) } : r) }))}
-                            className="rounded-sm bg-background"
+                            className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors"
                           />
                         </div>
                       </div>
@@ -308,8 +308,8 @@ export default function MasterDataPage() {
         </div>
 
         {/* Lain-lain & Margin */}
-        <div className="bg-card rounded-sm border border-border shadow-sm overflow-hidden">
-          <button onClick={() => toggleSection('other')} className="w-full px-6 py-4 flex items-center justify-between bg-muted/10 hover:bg-muted/20 transition-colors">
+        <div className="border border-border/40 rounded-sm bg-background overflow-hidden">
+          <button onClick={() => toggleSection('other')} className="w-full px-6 py-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-sm text-primary"><Settings2 className="w-5 h-5" /></div>
               <div className="text-left">
@@ -329,7 +329,7 @@ export default function MasterDataPage() {
                     <h3 className="text-sm font-bold border-b border-border pb-2 mb-4">License Margin</h3>
                     <div className="w-48">
                       <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Default Margin (%)</label>
-                      <Input type="number" step="0.1" value={config.licensePercent} onChange={e => setConfig(p => ({ ...p, licensePercent: Number(e.target.value) }))} className="rounded-sm bg-background" />
+                      <Input type="number" step="0.1" value={config.licensePercent} onChange={e => setConfig(p => ({ ...p, licensePercent: Number(e.target.value) }))} className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors" />
                     </div>
                   </div>
 
@@ -340,14 +340,14 @@ export default function MasterDataPage() {
                         <div key={fee.id} className="flex flex-col sm:flex-row gap-4 items-center">
                           <div className="flex-1 w-full">
                             <label className="text-xs font-semibold text-muted-foreground mb-1.5 block sm:hidden">Fee Description</label>
-                            <Input value={fee.name} onChange={e => setConfig(p => ({ ...p, additionalFees: p.additionalFees.map(r => r.id === fee.id ? { ...r, name: e.target.value } : r) }))} className="rounded-sm bg-background" />
+                            <Input value={fee.name} onChange={e => setConfig(p => ({ ...p, additionalFees: p.additionalFees.map(r => r.id === fee.id ? { ...r, name: e.target.value } : r) }))} className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors" />
                           </div>
                           <div className="w-full sm:w-32">
                             <label className="text-xs font-semibold text-muted-foreground mb-1.5 block sm:hidden">Type</label>
                             <select
                               value={fee.type || 'one-time'}
                               onChange={e => setConfig(p => ({ ...p, additionalFees: p.additionalFees.map(r => r.id === fee.id ? { ...r, type: e.target.value as "monthly" | "yearly" | "one-time" | "per-case" } : r) }))}
-                              className="h-9 w-full px-3 text-sm rounded-sm border border-input bg-background shadow-sm"
+                              className="h-9 w-full px-3 text-sm rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors"
                             >
                               <option value="monthly">Monthly</option>
                               <option value="yearly">Yearly</option>
@@ -361,7 +361,7 @@ export default function MasterDataPage() {
                               type="text"
                               value={fee.price === 0 ? '' : new Intl.NumberFormat('id-ID').format(fee.price)}
                               onChange={e => setConfig(p => ({ ...p, additionalFees: p.additionalFees.map(r => r.id === fee.id ? { ...r, price: Number(e.target.value.replace(/\D/g, '')) } : r) }))}
-                              className="rounded-sm bg-background"
+                              className="rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors"
                             />
                           </div>
                           <Button variant="ghost" size="icon" onClick={() => setConfig(p => ({ ...p, additionalFees: p.additionalFees.filter(r => r.id !== fee.id) }))} className="text-destructive h-9 w-9 hover:bg-destructive/10 shrink-0">

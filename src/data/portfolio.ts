@@ -6,7 +6,7 @@ const yearsOfExperience = currentYear - startYear;
 export const personalInfo = {
   name: "Nuralim",
   title: "Product & Technology Development Manager",
-  email: "nuralim.mail@gmail.com",
+  email: "halo@nuralim.dev",
   phone: "+62 811 144 1696",
   whatsapp: "https://wa.me/628111441696?text=Halo%20Nuralim,%20saya%20ingin%20diskusikan%20proyek%20software.",
   address: "Segara City Cluster Baltic, SC 2.9 No.8",

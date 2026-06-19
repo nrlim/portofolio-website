@@ -69,6 +69,7 @@ export function LoginDialog({ children }: { children?: React.ReactNode }) {
           <button
             className="p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
             title="Admin Login"
+            suppressHydrationWarning
           >
             <Lock className="h-4 w-4" />
           </button>

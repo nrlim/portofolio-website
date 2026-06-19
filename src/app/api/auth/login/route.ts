@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { AuthSession } from '@/types/database';
 import { signSession } from '@/lib/auth';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,6 +11,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Email and password required' },
         { status: 400 }
+      );
+    }
+
+    // Rate Limiting
+    const ip = request.headers.get('x-forwarded-for') || 'unknown';
+    // Use a strict rate limit for login: 5 attempts per 15 minutes, 1 hour block
+    const rateLimit = checkRateLimit(`login_${ip}`, {
+      maxRequests: 5,
+      windowMs: 15 * 60 * 1000,
+      blockDurationMs: 60 * 60 * 1000,
+      maxRequestsPerDay: 50,
+      dayMs: 24 * 60 * 60 * 1000,
+    });
+    
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: rateLimit.message || 'Terlalu banyak percobaan login. Silakan coba lagi nanti.' },
+        { status: 429 }
       );
     }
 

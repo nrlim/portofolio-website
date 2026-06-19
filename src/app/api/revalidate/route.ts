@@ -16,9 +16,24 @@ export async function POST(request: NextRequest) {
 
     const { path } = await request.json();
 
-    if (!path) {
+    if (!path || typeof path !== 'string') {
       return NextResponse.json(
         { error: 'Path is required' },
+        { status: 400 }
+      );
+    }
+
+    // Path whitelist validation
+    const allowedPaths = [
+      '/',
+      '/cms/dashboard',
+      '/api/cms/projects',
+      '/api/cms/master-data'
+    ];
+
+    if (!allowedPaths.includes(path) && !path.startsWith('/projects/')) {
+      return NextResponse.json(
+        { error: 'Invalid path' },
         { status: 400 }
       );
     }

@@ -37,8 +37,11 @@ export function Footer() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           {/* Brand */}
-          <div>
-            <p className="text-sm text-muted-foreground max-w-xs">
+          <div className="flex flex-col items-start text-left">
+            <Link href="/" className="text-2xl font-black tracking-tight mb-4 text-foreground">
+              Nuralim<span className="text-primary">.Dev</span>
+            </Link>
+            <p className="text-sm text-muted-foreground max-w-xs leading-relaxed">
               Product & Technology Development Manager. Membangun software yang
               adaptif dan tim yang berdaya.
             </p>
@@ -95,8 +98,8 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
-          <p>© {currentYear} Nuralim (nuralim.dev). All rights reserved.</p>
+        <div className="border-t pt-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-sm text-muted-foreground">
+          <p>© {currentYear} Nuralim.Dev. All rights reserved.</p>
         </div>
       </div>
     </footer>

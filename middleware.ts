@@ -15,6 +15,14 @@ export function middleware(request: NextRequest) {
     return new NextResponse('Forbidden', { status: 403 });
   }
 
+  // 2. Block access to sensitive files
+  const sensitivePaths = ['.env', '.git', 'package.json', 'package-lock.json', 'README.md'];
+  const pathname = request.nextUrl.pathname;
+  const isSensitive = sensitivePaths.some(path => pathname.toLowerCase().includes(path));
+  if (isSensitive) {
+     return new NextResponse('Forbidden', { status: 403 });
+  }
+
   const response = NextResponse.next();
   
   // Add global security headers
@@ -26,6 +34,20 @@ export function middleware(request: NextRequest) {
   response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), browsing-topics=()');
   response.headers.set('X-XSS-Protection', '1; mode=block');
+  response.headers.set('X-DNS-Prefetch-Control', 'off');
+
+  // Content Security Policy
+  // Allow scripts from self and necessary CDN/AI endpoints
+  const cspHeader = `
+    default-src 'self';
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://vercel.live;
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' blob: data: https://media.licdn.com https://upload.wikimedia.org;
+    font-src 'self' data:;
+    connect-src 'self' https://vitals.vercel-insights.com;
+    frame-src 'self';
+  `.replace(/\s{2,}/g, ' ').trim();
+  response.headers.set('Content-Security-Policy', cspHeader);
 
   // Add security headers only for actual certificate image files
   const isImageFile = /\.(jpg|jpeg|png|gif|webp)$/i.test(request.nextUrl.pathname);

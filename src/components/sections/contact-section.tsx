@@ -4,11 +4,8 @@ import * as React from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { personalInfo } from "@/data/portfolio";
-import { Mail, Phone, MapPin, MessageCircle, Send, Loader2 } from "lucide-react";
+import { Mail, Phone, MapPin, MessageCircle } from "lucide-react";
 import Link from "next/link";
 
 const containerVariants = {
@@ -33,95 +30,6 @@ const itemVariants = {
 };
 
 export function ContactSection() {
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [submitStatus, setSubmitStatus] = React.useState<{
-    type: 'success' | 'error' | null;
-    message: string;
-  }>({ type: null, message: '' });
-  const [formData, setFormData] = React.useState({
-    name: "",
-    email: "",
-    company: "",
-    message: "",
-  });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setSubmitStatus({ type: null, message: '' });
-
-    try {
-      const response = await fetch('/api/send-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      // Handle rate limit (429 status)
-      if (response.status === 429) {
-        setSubmitStatus({
-          type: 'error',
-          message: data.error || 'Terlalu banyak percobaan. Silakan coba lagi nanti atau hubungi via WhatsApp.',
-        });
-        setIsSubmitting(false);
-        return;
-      }
-
-      if (data.success) {
-        setSubmitStatus({
-          type: 'success',
-          message: data.message || 'Terima kasih! Pesan Anda telah terkirim. Saya akan segera menghubungi Anda.',
-        });
-
-        // Reset form
-        setFormData({
-          name: "",
-          email: "",
-          company: "",
-          message: "",
-        });
-
-        // Auto-hide success message after 5 seconds
-        setTimeout(() => {
-          setSubmitStatus({ type: null, message: '' });
-        }, 5000);
-      } else if (data.fallback && data.mailtoLink) {
-        // Fallback: Open mailto link
-        window.location.href = data.mailtoLink;
-        setSubmitStatus({
-          type: 'error',
-          message: data.message || 'Membuka aplikasi email Anda...',
-        });
-      } else {
-        setSubmitStatus({
-          type: 'error',
-          message: data.error || 'Gagal mengirim pesan. Silakan coba lagi.',
-        });
-      }
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      setSubmitStatus({
-        type: 'error',
-        message: 'Terjadi kesalahan. Silakan coba lagi atau hubungi via WhatsApp.',
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
   const contactInfo = [
     {
       icon: Mail,
@@ -160,15 +68,14 @@ export function ContactSection() {
             <div className="w-20 h-1 bg-primary mx-auto mb-8" />
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Tertarik untuk diskusi proyek atau sekadar ngobrol tentang teknologi?
-              Hubungi saya melalui form di bawah atau WhatsApp
+              Hubungi saya melalui kontak di bawah ini.
             </p>
           </motion.div>
 
           <div className="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-8">
-            {/* Contact Info */}
-            <motion.div variants={itemVariants} className="lg:col-span-2 space-y-6">
-              {/* WhatsApp CTA */}
-              <Card className="border-2 border-accent bg-accent/5">
+            {/* WhatsApp CTA (Left Side) */}
+            <motion.div variants={itemVariants} className="lg:col-span-2">
+              <Card className="border-2 border-accent bg-accent/5 h-full flex flex-col justify-center">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <MessageCircle className="h-5 w-5 text-accent" />
@@ -187,25 +94,30 @@ export function ContactSection() {
                   </Button>
                 </CardContent>
               </Card>
+            </motion.div>
 
-              {/* Contact Details */}
-              <Card>
+            {/* Contact Details (Right Side) */}
+            <motion.div variants={itemVariants} className="lg:col-span-3">
+              <Card className="h-full">
                 <CardHeader>
                   <CardTitle>Informasi Kontak</CardTitle>
+                  <CardDescription>
+                    Detail informasi yang dapat Anda hubungi
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {contactInfo.map((info) => {
                     const Icon = info.icon;
                     const content = (
-                      <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-accent/10 transition-colors">
-                        <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                          <Icon className="h-5 w-5 text-primary" />
+                      <div className="flex items-center gap-4 p-4 rounded-lg hover:bg-accent/10 transition-colors border border-transparent hover:border-accent/20">
+                        <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                          <Icon className="h-6 w-6 text-primary" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-muted-foreground">
                             {info.label}
                           </p>
-                          <p className="text-sm font-medium break-words">
+                          <p className="text-base font-semibold break-words">
                             {info.value}
                           </p>
                         </div>
@@ -220,122 +132,6 @@ export function ContactSection() {
                       <div key={info.label}>{content}</div>
                     );
                   })}
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            {/* Contact Form */}
-            <motion.div variants={itemVariants} className="lg:col-span-3">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Kirim Pesan</CardTitle>
-                  <CardDescription>
-                    Isi form di bawah dan saya akan segera menghubungi Anda
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Honeypot for anti-spam */}
-                    <input
-                      type="text"
-                      name="honeypot"
-                      style={{ display: "none" }}
-                      tabIndex={-1}
-                      autoComplete="off"
-                    />
-
-                    {/* Success/Error Message */}
-                    {submitStatus.type && (
-                      <div
-                        className={`p-4 rounded-lg ${
-                          submitStatus.type === 'success'
-                            ? 'bg-accent/10 border border-accent text-accent'
-                            : 'bg-destructive/10 border border-destructive text-destructive'
-                        }`}
-                      >
-                        <p className="text-sm font-medium">{submitStatus.message}</p>
-                      </div>
-                    )}
-
-                    <div className="space-y-2">
-                      <Label htmlFor="name">
-                        Nama Lengkap <span className="text-destructive">*</span>
-                      </Label>
-                      <Input
-                        id="name"
-                        name="name"
-                        placeholder="John Doe"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
-                        disabled={isSubmitting}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="email">
-                        Email <span className="text-destructive">*</span>
-                      </Label>
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        placeholder="john@example.com"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                        disabled={isSubmitting}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="company">Perusahaan (Opsional)</Label>
-                      <Input
-                        id="company"
-                        name="company"
-                        placeholder="PT. Example Indonesia"
-                        value={formData.company}
-                        onChange={handleChange}
-                        disabled={isSubmitting}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="message">
-                        Kebutuhan / Pesan <span className="text-destructive">*</span>
-                      </Label>
-                      <Textarea
-                        id="message"
-                        name="message"
-                        placeholder="Ceritakan tentang proyek atau pertanyaan Anda..."
-                        value={formData.message}
-                        onChange={handleChange}
-                        required
-                        disabled={isSubmitting}
-                        rows={5}
-                        className="resize-none"
-                      />
-                    </div>
-
-                    <Button
-                      type="submit"
-                      size="lg"
-                      className="w-full"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                          Mengirim...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="mr-2 h-5 w-5" />
-                          Kirim Pesan
-                        </>
-                      )}
-                    </Button>
-                  </form>
                 </CardContent>
               </Card>
             </motion.div>
