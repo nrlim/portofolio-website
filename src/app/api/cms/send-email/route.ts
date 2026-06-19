@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { generateDocumentHtml, ProjectData } from '@/lib/template-generator';
 import { sendMail } from '@/lib/mailer';
-import puppeteer from 'puppeteer';
 import { verifySession } from '@/lib/auth';
 import { checkRateLimit, validateEmail } from '@/lib/rate-limit';
+import fs from 'fs';
+import path from 'path';
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,11 +29,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: rateLimit.message || 'Rate limit exceeded' }, { status: 429 });
     }
 
-    const body = await req.json();
-    const { projectId, emailType, targetEmail, ccEmail } = body;
+    // 3. Receive FormData
+    const formData = await req.formData();
+    const projectId = formData.get('projectId') as string;
+    const emailType = formData.get('emailType') as string;
+    const targetEmail = formData.get('targetEmail') as string;
+    const ccEmail = formData.get('ccEmail') as string | null;
+    const pdfFile = formData.get('pdfFile') as File | null;
 
-    // 3. Input validation
-    if (!projectId || !emailType || !targetEmail) {
+    // 4. Input validation
+    if (!projectId || !emailType || !targetEmail || !pdfFile) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
@@ -57,14 +62,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
-    const projectData = project.data as unknown as ProjectData;
-    
-    // Generate HTML for the document
-    let documentHtml = generateDocumentHtml(projectData, emailType as 'QUOTATION' | 'INVOICE', project.id, 'https://nuralim.dev');
-    
-    // Remove the window.print script just to be safe
-    documentHtml = documentHtml.replace('<script>window.onload=()=>{window.print()}</script>', '');
-
     const docTypeName = emailType === 'QUOTATION' ? 'Penawaran Harga (Quotation)' : 'Tagihan (Invoice)';
     const subject = `${emailType === 'INVOICE' ? 'Invoice' : 'Project Quotation'} - ${project.project_name || 'Project'}`;
 
@@ -82,7 +79,6 @@ export async function POST(req: NextRequest) {
 
     const emailBody = `
       <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #334155; line-height: 1.6; font-size: 15px; max-width: 800px; padding: 20px;">
-        
         <!-- Body -->
         <div style="margin-bottom: 30px;">
           <p style="margin-top: 0;">Yth. Tim <strong>${project.client_name}</strong>,</p>
@@ -101,7 +97,6 @@ export async function POST(req: NextRequest) {
               <td style="padding-left: 15px; vertical-align: top;">
                 <p style="margin: 0 0 2px; font-weight: 800; font-size: 18px; color: #0f172a; letter-spacing: -0.5px;">Nuralim</p>
                 <p style="margin: 0 0 10px; color: #3b82f6; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Software Engineer</p>
-                
                 <table cellpadding="0" cellspacing="0" style="font-size: 13px;">
                   <tr>
                     <td style="padding-bottom: 3px; color: #94a3b8; padding-right: 8px; font-weight: 600;">W</td>
@@ -125,28 +120,27 @@ export async function POST(req: NextRequest) {
         <div style="padding-top: 20px; border-top: 1px solid #e2e8f0;">
           <p style="margin: 0; color: #94a3b8; font-size: 12px;">Email ini dibuat secara otomatis dari sistem Nuralim.Dev. Dokumen asli terlampir di email ini.</p>
         </div>
-        
       </div>
     `;
 
-    // Convert HTML to PDF buffer using Puppeteer
-    const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-      headless: true,
-      ...(process.env.PUPPETEER_EXECUTABLE_PATH && { executablePath: process.env.PUPPETEER_EXECUTABLE_PATH })
-    });
-    const page = await browser.newPage();
-    // Use waitUntil: 'load' to fix TS error and wait for resources
-    await page.setContent(documentHtml, { waitUntil: 'load' });
-    const pdfBuffer = await page.pdf({
-      format: 'A4',
-      printBackground: true,
-      margin: { top: 0, right: 0, bottom: 0, left: 0 }
-    });
-    await browser.close();
-
+    // 5. Convert PDF file to buffer and save it to temp-docs
+    const pdfBuffer = Buffer.from(await pdfFile.arrayBuffer());
     const attachmentFilename = `${emailType === 'QUOTATION' ? 'Quotation' : 'Invoice'}_${project.project_name.replace(/\s+/g, '_')}.pdf`;
+    
+    // Create temp-docs directory if not exists
+    const tempDocsDir = process.env.TEMP_DOCS_PATH 
+      ? path.resolve(process.cwd(), process.env.TEMP_DOCS_PATH)
+      : path.join(process.cwd(), 'temp-docs');
+      
+    if (!fs.existsSync(tempDocsDir)) {
+      fs.mkdirSync(tempDocsDir, { recursive: true });
+    }
+    
+    // Save PDF to local directory
+    const filePath = path.join(tempDocsDir, attachmentFilename);
+    fs.writeFileSync(filePath, pdfBuffer);
 
+    // 6. Send the email via Nodemailer
     await sendMail({
       to: targetEmail,
       cc: ccEmail || undefined,
@@ -155,13 +149,13 @@ export async function POST(req: NextRequest) {
       attachments: [
         {
           filename: attachmentFilename,
-          content: Buffer.from(pdfBuffer),
+          content: pdfBuffer,
           contentType: 'application/pdf'
         }
       ]
     });
 
-    return NextResponse.json({ success: true, message: 'Email sent successfully' });
+    return NextResponse.json({ success: true, message: 'Email sent successfully and PDF saved.' });
   } catch (error) {
     console.error('Error sending email:', error);
     return NextResponse.json({ error: 'Internal server error while sending email' }, { status: 500 });

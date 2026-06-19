@@ -5,7 +5,9 @@ import { toast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import { Plus, Trash2, FileText, Search, FolderOpen, Printer, Pencil, CreditCard, Mail, Loader2 } from 'lucide-react';
+import { Pencil, Trash2, Mail, ExternalLink, Calendar, Calculator, Download, Plus, FileText, Send, X, Copy, Mail as MailIcon, CreditCard, LayoutDashboard, Search, Eye, BarChart, Server, FolderOpen, Printer, Loader2 } from 'lucide-react';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { generateDocumentHtml, ProjectData } from '@/lib/template-generator';
@@ -86,17 +88,56 @@ export default function DashboardPage() {
     if (!emailTarget) return toast.error('Email tujuan harus diisi');
     if (!currentProjectId) return;
     
+    const project = projects.find(p => p.id === currentProjectId);
+    if (!project) return toast.error('Proyek tidak ditemukan');
+    
     try {
       setEmailLoading(true);
+      
+      // 1. Generate HTML
+      const html = generateDocumentHtml(project.data as unknown as ProjectData, emailType, project.id, window.location.origin);
+      
+      // 2. Render to DOM temporarily
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html;
+      tempDiv.style.position = 'absolute';
+      tempDiv.style.top = '-9999px';
+      tempDiv.style.left = '-9999px';
+      tempDiv.style.width = '794px'; // A4 width at 96 DPI
+      tempDiv.style.background = 'white';
+      document.body.appendChild(tempDiv);
+      
+      // Wait for fonts and images to load
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // 3. Generate Canvas
+      const canvas = await html2canvas(tempDiv, { scale: 2, useCORS: true });
+      document.body.removeChild(tempDiv);
+      
+      // 4. Generate PDF
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgData = canvas.toDataURL('image/png');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      
+      // 5. Convert to File
+      const pdfBlob = pdf.output('blob');
+      const pdfFile = new File([pdfBlob], 'document.pdf', { type: 'application/pdf' });
+      
+      // 6. Create FormData
+      const formData = new FormData();
+      formData.append('projectId', currentProjectId);
+      formData.append('emailType', emailType);
+      formData.append('targetEmail', emailTarget);
+      if (emailCc) formData.append('ccEmail', emailCc);
+      formData.append('pdfFile', pdfFile);
+
+      // 7. Fetch API
       const res = await fetch('/api/cms/send-email', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          projectId: currentProjectId,
-          emailType,
-          targetEmail: emailTarget,
-          ccEmail: emailCc
-        })
+        body: formData
       });
       
       const data = await res.json();

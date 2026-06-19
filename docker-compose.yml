@@ -1,19 +1,21 @@
-version: '3.8'
-
 services:
   web:
     build:
       context: .
       dockerfile: Dockerfile
+      network: host
     container_name: nuralim_portfolio
     restart: always
     ports:
       - "3000:3000"
     env_file:
       - .env
+    volumes:
+      - ./temp-docs:/app/temp-docs
     networks:
-      - postgres-network
+      - apps_database_network
 
 networks:
-  postgres-network:
+  apps_database_network:
     external: true
+    name: postgres-network

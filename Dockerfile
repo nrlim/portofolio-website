@@ -1,22 +1,11 @@
 # Base image
 FROM node:20-bookworm-slim AS base
 
-# Install system dependencies for Chromium (required for Puppeteer) and OpenSSL (required for Prisma)
+# Install system dependencies for OpenSSL (required for Prisma)
 RUN apt-get update && apt-get install -y \
     openssl \
-    chromium \
-    libnss3 \
-    libfreetype6 \
-    libfreetype6-dev \
-    libharfbuzz-dev \
-    ca-certificates \
-    fonts-freefont-ttf \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
-
-# Set Puppeteer environment variables to use system Chromium
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 # Dependencies
 FROM base AS deps
