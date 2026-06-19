@@ -1,18 +1,19 @@
 import jwt from 'jsonwebtoken';
 import { AuthSession } from '@/types/database';
 
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable is not defined.');
-}
+const getJwtSecret = () => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error('JWT_SECRET environment variable is not defined.');
+  return secret as string;
+};
 
 export function signSession(session: AuthSession): string {
-  return jwt.sign(session, JWT_SECRET as string, { expiresIn: '7d' });
+  return jwt.sign(session, getJwtSecret(), { expiresIn: '7d' });
 }
 
 export function verifySession(token: string): AuthSession | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET as string) as AuthSession;
+    const decoded = jwt.verify(token, getJwtSecret()) as AuthSession;
     return decoded;
   } catch {
     return null;
