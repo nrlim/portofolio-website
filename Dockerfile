@@ -52,6 +52,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
+# Create temp-docs directory and grant ownership to nextjs user
+RUN mkdir -p /app/temp-docs && chown -R nextjs:nodejs /app/temp-docs
+
 USER nextjs
 
 EXPOSE 3000

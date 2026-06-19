@@ -97,12 +97,15 @@ export default function DashboardPage() {
       setEmailLoading(true);
 
       // 1. Generate HTML document string
-      const html = generateDocumentHtml(
+      let html = generateDocumentHtml(
         project.data as unknown as ProjectData,
         emailType,
         project.id,
         window.location.origin
       );
+
+      // Remove auto-print script so it doesn't trigger the browser download/print dialog!
+      html = html.replace('<script>window.onload=()=>{window.print()}</script>', '');
 
       // 2. Render HTML into a hidden iframe and capture via html2canvas
       iframe = document.createElement('iframe');

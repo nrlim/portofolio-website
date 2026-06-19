@@ -155,7 +155,12 @@ export async function POST(req: NextRequest) {
       ]
     });
 
-    return NextResponse.json({ success: true, message: 'Email sent successfully and PDF saved.' });
+    // 7. Auto-cleanup: delete the temp PDF after successful send
+    fs.unlink(filePath, (err) => {
+      if (err) console.warn('Failed to delete temp PDF:', filePath, err.message);
+    });
+
+    return NextResponse.json({ success: true, message: 'Email sent successfully.' });
   } catch (error) {
     console.error('Error sending email:', error);
     return NextResponse.json({ error: 'Internal server error while sending email' }, { status: 500 });
