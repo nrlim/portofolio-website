@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 FROM base AS deps
 WORKDIR /app
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN npm install
 
 # Builder
 FROM base AS builder
