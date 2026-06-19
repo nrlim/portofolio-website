@@ -11,6 +11,9 @@ services:
     env_file:
       - .env
     command: node server.js
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
     volumes:
       - ./temp-docs:/app/temp-docs
     networks:
