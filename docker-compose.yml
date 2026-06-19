@@ -11,9 +11,8 @@ services:
     env_file:
       - .env
     command: node server.js
-    dns:
-      - 1.1.1.1
-      - 8.8.8.8
+    extra_hosts:
+      - "mail.nuralim.dev:host-gateway"
     volumes:
       - ./temp-docs:/app/temp-docs
     networks:
