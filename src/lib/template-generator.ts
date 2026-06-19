@@ -28,7 +28,8 @@ export function generateDocumentHtml(
   projectData: ProjectData,
   type: 'QUOTATION' | 'INVOICE' = 'QUOTATION',
   pId?: string,
-  baseUrl: string = 'https://nuralim.dev'
+  baseUrl: string = 'https://nuralim.dev',
+  mode: 'print' | 'email' = 'print'
 ) {
   const project = projectData || {};
   const projectDateStr = project.projectDate || new Date().toISOString().split('T')[0];
@@ -86,11 +87,11 @@ export function generateDocumentHtml(
 
   // Helper: table cell
   const td = (val: string, align = 'left', bold = false) =>
-    `<td style="padding:7px 10px;border-bottom:1px solid #e5e7eb;text-align:${align};${bold ? 'font-weight:600;' : ''}">${val}</td>`;
+    `<td style="padding:7px 10px;border-bottom:1px solid #e5e7eb;text-align:${align};vertical-align:middle;${bold ? 'font-weight:600;' : ''}">${val}</td>`;
 
   // Helper: table header cell
   const th = (label: string, align = 'left', w = '') =>
-    `<th style="padding:7px 10px;background:#f1f5f9;color:#475569;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;text-align:${align};${w ? `width:${w};` : ''}white-space:nowrap">${label}</th>`;
+    `<th style="padding:7px 10px;background:#f1f5f9;color:#475569;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;text-align:${align};vertical-align:middle;${w ? `width:${w};` : ''}white-space:nowrap">${label}</th>`;
 
   // Helper: section heading
   const sec = (n: string, t: string) =>
@@ -110,17 +111,32 @@ export function generateDocumentHtml(
     return `<tr>${td(i.name || '-')}${td(tipe, 'center')}${td(fmt(i.price || 0), 'right')}${td(`${i.ppnPercent || 0}%`, 'right')}${td(fmt(base * (1 + (i.ppnPercent || 0) / 100)), 'right', true)}</tr>`;
   }).join('');
 
+  const isEmail = mode === 'email';
+  // System fonts are used in email mode to avoid html2canvas font-loading issues with Google Fonts.
+  // When Inter fails to load in a hidden iframe, text baselines shift unpredictably.
+  // Arial has well-standardized metrics and renders consistently without external loading.
+  const badgeFontStack = isEmail ? 'Arial, Helvetica, sans-serif' : 'inherit';
+  const selectedBadgeStyle = isEmail 
+    ? `font-size:10px;font-family:${badgeFontStack};padding:3px 6px;border-radius:2px;background:#eff6ff;color:#2563eb;font-weight:700;border:1px solid #bfdbfe;margin-left:8px;display:inline-block;vertical-align:middle`
+    : 'font-size:10px;padding:3px 6px;border-radius:2px;background:#eff6ff;color:#2563eb;font-weight:600;border:1px solid #bfdbfe;margin-left:8px;display:inline-flex;align-items:center;line-height:1';
+  const infoOnlyBadgeStyle = isEmail
+    ? `font-size:10px;font-family:${badgeFontStack};padding:3px 6px;border-radius:2px;background:#f8fafc;color:#64748b;font-weight:700;border:1px solid #e2e8f0;margin-left:8px;display:inline-block;vertical-align:middle`
+    : 'font-size:10px;padding:3px 6px;border-radius:2px;background:#f8fafc;color:#64748b;font-weight:600;border:1px solid #e2e8f0;margin-left:8px;display:inline-flex;align-items:center;line-height:1';
+  const quotationBadgeStyle = isEmail
+    ? `display:inline-block;font-family:${badgeFontStack};background-color:#1e3a8a;color:#ffffff;padding:6px 12px;border-radius:4px;font-size:15px;font-weight:900;letter-spacing:0.2em;vertical-align:middle`
+    : 'display:inline-flex;align-items:center;justify-content:center;background-color:#1e3a8a;color:#ffffff;padding:6px 12px;border-radius:4px;font-size:15px;font-weight:900;letter-spacing:0.2em;line-height:1';
+
   const feeRows = additionalFees.map((f: AdditionalFee) => {
     const tipe = f.type === 'monthly' ? 'Monthly' : f.type === 'yearly' ? 'Yearly' : f.type === 'per-case' ? 'Per Case' : 'One-time';
-    const selectedBadge = f.isIncludedInTotal !== false ? `<span style="font-size:10px;padding:2px 6px;border-radius:2px;background:#eff6ff;color:#2563eb;font-weight:600;border:1px solid #bfdbfe;margin-left:8px;">✓ Included</span>` : `<span style="font-size:10px;padding:2px 6px;border-radius:2px;background:#f8fafc;color:#64748b;font-weight:600;border:1px solid #e2e8f0;margin-left:8px;">Info Only</span>`;
-    const nameHtml = `<div style="display:flex;align-items:center;">${f.name || '-'}${selectedBadge}</div>`;
+    const selectedBadge = f.isIncludedInTotal !== false ? `<span style="${selectedBadgeStyle}">✓ Included</span>` : `<span style="${infoOnlyBadgeStyle}">Info Only</span>`;
+    const nameHtml = `<div style="display:flex;align-items:center;"><span>${f.name || '-'}</span>${selectedBadge}</div>`;
     return `<tr>${td(nameHtml)}${td(tipe, 'center')}${td(f.isIncludedInTotal !== false ? fmt(f.price || 0) : `<span style="text-decoration:line-through;color:#94a3b8">${fmt(f.price || 0)}</span>`, 'right', f.isIncludedInTotal !== false)}</tr>`;
   }).join('');
 
   const aiRows = aiServices.map((a: AIService) => {
     const periodLabel = a.billingType === 'monthly' ? 'Monthly' : a.billingType === 'yearly' ? 'Yearly' : a.billingType === 'quota-based' ? 'Quota Based' : 'One-time';
-    const selectedBadge = a.isIncludedInTotal ? `<span style="font-size:10px;padding:2px 6px;border-radius:2px;background:#eff6ff;color:#2563eb;font-weight:600;border:1px solid #bfdbfe;margin-left:8px;">✓ Selected</span>` : '';
-    const serviceNameHtml = `<div style="display:flex;align-items:center;">${a.name || '-'}${selectedBadge}</div>`;
+    const selectedBadge = a.isIncludedInTotal ? `<span style="${selectedBadgeStyle}">✓ Selected</span>` : '';
+    const serviceNameHtml = `<div style="display:flex;align-items:center;"><span>${a.name || '-'}</span>${selectedBadge}</div>`;
     return `<tr>${td(serviceNameHtml)}${td(a.pricingModel || '-', 'center')}${td(periodLabel, 'center')}${td((a.qty || 1).toString(), 'right')}${td(fmt(a.price || 0), 'right')}${td(fmt((a.price || 0) * (a.qty || 1)), 'right', true)}</tr>`;
   }).join('');
 
@@ -131,18 +147,18 @@ export function generateDocumentHtml(
 <meta charset="UTF-8">
 <title>${type === 'INVOICE' ? 'Invoice' : 'Project Quotation'} - ${project.projectName || 'Unnamed'}</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+${mode === 'email' ? '' : `@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');`}
 @page { size: A4 portrait; margin: 0; }
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'Inter',sans-serif; color:#1e293b; background:#fff; font-size:12px; line-height:1.5; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-table { width:100%; border-collapse:collapse; margin-bottom: 40mm; }
-.page-footer { position: fixed; bottom: 0; left: 0; right: 0; height: 35mm; padding: 0 14mm 8mm; display: flex; justify-content: space-between; align-items: flex-end; }
+body { font-family:${mode === 'email' ? "'Arial',Helvetica,sans-serif" : "'Inter',sans-serif"}; color:#1e293b; background:#fff; font-size:12px; line-height:1.5; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+table { width:100%; border-collapse:collapse; ${mode === 'email' ? '' : 'margin-bottom: 40mm;'} }
+${mode === 'print' ? '.page-footer { position: fixed; bottom: 0; left: 0; right: 0; height: 35mm; padding: 0 14mm 8mm; display: flex; justify-content: space-between; align-items: flex-end; }' : ''}
 </style></head><body>
-<div class="page-footer">
+${mode === 'print' ? `<div class="page-footer">
 <div style="width:100%;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #e2e8f0;padding-top:3mm;margin-bottom:4px">
   <span style="font-size:8px;color:#94a3b8;font-style:italic">${type === 'INVOICE' ? 'This document is an official billing from NuralimDev.' : 'This document is strictly confidential and intended only for the addressed party.'}</span>
 </div>
-</div>
+</div>` : ''}
 <table>
 <thead style="display:table-header-group">
   <tr><td style="padding:0">
@@ -155,7 +171,7 @@ table { width:100%; border-collapse:collapse; margin-bottom: 40mm; }
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
         <div style="text-align:right;margin-bottom:4px">
-          <div style="display:inline-block;background-color:#1e3a8a;color:#ffffff;padding:5px 12px;border-radius:4px;font-size:15px;font-weight:900;letter-spacing:0.2em;line-height:1">${type}</div>
+          <div style="${quotationBadgeStyle}">${type}</div>
         </div>
         ${type === 'INVOICE' 
           ? `<div style="text-align:right">
@@ -270,7 +286,10 @@ table { width:100%; border-collapse:collapse; margin-bottom: 40mm; }
   </div>
 </td></tr></tbody>
 </table>
-<script>window.onload=()=>{window.print()}</script>
+${mode === 'print' ? '<script>window.onload=()=>{window.print()}</script>' : ''}
+${mode === 'email' ? `<div style="padding:16px 14mm 14px;border-top:1px solid #e2e8f0;margin-top:16px">
+  <span style="font-size:8px;color:#94a3b8;font-style:italic">${type === 'INVOICE' ? 'This document is an official billing from NuralimDev.' : 'This document is strictly confidential and intended only for the addressed party.'}</span>
+</div>` : ''}
 </body></html>`;
 
   return html;

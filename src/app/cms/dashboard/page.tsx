@@ -96,16 +96,14 @@ export default function DashboardPage() {
     try {
       setEmailLoading(true);
 
-      // 1. Generate HTML document string
-      let html = generateDocumentHtml(
+      // 1. Generate HTML document string in email mode (no fixed footer, no print script, no 40mm margin)
+      const html = generateDocumentHtml(
         project.data as unknown as ProjectData,
         emailType,
         project.id,
-        window.location.origin
+        window.location.origin,
+        'email'
       );
-
-      // Remove auto-print script so it doesn't trigger the browser download/print dialog!
-      html = html.replace('<script>window.onload=()=>{window.print()}</script>', '');
 
       // 2. Render HTML into a hidden iframe and capture via html2canvas
       iframe = document.createElement('iframe');
@@ -137,42 +135,46 @@ export default function DashboardPage() {
       // Extra wait for fonts/images inside iframe
       await new Promise(resolve => setTimeout(resolve, 1200));
 
+      // Expand iframe height to fit the entire document so absolutely positioned footers and contents don't get clipped or crushed
+      const scrollHeight = iframeDoc.documentElement.scrollHeight;
+      iframe.style.height = `${scrollHeight}px`;
+      
+      // Let the browser reflow after resize
+      await new Promise(resolve => setTimeout(resolve, 300));
+
       // 3. Capture iframe body with html2canvas
       const canvas = await html2canvas(iframeDoc.body, {
-        scale: 2,
+        scale: 3, // Increased scale for sharper text
         useCORS: true,
         allowTaint: false,
         backgroundColor: '#ffffff',
         windowWidth: 794,
-        windowHeight: iframeDoc.body.scrollHeight,
+        windowHeight: scrollHeight,
         scrollX: 0,
         scrollY: 0,
+        logging: false,
+        onclone: (clonedDoc) => {
+          // Force font loading in the cloned document before render
+          const link = clonedDoc.createElement('link');
+          link.rel = 'stylesheet';
+          link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap';
+          clonedDoc.head.appendChild(link);
+        }
       });
 
       // Cleanup iframe immediately after capture
       document.body.removeChild(iframe);
       iframe = null;
 
-      // 4. Generate PDF from canvas
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-      // Handle multi-page if content is taller than A4
-      const a4HeightMm = pdf.internal.pageSize.getHeight();
-      if (pdfHeight > a4HeightMm) {
-        let remainingHeight = pdfHeight;
-        let pageOffset = 0;
-        while (remainingHeight > 0) {
-          if (pageOffset > 0) pdf.addPage();
-          pdf.addImage(imgData, 'JPEG', 0, -pageOffset, pdfWidth, pdfHeight);
-          pageOffset += a4HeightMm;
-          remainingHeight -= a4HeightMm;
-        }
-      } else {
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-      }
+      // 4. Generate custom-sized PDF to prevent page breaks cutting through text
+      const pdfWidthMm = 210; // A4 width
+      const pdfHeightMm = (canvas.height * pdfWidthMm) / canvas.width;
+      
+      // Create a single continuous page PDF
+      const pdf = new jsPDF('p', 'mm', [pdfWidthMm, Math.max(pdfHeightMm, 297)]);
+      const imgData = canvas.toDataURL('image/jpeg', 0.98);
+      
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidthMm, pdfHeightMm);
 
       // 5. Convert to File
       const pdfBlob = pdf.output('blob');
