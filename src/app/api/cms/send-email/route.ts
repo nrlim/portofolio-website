@@ -131,8 +131,9 @@ export async function POST(req: NextRequest) {
 
     // Convert HTML to PDF buffer using Puppeteer
     const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      headless: true
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+      headless: true,
+      ...(process.env.PUPPETEER_EXECUTABLE_PATH && { executablePath: process.env.PUPPETEER_EXECUTABLE_PATH })
     });
     const page = await browser.newPage();
     // Use waitUntil: 'load' to fix TS error and wait for resources

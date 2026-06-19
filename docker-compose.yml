@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nuralim_portfolio
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      # Prisma Configuration
+      - DATABASE_URL=${DATABASE_URL}
+      - DIRECT_URL=${DIRECT_URL}
+      
+      # CMS Auth
+      - CMS_ADMIN_USER=${CMS_ADMIN_USER}
+      - CMS_ADMIN_SECRET=${CMS_ADMIN_SECRET}
+      - CMS_ADMIN_SUFFIX=${CMS_ADMIN_SUFFIX}
+      - JWT_SECRET=${JWT_SECRET}
+      
+      # AI Gateway
+      - AI_GATEWAY_API_KEY=${AI_GATEWAY_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      
+      # SMTP & Email
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_FROM_NAME=${SMTP_FROM_NAME}
+      - SMTP_FROM_EMAIL=${SMTP_FROM_EMAIL}
+      
+      # Certificates
+      - CERTIFICATE_API_KEY=${CERTIFICATE_API_KEY}
+      
+      # Puppeteer
+      - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+      - PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+    
+    # Use env_file to automatically inject all variables from .env
+    env_file:
+      - .env
