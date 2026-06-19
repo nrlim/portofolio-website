@@ -5,7 +5,7 @@ import { toast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import { Pencil, Trash2, Mail, ExternalLink, Calendar, Calculator, Download, Plus, FileText, Send, X, Copy, Mail as MailIcon, CreditCard, LayoutDashboard, Search, Eye, BarChart, Server, FolderOpen, Printer, Loader2 } from 'lucide-react';
+import { Pencil, Trash2, Mail, Plus, FileText, CreditCard, Search, FolderOpen, Printer, Loader2 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Link from 'next/link';
@@ -90,43 +90,93 @@ export default function DashboardPage() {
     
     const project = projects.find(p => p.id === currentProjectId);
     if (!project) return toast.error('Proyek tidak ditemukan');
+
+    let iframe: HTMLIFrameElement | null = null;
     
     try {
       setEmailLoading(true);
-      
-      // 1. Generate HTML
-      const html = generateDocumentHtml(project.data as unknown as ProjectData, emailType, project.id, window.location.origin);
-      
-      // 2. Render to DOM temporarily
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = html;
-      tempDiv.style.position = 'absolute';
-      tempDiv.style.top = '-9999px';
-      tempDiv.style.left = '-9999px';
-      tempDiv.style.width = '794px'; // A4 width at 96 DPI
-      tempDiv.style.background = 'white';
-      document.body.appendChild(tempDiv);
-      
-      // Wait for fonts and images to load
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // 3. Generate Canvas
-      const canvas = await html2canvas(tempDiv, { scale: 2, useCORS: true });
-      document.body.removeChild(tempDiv);
-      
-      // 4. Generate PDF
+
+      // 1. Generate HTML document string
+      const html = generateDocumentHtml(
+        project.data as unknown as ProjectData,
+        emailType,
+        project.id,
+        window.location.origin
+      );
+
+      // 2. Render HTML into a hidden iframe and capture via html2canvas
+      iframe = document.createElement('iframe');
+      iframe.style.position = 'fixed';
+      iframe.style.top = '-9999px';
+      iframe.style.left = '-9999px';
+      iframe.style.width = '794px';
+      iframe.style.height = '1123px';
+      iframe.style.border = 'none';
+      iframe.style.visibility = 'hidden';
+      document.body.appendChild(iframe);
+
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!iframeDoc) throw new Error('Could not access iframe document');
+
+      iframeDoc.open();
+      iframeDoc.write(html);
+      iframeDoc.close();
+
+      // Wait for iframe content to fully render
+      await new Promise<void>(resolve => {
+        const checkReady = () => {
+          if (iframeDoc.readyState === 'complete') resolve();
+          else iframe!.addEventListener('load', () => resolve(), { once: true });
+        };
+        checkReady();
+      });
+
+      // Extra wait for fonts/images inside iframe
+      await new Promise(resolve => setTimeout(resolve, 1200));
+
+      // 3. Capture iframe body with html2canvas
+      const canvas = await html2canvas(iframeDoc.body, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: '#ffffff',
+        windowWidth: 794,
+        windowHeight: iframeDoc.body.scrollHeight,
+        scrollX: 0,
+        scrollY: 0,
+      });
+
+      // Cleanup iframe immediately after capture
+      document.body.removeChild(iframe);
+      iframe = null;
+
+      // 4. Generate PDF from canvas
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgData = canvas.toDataURL('image/png');
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      
+
+      // Handle multi-page if content is taller than A4
+      const a4HeightMm = pdf.internal.pageSize.getHeight();
+      if (pdfHeight > a4HeightMm) {
+        let remainingHeight = pdfHeight;
+        let pageOffset = 0;
+        while (remainingHeight > 0) {
+          if (pageOffset > 0) pdf.addPage();
+          pdf.addImage(imgData, 'JPEG', 0, -pageOffset, pdfWidth, pdfHeight);
+          pageOffset += a4HeightMm;
+          remainingHeight -= a4HeightMm;
+        }
+      } else {
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+      }
+
       // 5. Convert to File
       const pdfBlob = pdf.output('blob');
-      const pdfFile = new File([pdfBlob], 'document.pdf', { type: 'application/pdf' });
+      const attachmentFilename = `${emailType === 'QUOTATION' ? 'Quotation' : 'Invoice'}_${project.project_name.replace(/\s+/g, '_')}.pdf`;
+      const pdfFile = new File([pdfBlob], attachmentFilename, { type: 'application/pdf' });
       
-      // 6. Create FormData
+      // 6. Build FormData & send
       const formData = new FormData();
       formData.append('projectId', currentProjectId);
       formData.append('emailType', emailType);
@@ -134,7 +184,6 @@ export default function DashboardPage() {
       if (emailCc) formData.append('ccEmail', emailCc);
       formData.append('pdfFile', pdfFile);
 
-      // 7. Fetch API
       const res = await fetch('/api/cms/send-email', {
         method: 'POST',
         body: formData
@@ -149,9 +198,14 @@ export default function DashboardPage() {
       } else {
         toast.error(data.error || 'Gagal mengirim email');
       }
-    } catch {
-      toast.error('Terjadi kesalahan saat mengirim email');
+    } catch (err) {
+      console.error('Send email error:', err);
+      toast.error('Terjadi kesalahan saat membuat atau mengirim dokumen');
     } finally {
+      // Always cleanup iframe if still attached
+      if (iframe && iframe.parentNode) {
+        document.body.removeChild(iframe);
+      }
       setEmailLoading(false);
     }
   };
