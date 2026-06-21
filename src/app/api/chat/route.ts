@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { streamText, createGateway } from 'ai';
+import { streamText } from 'ai';
+import { createOpenAI } from '@ai-sdk/openai';
 import { checkRateLimit, CHAT_RATE_LIMIT_CONFIG } from '@/lib/rate-limit';
 
-const aiGateway = createGateway({
+const aiGateway = createOpenAI({
   apiKey: process.env.AI_GATEWAY_API_KEY,
+  baseURL: 'https://ai-gateway.vercel.sh/v1',
   fetch: (url, options) => {
     return fetch(url, { ...options, signal: AbortSignal.timeout(30000) });
   }
@@ -123,7 +125,7 @@ export async function POST(req: NextRequest) {
     }));
 
     const result = streamText({
-      model: aiGateway('openai/gpt-4o-mini'),
+      model: aiGateway('gpt-4o-mini'),
       system: systemPrompt,
       messages: formattedMessages,
       temperature: 0.7,
