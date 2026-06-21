@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { streamText, createGateway } from 'ai';
+import { streamText } from 'ai';
+import { openai } from '@ai-sdk/openai';
 import { checkRateLimit, CHAT_RATE_LIMIT_CONFIG } from '@/lib/rate-limit';
-
-const aiGateway = createGateway({
-  apiKey: process.env.AI_GATEWAY_API_KEY,
-});
 import { about, skills, experience, projects, certifications, education } from '@/data/portfolio';
 
 const systemPrompt = `You are LimAI - Nuralim's professional AI recommendation agent. LimAI is a sophisticated expert AI designed to represent Nuralim's background, skills, and achievements. Your role is to help potential employers and clients understand why Nuralim is an excellent hire and what makes him unique.
@@ -120,7 +117,7 @@ export async function POST(req: NextRequest) {
     }));
 
     const result = streamText({
-      model: aiGateway('openai/gpt-4o-mini'),
+      model: openai('gpt-4o-mini'),
       system: systemPrompt,
       messages: formattedMessages,
       temperature: 0.7,
