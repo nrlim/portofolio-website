@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import { Pencil, Trash2, Mail, Plus, FileText, CreditCard, Search, FolderOpen, Printer, Loader2 } from 'lucide-react';
+import { Pencil, Trash2, Mail, Plus, FileText, CreditCard, Search, FolderOpen, Printer, Loader2, Eye, EyeOff, ChevronLeft, ChevronRight } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Link from 'next/link';
@@ -27,9 +27,15 @@ const fmt = (n: number) =>
 
 export default function DashboardPage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [projects, setProjects] = useState<ProjectRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(() => searchParams.get('q') || '');
+  const [clientFilter, setClientFilter] = useState(() => searchParams.get('client') || '');
+  const [showSensitive, setShowSensitive] = useState(false);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(() => Number(searchParams.get('pageSize')) || 8);
   
   // Email Modal States
   const [emailModalOpen, setEmailModalOpen] = useState(false);
@@ -64,10 +70,40 @@ export default function DashboardPage() {
     } catch { /* silently fail */ }
   };
 
-  const filtered = projects.filter(p =>
-    p.client_name.toLowerCase().includes(search.toLowerCase()) ||
-    p.project_name.toLowerCase().includes(search.toLowerCase())
+  const clients = useMemo(
+    () => Array.from(new Set(projects.map(p => p.client_name).filter(Boolean))).sort((a, b) => a.localeCompare(b)),
+    [projects]
   );
+
+  const filtered = projects.filter(p => {
+    const keyword = search.toLowerCase();
+    const matchesSearch =
+      p.client_name.toLowerCase().includes(keyword) ||
+      p.project_name.toLowerCase().includes(keyword);
+    const matchesClient = !clientFilter || p.client_name === clientFilter;
+
+    return matchesSearch && matchesClient;
+  });
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, clientFilter, pageSize]);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+
+    if (search) params.set('q', search);
+    if (clientFilter) params.set('client', clientFilter);
+    if (pageSize !== 8) params.set('pageSize', String(pageSize));
+
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }, [clientFilter, pageSize, pathname, router, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const startIndex = (currentPage - 1) * pageSize;
+  const paginated = filtered.slice(startIndex, startIndex + pageSize);
 
   const handleExportPDF = (projectData: ProjectData, type: 'QUOTATION' | 'INVOICE' = 'QUOTATION', pId?: string) => {
     const html = generateDocumentHtml(projectData, type, pId, window.location.origin);
@@ -229,7 +265,7 @@ export default function DashboardPage() {
       </div>
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col min-h-[400px] space-y-4">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
@@ -239,6 +275,35 @@ export default function DashboardPage() {
               className="pl-9 h-9 rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors"
             />
           </div>
+          <select
+            value={clientFilter}
+            onChange={e => setClientFilter(e.target.value)}
+            className="h-9 w-full sm:w-64 px-3 text-sm rounded-sm bg-muted/30 border-transparent focus-visible:border-primary focus-visible:ring-0 transition-colors"
+            aria-label="Filter by client"
+          >
+            <option value="">All Clients</option>
+            {clients.map(client => (
+              <option key={client} value={client}>{client}</option>
+            ))}
+          </select>
+          <Button
+            variant="outline"
+            onClick={() => setShowSensitive(prev => !prev)}
+            className="h-9 rounded-sm text-sm gap-2"
+            title={showSensitive ? 'Hide client names and totals' : 'Show client names and totals'}
+          >
+            {showSensitive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            {showSensitive ? 'Hide' : 'Show'}
+          </Button>
+          {(search || clientFilter) && (
+            <Button
+              variant="outline"
+              onClick={() => { setSearch(''); setClientFilter(''); }}
+              className="h-9 rounded-sm text-sm"
+            >
+              Reset
+            </Button>
+          )}
         </div>
 
         <div className="flex-1 overflow-x-auto rounded-sm border border-border/40 bg-background">
@@ -264,14 +329,22 @@ export default function DashboardPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/40">
-                {filtered.map(p => (
+                {paginated.map(p => (
                   <tr key={p.id} className="hover:bg-muted/30 transition-colors">
                     <td className="px-5 py-3 whitespace-nowrap text-muted-foreground">
                       {new Date(p.created_at).toLocaleDateString('id-ID')}
                     </td>
-                    <td className="px-5 py-3 font-medium">{p.client_name}</td>
+                    <td className="px-5 py-3 font-medium">
+                      <span className={showSensitive ? '' : 'inline-block blur-sm select-none'}>
+                        {p.client_name}
+                      </span>
+                    </td>
                     <td className="px-5 py-3 text-muted-foreground">{p.project_name}</td>
-                    <td className="px-5 py-3 text-right font-semibold tabular-nums">{fmt(p.total_cost)}</td>
+                    <td className="px-5 py-3 text-right font-semibold tabular-nums">
+                      <span className={showSensitive ? '' : 'inline-block blur-sm select-none'}>
+                        {fmt(p.total_cost)}
+                      </span>
+                    </td>
                     <td className="px-5 py-3 text-right flex justify-end gap-1">
                       <Button variant="ghost" size="icon" className="h-8 w-8 rounded-sm text-muted-foreground hover:bg-muted" onClick={() => router.push(`/cms/calculator?id=${p.id}`)} title="Edit Project">
                         <Pencil className="w-3.5 h-3.5" />
@@ -304,6 +377,49 @@ export default function DashboardPage() {
                 )}
               </tbody>
             </table>
+          )}
+          {!loading && projects.length > 0 && filtered.length > 0 && (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3 border-t border-border/40 text-sm text-muted-foreground">
+              <div>
+                Showing <span className="font-semibold text-foreground">{startIndex + 1}</span> - <span className="font-semibold text-foreground">{Math.min(startIndex + pageSize, filtered.length)}</span> of <span className="font-semibold text-foreground">{filtered.length}</span> projects
+              </div>
+              <div className="flex items-center gap-2">
+                <select
+                  value={pageSize}
+                  onChange={e => setPageSize(Number(e.target.value))}
+                  className="h-8 rounded-sm bg-muted/30 border-transparent px-2 text-xs text-foreground"
+                  aria-label="Rows per page"
+                >
+                  <option value={5}>5 / page</option>
+                  <option value={8}>8 / page</option>
+                  <option value={10}>10 / page</option>
+                  <option value={20}>20 / page</option>
+                </select>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8 rounded-sm"
+                  onClick={() => setPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                  title="Previous page"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </Button>
+                <span className="min-w-20 text-center text-xs font-medium text-foreground">
+                  Page {currentPage} / {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8 rounded-sm"
+                  onClick={() => setPage(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                  title="Next page"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
           )}
         </div>
       </motion.div>

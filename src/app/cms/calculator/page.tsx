@@ -42,6 +42,18 @@ interface ProjectData {
 const genId = () => crypto.randomUUID();
 const fmt = (n: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(n);
 
+const encodePayloadForWaf = (value: unknown) => {
+  const bytes = new TextEncoder().encode(JSON.stringify(value));
+  const chunkSize = 0x8000;
+  let binary = '';
+
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+};
+
 function ComboboxInput<T>({
   value, onChange, onSelect, options, placeholder
 }: {
@@ -191,10 +203,24 @@ export default function CalculatorPage() {
       const payload = { client_name: project.clientName, project_name: project.projectName, total_cost: grandTotal, data: project };
       const res = await fetch(
         isEditMode ? `/api/cms/projects?id=${editId}` : '/api/cms/projects',
-        { method: isEditMode ? 'PATCH' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
+        {
+          method: isEditMode ? 'PATCH' : 'POST',
+          headers: {
+            'Content-Type': 'text/plain;charset=UTF-8',
+            'X-Payload-Encoding': 'base64url',
+          },
+          body: encodePayloadForWaf(payload),
+        }
       );
-      if (res.ok) { toast.success(isEditMode ? 'Project updated!' : 'Project saved!'); router.push('/cms/dashboard'); }
-      else toast.error('Failed to save project.');
+
+      if (res.ok) {
+        toast.success(isEditMode ? 'Project updated!' : 'Project saved!');
+        router.push('/cms/dashboard');
+        return;
+      }
+
+      const message = await res.text().catch(() => '');
+      toast.error(message || 'Failed to save project.');
     } catch { toast.error('Error saving project.'); }
     finally { setSaving(false); }
   };

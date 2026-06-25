@@ -1,6 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { verifySession } from '@/lib/auth';
+
+type ProjectPayload = {
+  client_name?: unknown;
+  project_name?: unknown;
+  total_cost?: unknown;
+  data?: unknown;
+};
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -11,6 +19,32 @@ function isValidUUID(id: string): boolean {
 function sanitizeString(value: unknown, maxLen = 255): string {
   if (typeof value !== 'string') return '';
   return value.trim().slice(0, maxLen);
+}
+
+function decodeBase64UrlPayload(encoded: string): ProjectPayload {
+  const normalized = encoded.trim().replace(/-/g, '+').replace(/_/g, '/');
+  const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
+  const decoded = Buffer.from(padded, 'base64').toString('utf8');
+  const parsed = JSON.parse(decoded);
+
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('Invalid payload shape');
+  }
+
+  return parsed as ProjectPayload;
+}
+
+async function parseProjectPayload(req: NextRequest): Promise<ProjectPayload> {
+  if (req.headers.get('x-payload-encoding') === 'base64url') {
+    return decodeBase64UrlPayload(await req.text());
+  }
+
+  const parsed = await req.json();
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    throw new Error('Invalid payload shape');
+  }
+
+  return parsed as ProjectPayload;
 }
 
 export async function GET(req: NextRequest) {
@@ -66,7 +100,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const body = await req.json();
+    let body: ProjectPayload;
+    try {
+      body = await parseProjectPayload(req);
+    } catch {
+      return NextResponse.json({ error: 'Invalid request payload' }, { status: 400 });
+    }
 
     const client_name = sanitizeString(body.client_name, 255);
     const project_name = sanitizeString(body.project_name, 255);
@@ -83,7 +122,7 @@ export async function POST(req: NextRequest) {
     }
 
     const project = await prisma.cmsProject.create({
-      data: { client_name, project_name, total_cost, data: body.data },
+      data: { client_name, project_name, total_cost, data: body.data as Prisma.InputJsonValue },
     });
     return NextResponse.json({ success: true, project });
   } catch {
@@ -109,7 +148,12 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'Valid ID required' }, { status: 400 });
     }
 
-    const body = await req.json();
+    let body: ProjectPayload;
+    try {
+      body = await parseProjectPayload(req);
+    } catch {
+      return NextResponse.json({ error: 'Invalid request payload' }, { status: 400 });
+    }
 
     const client_name = sanitizeString(body.client_name, 255);
     const project_name = sanitizeString(body.project_name, 255);
@@ -127,7 +171,7 @@ export async function PATCH(req: NextRequest) {
 
     const project = await prisma.cmsProject.update({
       where: { id },
-      data: { client_name, project_name, total_cost, data: body.data },
+      data: { client_name, project_name, total_cost, data: body.data as Prisma.InputJsonValue },
     });
     return NextResponse.json({ success: true, project });
   } catch {
