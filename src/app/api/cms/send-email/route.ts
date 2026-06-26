@@ -3,8 +3,6 @@ import { prisma } from '@/lib/prisma';
 import { sendMail } from '@/lib/mailer';
 import { verifySession } from '@/lib/auth';
 import { checkRateLimit, validateEmail } from '@/lib/rate-limit';
-import fs from 'fs';
-import path from 'path';
 
 export async function POST(req: NextRequest) {
   try {
@@ -97,7 +95,7 @@ export async function POST(req: NextRequest) {
           <table cellpadding="0" cellspacing="0" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
             <tr>
               <td style="padding-right: 15px; border-right: 2px solid #2563eb; vertical-align: top;">
-                <img src="cid:personal-logo" alt="Nuralim" width="64" style="display: block; border-radius: 4px;" />
+                <img src="https://nuralim.dev/personal-logo.png" alt="Nuralim" width="64" style="display: block; border-radius: 4px;" />
               </td>
               <td style="padding-left: 15px; vertical-align: top;">
                 <p style="margin: 0 0 2px; font-weight: 800; font-size: 18px; color: #0f172a; letter-spacing: -0.5px;">Nuralim</p>
@@ -128,24 +126,11 @@ export async function POST(req: NextRequest) {
       </div>
     `;
 
-    // 5. Convert PDF file to buffer and save it to temp-docs
+    // 5. Convert PDF file to buffer
     const pdfBuffer = Buffer.from(await pdfFile.arrayBuffer());
-    const attachmentFilename = `${emailType === 'QUOTATION' ? 'Quotation' : 'Invoice'}_${project.project_name.replace(/\s+/g, '_')}.pdf`;
-    
-    // Create temp-docs directory if not exists
-    const tempDocsDir = process.env.TEMP_DOCS_PATH 
-      ? path.resolve(process.cwd(), process.env.TEMP_DOCS_PATH)
-      : path.join(process.cwd(), 'temp-docs');
-      
-    if (!fs.existsSync(tempDocsDir)) {
-      fs.mkdirSync(tempDocsDir, { recursive: true });
-    }
-    
-    // Save PDF to local directory
-    const filePath = path.join(tempDocsDir, attachmentFilename);
-    fs.writeFileSync(filePath, pdfBuffer);
+    const attachmentFilename = pdfFile.name || `${emailType === 'QUOTATION' ? 'Quotation' : 'Invoice'}_${project.project_name.replace(/\s+/g, '_')}.pdf`;
 
-    // 6. Send the email via Nodemailer
+    // 6. Send the email via SMTP
     await sendMail({
       to: targetEmail,
       cc: ccEmail || undefined,
@@ -156,18 +141,8 @@ export async function POST(req: NextRequest) {
           filename: attachmentFilename,
           content: pdfBuffer,
           contentType: 'application/pdf'
-        },
-        {
-          filename: 'personal-logo.png',
-          path: path.join(process.cwd(), 'public', 'personal-logo.png'),
-          cid: 'personal-logo'
         }
       ]
-    });
-
-    // 7. Auto-cleanup: delete the temp PDF after successful send
-    fs.unlink(filePath, (err) => {
-      if (err) console.warn('Failed to delete temp PDF:', filePath, err.message);
     });
 
     return NextResponse.json({ success: true, message: 'Email sent successfully.' });

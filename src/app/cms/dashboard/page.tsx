@@ -5,7 +5,7 @@ import { toast } from '@/hooks/use-toast';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-import { Pencil, Trash2, Mail, Plus, FileText, CreditCard, Search, FolderOpen, Printer, Loader2, Eye, EyeOff, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Pencil, Trash2, Mail, Plus, FileText, CreditCard, Search, FolderOpen, Printer, Loader2, Eye, EyeOff, ChevronLeft, ChevronRight, Download, Paperclip, X as XIcon } from 'lucide-react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import Link from 'next/link';
@@ -43,7 +43,9 @@ export default function DashboardPage() {
   const [emailCc, setEmailCc] = useState('');
   const [emailType, setEmailType] = useState<'QUOTATION' | 'INVOICE'>('QUOTATION');
   const [emailLoading, setEmailLoading] = useState(false);
+  const [pdfGenerating, setPdfGenerating] = useState(false);
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
+  const [emailAttachment, setEmailAttachment] = useState<File | null>(null);
 
   const fetchProjects = async () => {
     try {
@@ -120,19 +122,17 @@ export default function DashboardPage() {
     }
   };
 
-  const handleSendEmail = async () => {
-    if (!emailTarget) return toast.error('Email tujuan harus diisi');
+  const generateAndDownloadPdf = async () => {
     if (!currentProjectId) return;
-    
     const project = projects.find(p => p.id === currentProjectId);
     if (!project) return toast.error('Proyek tidak ditemukan');
 
     let iframe: HTMLIFrameElement | null = null;
-    
-    try {
-      setEmailLoading(true);
 
-      // 1. Generate HTML document string in email mode (no fixed footer, no print script, no 40mm margin)
+    try {
+      setPdfGenerating(true);
+
+      // 1. Generate HTML document string in email mode
       const html = generateDocumentHtml(
         project.data as unknown as ProjectData,
         emailType,
@@ -141,7 +141,7 @@ export default function DashboardPage() {
         'email'
       );
 
-      // 2. Render HTML into a hidden iframe and capture via html2canvas
+      // 2. Render HTML into a hidden iframe
       iframe = document.createElement('iframe');
       iframe.style.position = 'fixed';
       iframe.style.top = '-9999px';
@@ -159,7 +159,6 @@ export default function DashboardPage() {
       iframeDoc.write(html);
       iframeDoc.close();
 
-      // Wait for iframe content to fully render
       await new Promise<void>(resolve => {
         const checkReady = () => {
           if (iframeDoc.readyState === 'complete') resolve();
@@ -168,19 +167,15 @@ export default function DashboardPage() {
         checkReady();
       });
 
-      // Extra wait for fonts/images inside iframe
       await new Promise(resolve => setTimeout(resolve, 1200));
 
-      // Expand iframe height to fit the entire document so absolutely positioned footers and contents don't get clipped or crushed
       const scrollHeight = iframeDoc.documentElement.scrollHeight;
       iframe.style.height = `${scrollHeight}px`;
-      
-      // Let the browser reflow after resize
       await new Promise(resolve => setTimeout(resolve, 300));
 
-      // 3. Capture iframe body with html2canvas
+      // 3. Capture with html2canvas
       const canvas = await html2canvas(iframeDoc.body, {
-        scale: 3, // Increased scale for sharper text
+        scale: 3,
         useCORS: true,
         allowTaint: false,
         backgroundColor: '#ffffff',
@@ -190,7 +185,6 @@ export default function DashboardPage() {
         scrollY: 0,
         logging: false,
         onclone: (clonedDoc) => {
-          // Force font loading in the cloned document before render
           const link = clonedDoc.createElement('link');
           link.rel = 'stylesheet';
           link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap';
@@ -198,55 +192,77 @@ export default function DashboardPage() {
         }
       });
 
-      // Cleanup iframe immediately after capture
       document.body.removeChild(iframe);
       iframe = null;
 
-      // 4. Generate custom-sized PDF to prevent page breaks cutting through text
-      const pdfWidthMm = 210; // A4 width
+      // 4. Generate PDF
+      const pdfWidthMm = 210;
       const pdfHeightMm = (canvas.height * pdfWidthMm) / canvas.width;
-      
-      // Create a single continuous page PDF
       const pdf = new jsPDF('p', 'mm', [pdfWidthMm, Math.max(pdfHeightMm, 297)]);
       const imgData = canvas.toDataURL('image/jpeg', 0.98);
-      
       pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidthMm, pdfHeightMm);
 
-      // 5. Convert to File
+      const filename = `${emailType === 'QUOTATION' ? 'Quotation' : 'Invoice'}_${project.project_name.replace(/\s+/g, '_')}.pdf`;
+
+      // 5. Download the PDF
       const pdfBlob = pdf.output('blob');
-      const attachmentFilename = `${emailType === 'QUOTATION' ? 'Quotation' : 'Invoice'}_${project.project_name.replace(/\s+/g, '_')}.pdf`;
-      const pdfFile = new File([pdfBlob], attachmentFilename, { type: 'application/pdf' });
-      
-      // 6. Build FormData & send
+      const url = URL.createObjectURL(pdfBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 10_000);
+
+      // 6. Also set as the current attachment for quick re-attach
+      const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
+      setEmailAttachment(pdfFile);
+
+      toast.success('PDF berhasil di-generate dan diunduh. Silakan lampirkan file tersebut.');
+    } catch (err) {
+      console.error('Generate PDF error:', err);
+      toast.error('Terjadi kesalahan saat membuat dokumen PDF');
+    } finally {
+      if (iframe && iframe.parentNode) {
+        document.body.removeChild(iframe);
+      }
+      setPdfGenerating(false);
+    }
+  };
+
+  const handleSendEmail = async () => {
+    if (!emailTarget) return toast.error('Email tujuan harus diisi');
+    if (!currentProjectId) return;
+    if (!emailAttachment) return toast.error('Lampirkan file PDF terlebih dahulu');
+
+    try {
+      setEmailLoading(true);
+
       const formData = new FormData();
       formData.append('projectId', currentProjectId);
       formData.append('emailType', emailType);
       formData.append('targetEmail', emailTarget);
       if (emailCc) formData.append('ccEmail', emailCc);
-      formData.append('pdfFile', pdfFile);
+      formData.append('pdfFile', emailAttachment);
 
       const res = await fetch('/api/cms/send-email', {
         method: 'POST',
         body: formData
       });
-      
+
       const data = await res.json();
       if (res.ok) {
         toast.success('Email berhasil dikirim!');
         setEmailModalOpen(false);
         setEmailTarget('');
         setEmailCc('');
+        setEmailAttachment(null);
       } else {
         toast.error(data.error || 'Gagal mengirim email');
       }
     } catch (err) {
       console.error('Send email error:', err);
-      toast.error('Terjadi kesalahan saat membuat atau mengirim dokumen');
+      toast.error('Terjadi kesalahan saat mengirim email');
     } finally {
-      // Always cleanup iframe if still attached
-      if (iframe && iframe.parentNode) {
-        document.body.removeChild(iframe);
-      }
       setEmailLoading(false);
     }
   };
@@ -424,29 +440,31 @@ export default function DashboardPage() {
         </div>
       </motion.div>
 
-      <Dialog open={emailModalOpen} onOpenChange={setEmailModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+      <Dialog open={emailModalOpen} onOpenChange={(open) => { setEmailModalOpen(open); if (!open) { setEmailAttachment(null); setEmailTarget(''); setEmailCc(''); } }}>
+        <DialogContent className="sm:max-w-[480px]">
           <DialogHeader>
             <DialogTitle>Kirim Email ke Klien</DialogTitle>
             <DialogDescription>
-              Kirim quotation atau invoice langsung ke email klien.
+              Generate PDF terlebih dahulu, lalu lampirkan dan kirim ke email klien.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
+          <div className="grid gap-4 py-2">
+            {/* Email Target */}
+            <div className="grid grid-cols-4 items-center gap-3">
               <label htmlFor="emailTarget" className="text-right text-sm font-semibold">
                 Email Tujuan
               </label>
               <Input
                 id="emailTarget"
-                type="email"
+                type="text"
                 placeholder="client@company.com (koma untuk multi)"
                 value={emailTarget}
                 onChange={(e) => setEmailTarget(e.target.value)}
                 className="col-span-3 rounded-sm bg-muted/30"
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            {/* CC Email */}
+            <div className="grid grid-cols-4 items-center gap-3">
               <label htmlFor="emailCc" className="text-right text-sm font-semibold">
                 CC Email
               </label>
@@ -459,26 +477,84 @@ export default function DashboardPage() {
                 className="col-span-3 rounded-sm bg-muted/30"
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            {/* Document Type */}
+            <div className="grid grid-cols-4 items-center gap-3">
               <label htmlFor="emailType" className="text-right text-sm font-semibold">
-                Jenis Dokumen
+                Dokumen
               </label>
               <select
                 id="emailType"
                 value={emailType}
-                onChange={(e) => setEmailType(e.target.value as 'QUOTATION' | 'INVOICE')}
+                onChange={(e) => { setEmailType(e.target.value as 'QUOTATION' | 'INVOICE'); setEmailAttachment(null); }}
                 className="col-span-3 h-9 rounded-sm bg-muted/30 border-transparent focus-visible:border-primary px-3 text-sm"
               >
                 <option value="QUOTATION">Quotation (Penawaran)</option>
                 <option value="INVOICE">Invoice (Tagihan)</option>
               </select>
             </div>
+
+            {/* Divider */}
+            <div className="border-t border-border/40 pt-3">
+              {/* Step 1: Generate & Download */}
+              <p className="text-xs text-muted-foreground mb-2 font-medium">Langkah 1 — Generate &amp; Download PDF</p>
+              <Button
+                variant="outline"
+                className="w-full rounded-sm gap-2 h-9 text-sm"
+                onClick={generateAndDownloadPdf}
+                disabled={pdfGenerating || emailLoading}
+              >
+                {pdfGenerating
+                  ? <><Loader2 className="w-4 h-4 animate-spin" /> Generating PDF...</>
+                  : <><Download className="w-4 h-4" /> Generate &amp; Download PDF</>}
+              </Button>
+
+              {/* Step 2: Attach PDF */}
+              <p className="text-xs text-muted-foreground mt-4 mb-2 font-medium">Langkah 2 — Lampirkan File PDF</p>
+              {!emailAttachment ? (
+                <label
+                  htmlFor="emailAttachmentInput"
+                  className="flex items-center justify-center gap-2 w-full h-16 rounded-sm border-2 border-dashed border-border/60 bg-muted/20 text-sm text-muted-foreground cursor-pointer hover:border-primary/50 hover:bg-muted/40 transition-colors"
+                >
+                  <Paperclip className="w-4 h-4" />
+                  Klik untuk memilih file PDF
+                  <input
+                    id="emailAttachmentInput"
+                    type="file"
+                    accept="application/pdf"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) setEmailAttachment(file);
+                      e.target.value = '';
+                    }}
+                  />
+                </label>
+              ) : (
+                <div className="flex items-center gap-3 px-3 py-2.5 rounded-sm border border-border/60 bg-muted/20">
+                  <FileText className="w-8 h-8 text-primary shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate" title={emailAttachment.name}>{emailAttachment.name}</p>
+                    <p className="text-xs text-muted-foreground">{(emailAttachment.size / 1024).toFixed(1)} KB</p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 rounded-sm text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
+                    onClick={() => setEmailAttachment(null)}
+                    title="Hapus lampiran"
+                  >
+                    <XIcon className="w-3.5 h-3.5" />
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEmailModalOpen(false)} disabled={emailLoading} className="rounded-sm">
+
+          <DialogFooter className="pt-2">
+            <Button variant="outline" onClick={() => { setEmailModalOpen(false); setEmailAttachment(null); setEmailTarget(''); setEmailCc(''); }} disabled={emailLoading} className="rounded-sm">
               Batal
             </Button>
-            <Button onClick={handleSendEmail} disabled={emailLoading || !emailTarget} className="rounded-sm">
+            <Button onClick={handleSendEmail} disabled={emailLoading || !emailTarget || !emailAttachment} className="rounded-sm">
               {emailLoading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Mail className="w-4 h-4 mr-2" />}
               Kirim Email
             </Button>
