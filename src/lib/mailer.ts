@@ -23,8 +23,10 @@ export async function sendMail({
   html: string;
   attachments?: {
     filename: string;
-    content: Buffer | string;
+    content?: Buffer | string;
     contentType?: string;
+    path?: string;
+    cid?: string;
   }[];
 }) {
   const info = await transporter.sendMail({

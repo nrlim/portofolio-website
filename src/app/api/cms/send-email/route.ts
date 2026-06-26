@@ -42,11 +42,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    if (!validateEmail(targetEmail)) {
+    const validateEmails = (emailsStr: string) => {
+      const emails = emailsStr.split(',').map(e => e.trim()).filter(e => e);
+      return emails.length > 0 && emails.every(validateEmail);
+    };
+
+    if (!validateEmails(targetEmail)) {
       return NextResponse.json({ error: 'Invalid target email format' }, { status: 400 });
     }
 
-    if (ccEmail && !validateEmail(ccEmail)) {
+    if (ccEmail && !validateEmails(ccEmail)) {
       return NextResponse.json({ error: 'Invalid cc email format' }, { status: 400 });
     }
 
@@ -92,7 +97,7 @@ export async function POST(req: NextRequest) {
           <table cellpadding="0" cellspacing="0" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
             <tr>
               <td style="padding-right: 15px; border-right: 2px solid #2563eb; vertical-align: top;">
-                <img src="https://nuralim.dev/personal-logo.png" alt="Nuralim" width="64" style="display: block; border-radius: 4px;" />
+                <img src="cid:personal-logo" alt="Nuralim" width="64" style="display: block; border-radius: 4px;" />
               </td>
               <td style="padding-left: 15px; vertical-align: top;">
                 <p style="margin: 0 0 2px; font-weight: 800; font-size: 18px; color: #0f172a; letter-spacing: -0.5px;">Nuralim</p>
@@ -151,6 +156,11 @@ export async function POST(req: NextRequest) {
           filename: attachmentFilename,
           content: pdfBuffer,
           contentType: 'application/pdf'
+        },
+        {
+          filename: 'personal-logo.png',
+          path: path.join(process.cwd(), 'public', 'personal-logo.png'),
+          cid: 'personal-logo'
         }
       ]
     });
